@@ -1,0 +1,222 @@
+/*
+ * Тема сайта: нейтральный технический стиль, акцент — цвет меди.
+ * Переменные --sl-* — палитра Starlight; меняя их здесь, меняем весь сайт.
+ * Тёмная тема — значения по умолчанию (:root), светлая — [data-theme='light'].
+ */
+
+:root {
+	--sl-color-accent-low: #3a2414;
+	--sl-color-accent: #e08a45;
+	--sl-color-accent-high: #f6d3b5;
+
+	/* Цвета врезок и интерактивных компонентов (тёмная тема). */
+	--pcb-tip: #4cbf86;
+	--pcb-tip-bg: #12291f;
+	--pcb-warn: #f0a33a;
+	--pcb-warn-bg: #2e2210;
+	--pcb-altium: #8fa8ff;
+	--pcb-altium-bg: #1a2140;
+	--pcb-book: #d6a76b;
+	--pcb-book-bg: #2a2117;
+	--pcb-ok: #4cbf86;
+	--pcb-bad: #f06a6a;
+
+	/* Цвета слоёв платы в схемах и стеке. */
+	--pcb-copper: #d98a4a;
+	--pcb-fr4: #c9b36a;
+	--pcb-mask: #1f7a4a;
+	--pcb-silk: #f2f2f2;
+	--pcb-paste: #9aa3ad;
+
+	--pcb-radius: 0.5rem;
+	--pcb-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monospace;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #f8e4d3;
+	--sl-color-accent: #b0581a;
+	--sl-color-accent-high: #5a2c0c;
+
+	--pcb-tip: #19784a;
+	--pcb-tip-bg: #e7f6ee;
+	--pcb-warn: #9a5a00;
+	--pcb-warn-bg: #fdf1df;
+	--pcb-altium: #3550c8;
+	--pcb-altium-bg: #eaeefd;
+	--pcb-book: #8a5a1c;
+	--pcb-book-bg: #f8efe3;
+	--pcb-ok: #19784a;
+	--pcb-bad: #c22d2d;
+
+	--pcb-silk: #ffffff;
+}
+
+/* Галочка у пройденных уроков в боковом меню (класс ставит Sidebar.astro). */
+.sidebar-content a.is-done span::before {
+	content: '✓';
+	display: inline-block;
+	width: 1.1em;
+	margin-inline-start: -1.1em;
+	color: var(--pcb-ok);
+	font-weight: 700;
+}
+.sidebar-content a.is-done {
+	padding-inline-start: calc(var(--sl-sidebar-item-padding-inline, 0.5rem) + 1.1em);
+}
+
+/* Цифры в таблицах и калькуляторах — моноширинные, чтобы колонки не прыгали. */
+.sl-markdown-content table td,
+.pcb-calc output {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Общая основа интерактивных виджетов. */
+.pcb-widget {
+	display: block; /* кастомные элементы по умолчанию inline */
+	margin-block: 1.5rem;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--sl-color-hairline-light);
+	border-radius: var(--pcb-radius);
+	background: var(--sl-color-gray-7, var(--sl-color-black));
+}
+.pcb-widget__title {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0 0 0.75rem;
+	font-size: var(--sl-text-base);
+	font-weight: 650;
+	color: var(--sl-color-white);
+}
+.pcb-widget__title::before {
+	content: '';
+	width: 0.55rem;
+	height: 0.55rem;
+	border-radius: 50%;
+	background: var(--sl-color-accent);
+}
+
+/* Поля ввода калькуляторов. */
+.pcb-calc .fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+	gap: 0.75rem;
+}
+.pcb-calc label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.pcb-calc input,
+.pcb-calc select {
+	width: 100%;
+	padding: 0.45rem 0.6rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.35rem;
+	background: var(--sl-color-bg);
+	color: var(--sl-color-white);
+	font: inherit;
+	font-family: var(--pcb-mono);
+}
+.pcb-calc input:focus-visible,
+.pcb-calc select:focus-visible {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: 1px;
+}
+.pcb-calc input[aria-invalid='true'] {
+	border-color: var(--pcb-bad);
+}
+.pcb-calc .hint {
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+}
+.pcb-calc .results {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+.pcb-calc .result {
+	padding: 0.55rem 0.7rem;
+	border-radius: 0.35rem;
+	background: var(--sl-color-gray-6);
+}
+.pcb-calc .result span {
+	display: block;
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+}
+.pcb-calc .result output {
+	font-family: var(--pcb-mono);
+	font-size: var(--sl-text-lg);
+	font-weight: 600;
+	color: var(--sl-color-white);
+}
+.pcb-calc .result--main {
+	outline: 1px solid var(--sl-color-accent);
+}
+.pcb-calc .warnings {
+	margin: 0.75rem 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: var(--sl-text-sm);
+	color: var(--pcb-warn);
+}
+.pcb-calc .warnings li::before {
+	content: '⚠ ';
+}
+.pcb-widget .footnote {
+	margin: 0.75rem 0 0;
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+}
+
+/* Переключатели-«таблетки» (radio). */
+.pcb-segmented {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	padding: 0.2rem;
+	border-radius: 0.45rem;
+	background: var(--sl-color-gray-6);
+}
+.pcb-segmented label {
+	flex-direction: row;
+	cursor: pointer;
+}
+.pcb-segmented input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+}
+.pcb-segmented span {
+	padding: 0.3rem 0.7rem;
+	border-radius: 0.3rem;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.pcb-segmented input:checked + span {
+	background: var(--sl-color-accent);
+	color: var(--sl-color-black);
+	font-weight: 600;
+}
+.pcb-segmented input:focus-visible + span {
+	outline: 2px solid var(--sl-color-accent);
+}
+
+/* SVG-схемы в уроках: цвет линий следует теме. */
+.pcb-schematic {
+	color: var(--sl-color-white);
+	max-width: 100%;
+	height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		transition: none !important;
+		animation: none !important;
+	}
+}

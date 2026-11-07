@@ -1,0 +1,41 @@
+---
+/**
+ * Рис. 6.3: перекрёстное выделение — один и тот же компонент в схеме и на плате.
+ */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="6.3" caption="Схема и плата — два вида одной модели проекта. Щёлкнул по R1 в схеме — Altium показывает тот же R1 на плате, и наоборот. Связь держится на позиционном обозначении и уникальном идентификаторе компонента.">
+	<svg viewBox="0 0 640 230" role="img" aria-label="Слева фрагмент схемы с резистором R1 и транзистором Q1, справа фрагмент платы с посадочными местами R1 и Q1. Двусторонняя стрелка связывает R1 на схеме и R1 на плате.">
+		<!-- схема -->
+		<rect class="ln" x="10" y="30" width="250" height="180" rx="6" />
+		<text class="t t-s t-mut" x="20" y="22">Sheet1.SchDoc</text>
+		<path class="ln" d="M60 60 V80 M60 120 V150 H120 M150 120 V150 M150 180 V195" />
+		<rect x="53" y="80" width="14" height="40" fill="none" stroke="var(--sl-color-accent)" stroke-width="3" />
+		<text class="t t-acc" x="76" y="104">R1</text>
+		<!-- транзистор (упрощённо) -->
+		<circle class="ln" cx="150" cy="150" r="22" />
+		<path class="ln" d="M120 150 H140 M140 136 V164 M140 144 L158 132 V120 M140 156 L158 168 V180" />
+		<text class="t" x="180" y="154">Q1</text>
+		<!-- плата -->
+		<rect x="380" y="30" width="250" height="180" rx="6" fill="var(--pcb-mask)" opacity="0.85" />
+		<text class="t t-s t-mut" x="390" y="22">PCB1.PcbDoc</text>
+		<!-- R1 посадочное -->
+		<rect x="430" y="70" width="70" height="26" rx="3" fill="none" stroke="var(--sl-color-accent)" stroke-width="3" />
+		<rect x="436" y="76" width="14" height="14" fill="var(--pcb-copper)" />
+		<rect x="480" y="76" width="14" height="14" fill="var(--pcb-copper)" />
+		<text class="t t-acc" x="465" y="62" text-anchor="middle">R1</text>
+		<!-- Q1 посадочное -->
+		<g fill="var(--pcb-copper)">
+			<circle cx="520" cy="160" r="7" />
+			<circle cx="545" cy="160" r="7" />
+			<circle cx="570" cy="160" r="7" />
+		</g>
+		<path d="M503 174 H587 A44 44 0 0 0 503 174" fill="none" stroke="#f2f2f2" stroke-width="1.5" />
+		<text class="t" x="545" y="196" text-anchor="middle" fill="#f2f2f2">Q1</text>
+		<!-- стрелка связи -->
+		<path class="ln-acc" d="M100 100 C 220 100, 320 80, 420 83 M412 77 L420 83 L412 89 M108 94 L100 100 L108 106" />
+		<text class="t t-acc t-s" x="300" y="70" text-anchor="middle">перекрёстное выделение</text>
+		<text class="t t-acc t-s" x="300" y="118" text-anchor="middle">(cross-probe / cross-select)</text>
+	</svg>
+</Figure>

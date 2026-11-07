@@ -1,0 +1,29 @@
+---
+/** Рис. 5.11: один корпус SOT-23 — разные назначения выводов у разных компонентов. */
+import Figure from '../Figure.astro';
+const cu = 'var(--pcb-copper)';
+const parts = [
+	{ ox: 20, name: 'MMBT3904 (NPN)', pins: ['1 — база (B)', '2 — эмиттер (E)', '3 — коллектор (C)'] },
+	{ ox: 340, name: '2N7002 (N-MOSFET)', pins: ['1 — затвор (G)', '2 — исток (S)', '3 — сток (D)'] },
+];
+---
+
+<Figure n="5.11" caption="Посадочное место SOT-23 одно, а функции выводов у компонентов разные. Если символ и посадочное место «склеены» неправильно, плата соберётся без ошибок DRC, но работать не будет. Назначение выводов всегда сверяй с даташитом конкретного компонента.">
+	<svg viewBox="0 0 660 200" role="img" aria-label="Два одинаковых посадочных места SOT-23 с тремя площадками. У транзистора MMBT3904 вывод 1 — база, 2 — эмиттер, 3 — коллектор. У 2N7002 вывод 1 — затвор, 2 — исток, 3 — сток.">
+		{parts.map((p) => (
+			<g>
+				<rect x={p.ox + 30} y="60" width="60" height="40" rx="3" fill="none" class="ln-dash" />
+				<rect x={p.ox + 34} y="100" width="16" height="22" fill={cu} />
+				<rect x={p.ox + 70} y="100" width="16" height="22" fill={cu} />
+				<rect x={p.ox + 52} y="38" width="16" height="22" fill={cu} />
+				<text class="t t-s" x={p.ox + 42} y="140" text-anchor="middle">1</text>
+				<text class="t t-s" x={p.ox + 78} y="140" text-anchor="middle">2</text>
+				<text class="t t-s" x={p.ox + 60} y="32" text-anchor="middle">3</text>
+				<circle cx={p.ox + 38} cy="66" r="2.5" class="fill-cur" />
+				<text class="t t-acc" x={p.ox + 110} y="52">{p.name}</text>
+				{p.pins.map((s, i) => <text class="t t-s" x={p.ox + 110} y={76 + i * 20}>{s}</text>)}
+			</g>
+		))}
+		<text class="t t-s" x="330" y="185" text-anchor="middle" fill="var(--pcb-bad)">одинаковый корпус ≠ одинаковая распиновка</text>
+	</svg>
+</Figure>

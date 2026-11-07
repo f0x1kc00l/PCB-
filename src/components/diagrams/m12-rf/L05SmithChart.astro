@@ -1,0 +1,124 @@
+---
+/**
+ * Рис. 12.5в: диаграмма Смита, построенная по формуле Γ = (z − 1)/(z + 1),
+ * и путь Г-образного согласования из урока: нагрузка 20 − j30 Ом (z = 0,4 − j0,6) на 868 МГц,
+ * последовательная L ≈ 10 нГн, затем параллельная C ≈ 4,5 пФ на стороне 50-омного источника.
+ * Все кривые считаются здесь же, в frontmatter, — ничего не нарисовано «на глаз».
+ */
+import Figure from '../Figure.astro';
+
+const R = 165;
+const cx = 190;
+const cy = 195;
+const P = (g: [number, number]) => [cx + R * g[0], cy - R * g[1]] as const;
+
+/** Γ = (z − 1)/(z + 1) для z = zr + j·zi */
+function gamma(zr: number, zi: number): [number, number] {
+	const nr = zr - 1;
+	const dr = zr + 1;
+	const d = dr * dr + zi * zi;
+	return [(nr * dr + zi * zi) / d, (zi * dr - nr * zi) / d];
+}
+const toPath = (pts: (readonly [number, number])[]) =>
+	pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+const range = (a: number, b: number, n: number) => Array.from({ length: n + 1 }, (_, i) => a + ((b - a) * i) / n);
+
+// Сетка: окружности постоянного r (x пробегает всю ось через tan) и дуги постоянного x (r от 0 до ∞).
+const thetas = range(-Math.PI / 2 + 0.002, Math.PI / 2 - 0.002, 360);
+const phis = range(0, Math.PI / 2 - 0.002, 180);
+const rVals = [0.2, 0.5, 1, 2, 5];
+const xVals = [0.2, 0.5, 1, 2, 5];
+const rCircles = rVals.map((r) => toPath(thetas.map((t) => P(gamma(r, Math.tan(t))))));
+const xArcs = xVals.flatMap((x) => [
+	toPath(phis.map((f) => P(gamma(Math.tan(f), x)))),
+	toPath(phis.map((f) => P(gamma(Math.tan(f), -x)))),
+]);
+const rLabels = rVals.map((r) => {
+	const [x, y] = P([(r - 1) / (r + 1), 0]);
+	return { x: x + 3, y: y - 4, t: String(r).replace('.', ',') };
+});
+const xLabels = xVals.flatMap((x) => {
+	const g = gamma(0, x);
+	const k = 1.09;
+	const [px, py] = P([g[0] * k, g[1] * k]);
+	const [qx, qy] = P([g[0] * k, -g[1] * k]);
+	const t = String(x).replace('.', ',');
+	return [
+		{ x: px, y: py + 4, t: `+j${t}` },
+		{ x: qx, y: qy + 4, t: `−j${t}` },
+	];
+});
+
+// Окружность g = 1 (по ней движется точка при добавлении параллельной реактивности).
+const g1 = toPath(thetas.map((t) => {
+	const g = gamma(1, Math.tan(t));
+	return P([-g[0], -g[1]]);
+}));
+
+// Путь согласования.
+const xB = 0.49; // после последовательной L: z = 0,4 + j0,49
+const bB = -1.2248; // в проводимостях: y = 1 − j1,2248
+const arc1 = toPath(range(-0.6, xB, 60).map((x) => P(gamma(0.4, x))));
+const arc2 = toPath(range(bB, 0, 60).map((b) => {
+	const g = gamma(1, b);
+	return P([-g[0], -g[1]]);
+}));
+const A = P(gamma(0.4, -0.6));
+const B = P(gamma(0.4, xB));
+const O = P([0, 0]);
+---
+
+<Figure n="12.5в" caption="Диаграмма Смита с путём Г-образного согласования из урока (868 МГц). Точка A — антенна 20 − j30 Ом. Последовательная катушка 10 нГн ведёт точку по окружности r = 0,4 по часовой стрелке до B. Параллельный конденсатор 4,5 пФ ведёт её по окружности g = 1 (пунктир) по часовой стрелке в центр O, где сопротивление ровно 50 Ом и отражения нет.">
+	<svg viewBox="0 0 660 395" role="img" aria-label="Диаграмма Смита: сетка окружностей постоянного активного сопротивления и дуг постоянного реактивного. Отмечены точка нагрузки A внизу слева, точка B вверху слева и центр O. Путь из A в B идёт по окружности r равно 0,4, путь из B в O — по пунктирной окружности g равно 1.">
+		<defs>
+			<marker id="l05-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+				<path d="M0 0 L10 5 L0 10 Z" fill="var(--sl-color-accent)" />
+			</marker>
+		</defs>
+
+		<!-- сетка -->
+		<circle cx={cx} cy={cy} r={R} class="ln" />
+		<path d={`M${cx - R} ${cy} H${cx + R}`} class="ln-thin" />
+		{rCircles.map((d) => <path d={d} class="ln-thin" />)}
+		{xArcs.map((d) => <path d={d} class="ln-thin" />)}
+		{rLabels.map((l) => <text class="t t-s t-mut" x={l.x} y={l.y}>{l.t}</text>)}
+		{xLabels.map((l) => <text class="t t-s t-mut" x={l.x} y={l.y} text-anchor="middle">{l.t}</text>)}
+		<text class="t t-s t-mut" x={cx - R - 4} y={cy + 16} text-anchor="middle">КЗ</text>
+		<text class="t t-s t-mut" x={cx + R + 6} y={cy + 16} text-anchor="middle">ХХ</text>
+
+		<!-- окружность g = 1 -->
+		<path d={g1} class="ln-dash" />
+
+		<!-- путь -->
+		<path d={arc1} class="ln-acc" marker-end="url(#l05-arr)" />
+		<path d={arc2} class="ln-acc" marker-end="url(#l05-arr)" />
+		<circle cx={A[0]} cy={A[1]} r="5" class="fill-acc" />
+		<circle cx={B[0]} cy={B[1]} r="5" class="fill-acc" />
+		<circle cx={O[0]} cy={O[1]} r="5" class="fill-acc" />
+		<text class="t t-acc" x={A[0] - 16} y={A[1] + 16}>A</text>
+		<text class="t t-acc" x={B[0] - 18} y={B[1] - 6}>B</text>
+		<text class="t t-acc" x={O[0] + 8} y={O[1] + 18}>O</text>
+
+		<!-- пояснения -->
+		<g transform="translate(395 40)">
+			<text class="t" font-weight="700">Как читать</text>
+			<text class="t t-s" y="22">Верхняя половина — индуктивности (+jx),</text>
+			<text class="t t-s" y="37">нижняя — ёмкости (−jx).</text>
+			<text class="t t-s" y="52">Центр — z = 1, то есть 50 Ом.</text>
+			<text class="t t-s" y="67">Край — |Γ| = 1, вся мощность отражается.</text>
+
+			<text class="t" y="102" font-weight="700">Наш путь, 868 МГц</text>
+			<text class="t t-s" y="124"><tspan class="t-acc">A</tspan>  z = 0,4 − j0,6 (20 − j30 Ом)</text>
+			<text class="t t-s" y="139">    |Γ| = 0,56, КСВ = 3,5</text>
+			<text class="t t-s" y="160"><tspan class="t-acc">A→B</tspan>  последовательная L = 10 нГн</text>
+			<text class="t t-s" y="175">    +j54,5 Ом, идём по r = 0,4</text>
+			<text class="t t-s" y="196"><tspan class="t-acc">B</tspan>  z = 0,4 + j0,49 = 1/(1 − j1,22)</text>
+			<text class="t t-s" y="217"><tspan class="t-acc">B→O</tspan>  параллельная C = 4,5 пФ</text>
+			<text class="t t-s" y="232">    +j1,22 в проводимостях, по g = 1</text>
+			<text class="t t-s" y="253"><tspan class="t-acc">O</tspan>  50 Ом, КСВ = 1</text>
+
+			<text class="t t-s t-mut" y="290">r — нормированное сопротивление R/50,</text>
+			<text class="t t-s t-mut" y="305">x — реактивное X/50, g — проводимость·50.</text>
+		</g>
+	</svg>
+</Figure>

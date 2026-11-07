@@ -1,0 +1,60 @@
+---
+/**
+ * Рис. к уроку 12.10: |S11| антенны до и после подстройки П-цепью.
+ * Кривые модельные (резонанс лоренцевой формы), не измерения.
+ */
+import Figure from '../Figure.astro';
+
+const fMin = 780;
+const fMax = 960;
+const X0 = 70;
+const X1 = 610;
+const Y0 = 40; // 0 dB
+const Y1 = 250; // -30 dB
+const x = (f: number) => X0 + ((f - fMin) / (fMax - fMin)) * (X1 - X0);
+const y = (db: number) => Y0 + (-db / 30) * (Y1 - Y0);
+
+function curve(f0: number, gMin: number, bw: number) {
+	const pts: string[] = [];
+	for (let f = fMin; f <= fMax; f += 2) {
+		const u = (f - f0) / bw;
+		const g = gMin + (0.95 - gMin) * ((u * u) / (1 + u * u));
+		const db = 20 * Math.log10(g);
+		pts.push(`${x(f).toFixed(1)},${y(db).toFixed(1)}`);
+	}
+	return 'M' + pts.join(' L');
+}
+const before = curve(835, 0.3, 28); // минимум ≈ −10,5 дБ на 835 МГц
+const after = curve(868, 0.06, 30); // минимум ≈ −24 дБ на 868 МГц
+const grid = [0, -10, -20, -30];
+const fticks = [800, 850, 900, 950];
+---
+
+<Figure n="12.10б" caption="Модельные кривые |S11| антенны (не измерение). До подстройки минимум ушёл вниз, на 835 МГц: корпус, пластик и соседняя медь «утянули» резонанс. На 868 МГц |S11| всего около −3,5 дБ — назад отражается почти половина мощности. После подбора элементов П-цепи минимум стоит на 868 МГц, и вся полоса 863–870 МГц ниже уровня −10 дБ (КСВ ≈ 2).">
+	<svg viewBox="0 0 640 300" role="img" aria-label="График: по горизонтали частота от 780 до 960 мегагерц, по вертикали |S11| от 0 до минус 30 дБ. Пунктирная кривая с минимумом около минус 10 дБ на 835 мегагерц, сплошная — с минимумом минус 24 дБ на 868 мегагерц. Горизонтальная линия минус 10 дБ и закрашенная полоса 863–870 мегагерц.">
+		<!-- полоса 863–870 -->
+		<rect x={x(863)} y={Y0} width={x(870) - x(863)} height={Y1 - Y0} class="fill-acc" opacity="0.15" />
+		<text class="t t-s t-acc" x={x(866.5)} y={Y0 - 8} text-anchor="middle">863–870</text>
+		{grid.map((d) => (
+			<g>
+				<path class="ln-thin" d={`M${X0} ${y(d)} H${X1}`} />
+				<text class="t t-s" x={X0 - 8} y={y(d) + 4} text-anchor="end">{d === 0 ? '0' : '−' + Math.abs(d)}</text>
+			</g>
+		))}
+		{fticks.map((f) => (
+			<g>
+				<path class="ln-thin" d={`M${x(f)} ${Y1} V${Y1 + 5}`} />
+				<text class="t t-s" x={x(f)} y={Y1 + 18} text-anchor="middle">{f}</text>
+			</g>
+		))}
+		<path class="ln" d={`M${X0} ${Y0} V${Y1} H${X1}`} />
+		<path d={`M${X0} ${y(-10)} H${X1}`} stroke="var(--sl-color-accent)" stroke-width="1.5" stroke-dasharray="2 3" fill="none" />
+		<text class="t t-s t-acc" x={X1 - 4} y={y(-10) - 6} text-anchor="end">−10 дБ (КСВ ≈ 2)</text>
+		<path d={before} class="ln-dash" style="opacity:1;stroke-width:2" />
+		<path d={after} class="ln-acc" />
+		<text class="t t-s" x={x(800)} y={y(-12)}>до</text>
+		<text class="t t-s t-acc" x={x(885)} y={y(-20)}>после</text>
+		<text class="t t-s" x={(X0 + X1) / 2} y={Y1 + 38} text-anchor="middle">f, МГц</text>
+		<text class="t t-s" x="18" y="150" transform="rotate(-90 18 150)" text-anchor="middle">|S11|, дБ</text>
+	</svg>
+</Figure>

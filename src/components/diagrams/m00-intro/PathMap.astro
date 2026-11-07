@@ -1,0 +1,92 @@
+---
+/**
+ * Рис. к уроку 0.2: карта пути — 12 модулей «змейкой» в четыре этапа,
+ * с контрольными точками и оценкой времени по каждому модулю.
+ * Время считается из поля duration уроков, поэтому карта обновляется сама.
+ */
+import { getCollection } from 'astro:content';
+import Figure from '../Figure.astro';
+import { modules } from '../../../data/modules.mjs';
+
+const docs = await getCollection('docs');
+const hours = (dir: string) => {
+	const min = docs.filter((d) => d.id.startsWith(`${dir}/`)).reduce((s, d) => s + (d.data.duration ?? 0), 0);
+	return Math.max(1, Math.round(min / 60));
+};
+
+// Раскладка: 4 строки по 3 модуля, чётные строки слева направо, нечётные — справа налево.
+const W = 190;
+const H = 64;
+const GX = 40;
+const GY = 46;
+const X0 = 20;
+const Y0 = 20;
+// На карте — основной путь (модули 0–11); модуль 12 дополнительный и упоминается в подписи.
+const main = modules.filter((m) => m.n <= 11);
+const nodes = main.map((m, i) => {
+	const row = Math.floor(i / 3);
+	const colRaw = i % 3;
+	const col = row % 2 === 0 ? colRaw : 2 - colRaw;
+	return { ...m, x: X0 + col * (W + GX), y: Y0 + row * (H + GY), h: hours(m.dir), row };
+});
+
+// Контрольные точки после модулей (индекс модуля → подпись)
+const checkpoints: Record<number, string> = {
+	3: 'читаю и считаю схемы',
+	7: 'первая плата в Altium',
+	10: 'готов к заказу',
+};
+
+/** Путь от правого/левого края одного модуля к следующему. */
+const link = (a: (typeof nodes)[number], b: (typeof nodes)[number]) => {
+	if (a.row === b.row) {
+		const y = a.y + H / 2;
+		return a.x < b.x ? `M${a.x + W} ${y} H${b.x}` : `M${a.x} ${y} H${b.x + W}`;
+	}
+	const x = a.x + W / 2;
+	return `M${x} ${a.y + H} V${b.y}`;
+};
+/** Перенос названия модуля на две строки по словам. */
+const wrap = (text: string, max = 19) => {
+	const lines: string[] = [''];
+	for (const w of text.split(' ')) {
+		const cur = lines[lines.length - 1];
+		if ((cur + ' ' + w).trim().length > max && cur) lines.push(w);
+		else lines[lines.length - 1] = (cur + ' ' + w).trim();
+	}
+	return lines.slice(0, 2);
+};
+const total = nodes.reduce((s, n) => s + n.h, 0);
+const height = Y0 + 4 * (H + GY);
+---
+
+<Figure n="0.1" caption={`Маршрут курса: 12 модулей по порядку. Ромбы — контрольные точки, после которых ты умеешь что-то законченное. Числа — примерное время на модуль, всего около ${total} часов чистой учёбы без учёта практики. После основного пути — дополнительный модуль 12 «ВЧ- и СВЧ-платы».`}>
+	<svg viewBox={`0 0 ${X0 * 2 + 3 * W + 2 * GX} ${height}`} role="img" aria-label="Карта курса: двенадцать модулей змейкой, четыре этапа и контрольные точки.">
+		{nodes.slice(0, -1).map((n, i) => <path class="ln-acc" d={link(n, nodes[i + 1])} />)}
+		{
+			nodes.map((n) => (
+				<g>
+					<rect x={n.x} y={n.y} width={W} height={H} rx="8" fill="var(--sl-color-gray-6)" stroke="var(--sl-color-hairline-light)" />
+					<text class="t t-acc t-mono" x={n.x + 12} y={n.y + 24}>{n.n}</text>
+					{wrap(n.label).map((line, k) => (
+						<text class="t" x={n.x + 36} y={n.y + 24 + k * 17} font-weight="600">{line}</text>
+					))}
+					<text class="t t-s t-mut" x={n.x + W - 10} y={n.y + H - 9} text-anchor="end">~{n.h} ч</text>
+				</g>
+			))
+		}
+		{
+			Object.entries(checkpoints).map(([idx, label]) => {
+				const n = nodes[Number(idx)];
+				const cx = n.x + W / 2;
+				const cy = n.y + H + GY / 2;
+				return (
+					<g>
+						<path d={`M${cx} ${cy - 9} L${cx + 9} ${cy} L${cx} ${cy + 9} L${cx - 9} ${cy} Z`} fill="var(--pcb-ok)" />
+						<text class="t t-s" x={cx - 16} y={cy + 4} text-anchor="end" font-weight="600">{label}</text>
+					</g>
+				);
+			})
+		}
+	</svg>
+</Figure>

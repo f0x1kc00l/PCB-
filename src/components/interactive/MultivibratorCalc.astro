@@ -1,0 +1,234 @@
+---
+/**
+ * Калькулятор симметричного/несимметричного автоколебательного мультивибратора
+ * на двух NPN-транзисторах (Q1, Q2) — учебный проект курса (в руководстве Altium — BC547).
+ *
+ * Обозначения как в руководстве Altium: Q1, Q2 — транзисторы; Rк — в коллекторах;
+ * Rб1/Rб2 — в базах Q1/Q2; C1 — от коллектора Q2 к базе Q1, C2 — от коллектора Q1 к базе Q2.
+ *
+ * Полупериоды (упрощённо, при Uпит ≫ 0,6 В): транзистор закрыт, пока конденсатор
+ * в его базе перезаряжается через его базовый резистор:
+ *   Q1 закрыт: t1 = ln2 · Rб1 · C1 ≈ 0,693 · Rб1 · C1
+ *   Q2 закрыт: t2 = ln2 · Rб2 · C2
+ *   T = t1 + t2,  f = 1 / T
+ *
+ * Объяснение работы схемы — уроки 3.8 и 3.9; теория RC-цепей и ключа — Хоровиц, §1.13, §2.02, §5.13.
+ */
+interface Props {
+	vcc?: string;
+	rc?: string;
+	rb1?: string;
+	rb2?: string;
+	c1?: string;
+	c2?: string;
+	/** Минимальный коэффициент передачи тока h21э (β) из даташита. */
+	beta?: string;
+	/** Прямое напряжение светодиода в коллекторе, В; '0' — без светодиода. */
+	vled?: string;
+}
+const {
+	vcc = '5',
+	rc = '1к',
+	rb1 = '47к',
+	rb2 = '47к',
+	c1 = '10мк',
+	c2 = '10мк',
+	beta = '100',
+	vled = '2',
+} = Astro.props;
+---
+
+<multivibrator-calc class="pcb-widget pcb-calc not-content">
+	<p class="pcb-widget__title">Калькулятор мультивибратора</p>
+
+	<div class="fields">
+		<label>Uпит, В <input name="vcc" value={vcc} inputmode="decimal" autocomplete="off" /></label>
+		<label>Rк (оба), Ом <input name="rc" value={rc} inputmode="decimal" autocomplete="off" /></label>
+		<label>Rб1 (база Q1), Ом <input name="rb1" value={rb1} inputmode="decimal" autocomplete="off" /></label>
+		<label>Rб2 (база Q2), Ом <input name="rb2" value={rb2} inputmode="decimal" autocomplete="off" /></label>
+		<label>
+			C1 (кол. Q2 → база Q1), Ф
+			<input name="c1" value={c1} inputmode="decimal" autocomplete="off" />
+			<span class="hint">10мк = 10 мкФ, 100n = 100 нФ</span>
+		</label>
+		<label>C2 (кол. Q1 → база Q2), Ф <input name="c2" value={c2} inputmode="decimal" autocomplete="off" /></label>
+		<label>
+			h21э (β) минимальный
+			<input name="beta" value={beta} inputmode="decimal" autocomplete="off" />
+			<span class="hint">минимальный из даташита (для BC547 зависит от группы A/B/C)</span>
+		</label>
+		<label>
+			Светодиод в коллекторе, Uпр, В
+			<input name="vled" value={vled} inputmode="decimal" autocomplete="off" />
+			<span class="hint">0 — без светодиода</span>
+		</label>
+	</div>
+
+	<div class="results">
+		<div class="result result--main"><span>Частота f</span><output data-out="f">—</output></div>
+		<div class="result"><span>Период T</span><output data-out="T">—</output></div>
+		<div class="result"><span>Q1 закрыт / Q2 закрыт</span><output data-out="t">—</output></div>
+		<div class="result"><span>Коэф. заполнения D (Q1 закрыт)</span><output data-out="duty">—</output></div>
+		<div class="result"><span>Ток коллектора Iк</span><output data-out="ic">—</output></div>
+		<div class="result"><span>Запас насыщения β·Iб / Iк</span><output data-out="sat">—</output></div>
+	</div>
+
+	<figure class="waves">
+		<svg viewBox="0 0 600 170" role="img" aria-label="Напряжение на коллекторах Q1 и Q2 во времени" data-waves>
+			<g class="grid" stroke="currentColor" stroke-width="0.5" opacity="0.25">
+				<line x1="40" y1="70" x2="590" y2="70" />
+				<line x1="40" y1="150" x2="590" y2="150" />
+			</g>
+			<text x="0" y="40" class="lbl">Uк1</text>
+			<text x="0" y="120" class="lbl">Uк2</text>
+			<path data-wave="1" fill="none" stroke="var(--pcb-copper)" stroke-width="2" />
+			<path data-wave="2" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
+			<text x="590" y="166" text-anchor="end" class="lbl" data-scale>t</text>
+		</svg>
+		<figcaption>
+			Напряжение на коллекторах (качественно). Фронт нарастает плавно: конденсатор заряжается через Rк, τ = Rк·C.
+		</figcaption>
+	</figure>
+
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		t = ln2·Rб·C ≈ 0,693·Rб·C — приближение для Uпит ≫ 0,6 В. Реальная частота отличается на 10–20 % из-за
+		допусков конденсаторов (у электролитов −20…+80 %) и параметров транзисторов.
+	</p>
+</multivibrator-calc>
+
+<script>
+	import { parseValue, formatValue, formatNumber } from '../../lib/units';
+
+	const LN2 = Math.LN2;
+	const VBE = 0.7; // напряжение база-эмиттер открытого транзистора, В
+	const VCE_SAT = 0.2; // напряжение насыщения коллектор-эмиттер, В
+	const VEBO = 6; // максимальное обратное напряжение эмиттер-база BC547 и 2N3904 (даташиты), В
+
+	class MultivibratorCalc extends HTMLElement {
+		connectedCallback() {
+			const num = (n: string) => parseValue(this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!.value);
+			const out = (n: string) => this.querySelector(`[data-out="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+
+			const update = () => {
+				const v = {
+					vcc: num('vcc'),
+					rc: num('rc'),
+					rb1: num('rb1'),
+					rb2: num('rb2'),
+					c1: num('c1'),
+					c2: num('c2'),
+					beta: num('beta'),
+					vled: num('vled') || 0,
+				};
+				this.querySelectorAll<HTMLInputElement>('input').forEach((inp) => {
+					const x = parseValue(inp.value);
+					inp.setAttribute('aria-invalid', String(!(x >= 0)));
+				});
+
+				const t1 = LN2 * v.rb1 * v.c1; // Q1 закрыт
+				const t2 = LN2 * v.rb2 * v.c2; // Q2 закрыт
+				const T = t1 + t2;
+				const ic = (v.vcc - VCE_SAT - v.vled) / v.rc;
+				const ib1 = (v.vcc - VBE) / v.rb1;
+				const ib2 = (v.vcc - VBE) / v.rb2;
+				const sat = (v.beta * Math.min(ib1, ib2)) / ic;
+
+				out('f').textContent = formatValue(1 / T, 'Гц');
+				out('T').textContent = formatValue(T, 'с');
+				out('t').textContent = `${formatValue(t1, 'с')} / ${formatValue(t2, 'с')}`;
+				out('duty').textContent = T > 0 ? `${formatNumber((t1 / T) * 100)} %` : '—';
+				out('ic').textContent = ic > 0 ? formatValue(ic, 'А') : '—';
+				out('sat').textContent = Number.isFinite(sat) && sat > 0 ? `${formatNumber(sat, 2)}×` : '—';
+
+				const msgs: string[] = [];
+				if (sat < 1.5)
+					msgs.push('Транзистор может не войти в насыщение: уменьши Rб или увеличь Rк (нужно β·Rк заметно больше Rб).');
+				if (ic <= 0) msgs.push('Напряжения питания не хватает, чтобы открыть светодиод.');
+				if (v.vcc > VEBO - 0.5)
+					msgs.push(
+						`При Uпит > ~5,5 В обратное напряжение на переходе база-эмиттер приближается к пределу VEBO = ${VEBO} В (BC547, 2N3904). Добавь диоды в цепь баз или снизь питание.`,
+					);
+				if (ic > 0.1) msgs.push('Ток коллектора больше 100 мА — проверь допустимый ток и мощность транзистора.');
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+
+				this.drawWaves(t1, t2, v.rc * v.c2, v.rc * v.c1, T);
+			};
+
+			this.addEventListener('input', update);
+			update();
+		}
+
+		/**
+		 * Рисует коллекторные напряжения на 2,5 периода.
+		 * Спад — мгновенный (транзистор открылся), нарастание — экспонента с τ = Rк·C.
+		 */
+		drawWaves(t1: number, t2: number, tau1: number, tau2: number, T: number) {
+			const svg = this.querySelector('[data-waves]')!;
+			const p1 = svg.querySelector('[data-wave="1"]')!;
+			const p2 = svg.querySelector('[data-wave="2"]')!;
+			const scale = svg.querySelector('[data-scale]')!;
+			if (!(T > 0) || !Number.isFinite(T)) {
+				p1.setAttribute('d', '');
+				p2.setAttribute('d', '');
+				return;
+			}
+			const x0 = 40;
+			const width = 550;
+			const span = 2.5 * T;
+			const x = (t: number) => x0 + (t / span) * width;
+
+			// Строит путь для одного коллектора: high — пока транзистор закрыт (offTime), low — пока открыт.
+			const build = (offTime: number, onTime: number, tau: number, yHigh: number, yLow: number, startOff: boolean) => {
+				const pts: string[] = [];
+				let t = 0;
+				let off = startOff;
+				pts.push(`M ${x(0)} ${off ? yHigh : yLow}`);
+				while (t < span) {
+					const dur = off ? offTime : onTime;
+					const end = Math.min(t + dur, span);
+					if (off) {
+						// экспоненциальное нарастание от yLow к yHigh
+						const steps = 24;
+						for (let s = 0; s <= steps; s++) {
+							const tt = t + ((end - t) * s) / steps;
+							const k = 1 - Math.exp(-(tt - t) / Math.max(tau, 1e-12));
+							pts.push(`L ${x(tt).toFixed(1)} ${(yLow + (yHigh - yLow) * k).toFixed(1)}`);
+						}
+					} else {
+						pts.push(`L ${x(t).toFixed(1)} ${yLow}`, `L ${x(end).toFixed(1)} ${yLow}`);
+					}
+					t = end;
+					off = !off;
+				}
+				return pts.join(' ');
+			};
+
+			p1.setAttribute('d', build(t1, t2, tau1, 15, 70, true));
+			p2.setAttribute('d', build(t2, t1, tau2, 95, 150, false));
+			scale.textContent = `t, 0 … ${formatValue(span, 'с')}`;
+		}
+	}
+	customElements.define('multivibrator-calc', MultivibratorCalc);
+</script>
+
+<style>
+	.waves {
+		margin: 1rem 0 0;
+	}
+	.waves svg {
+		width: 100%;
+		height: auto;
+		color: var(--sl-color-gray-2);
+	}
+	.lbl {
+		font-size: 12px;
+		fill: currentColor;
+		font-family: var(--pcb-mono);
+	}
+	figcaption {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+</style>

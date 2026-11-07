@@ -1,0 +1,126 @@
+---
+/**
+ * Калькулятор закона Ома: U = I · R, P = U · I.
+ *
+ *   <OhmCalc />                        — по умолчанию ищем ток
+ *   <OhmCalc find="R" u="5" i="20m" /> — свои начальные значения
+ *
+ * Поля понимают приставки: 4,7к · 4k7 · 20m · 20мА · 100u.
+ */
+interface Props {
+	find?: 'U' | 'I' | 'R';
+	u?: string;
+	i?: string;
+	r?: string;
+}
+const { find = 'I', u = '5', i = '10m', r = '470' } = Astro.props;
+const uid = `ohm-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<ohm-calc class="pcb-widget pcb-calc not-content" data-find={find}>
+	<p class="pcb-widget__title">Калькулятор закона Ома</p>
+
+	<div class="pcb-segmented" role="radiogroup" aria-label="Что найти">
+		<span class="seg-caption">Найти:</span>
+		{
+			(['U', 'I', 'R'] as const).map((k) => (
+				<label>
+					<input type="radio" name={`${uid}-find`} value={k} checked={k === find} />
+					<span>{{ U: 'напряжение U', I: 'ток I', R: 'сопротивление R' }[k]}</span>
+				</label>
+			))
+		}
+	</div>
+
+	<div class="fields" style="margin-top: 0.9rem">
+		<label>
+			Напряжение U, В
+			<input name="U" value={u} inputmode="decimal" autocomplete="off" />
+		</label>
+		<label>
+			Ток I, А
+			<input name="I" value={i} inputmode="decimal" autocomplete="off" />
+			<span class="hint">20m = 20 мА</span>
+		</label>
+		<label>
+			Сопротивление R, Ом
+			<input name="R" value={r} inputmode="decimal" autocomplete="off" />
+			<span class="hint">4,7к или 4k7 = 4700 Ом</span>
+		</label>
+	</div>
+
+	<div class="results">
+		<div class="result result--main"><span data-label>Результат</span><output data-main>—</output></div>
+		<div class="result"><span>Мощность P = U·I</span><output data-power>—</output></div>
+	</div>
+	<p class="footnote" data-formula></p>
+</ohm-calc>
+
+<script>
+	import { parseValue, formatValue } from '../../lib/units';
+
+	const UNITS = { U: 'В', I: 'А', R: 'Ом' } as const;
+	type Key = keyof typeof UNITS;
+
+	class OhmCalc extends HTMLElement {
+		connectedCallback() {
+			const inputs = Object.fromEntries(
+				(['U', 'I', 'R'] as Key[]).map((k) => [k, this.querySelector<HTMLInputElement>(`input[name="${k}"]`)!]),
+			) as Record<Key, HTMLInputElement>;
+			const main = this.querySelector('[data-main]')!;
+			const label = this.querySelector('[data-label]')!;
+			const power = this.querySelector('[data-power]')!;
+			const formula = this.querySelector('[data-formula]')!;
+
+			const getFind = () =>
+				(this.querySelector<HTMLInputElement>('input[type="radio"]:checked')?.value ?? 'I') as Key;
+
+			const update = () => {
+				const find = getFind();
+				// Искомое поле блокируем: в него выводится результат.
+				(Object.keys(inputs) as Key[]).forEach((k) => {
+					inputs[k].disabled = k === find;
+				});
+				const v = {
+					U: parseValue(inputs.U.value),
+					I: parseValue(inputs.I.value),
+					R: parseValue(inputs.R.value),
+				};
+				(Object.keys(inputs) as Key[]).forEach((k) => {
+					inputs[k].setAttribute('aria-invalid', String(k !== find && !Number.isFinite(v[k])));
+				});
+
+				let result = NaN;
+				if (find === 'U') {
+					result = v.I * v.R;
+					formula.textContent = 'U = I · R';
+				} else if (find === 'I') {
+					result = v.R !== 0 ? v.U / v.R : NaN;
+					formula.textContent = 'I = U / R';
+				} else {
+					result = v.I !== 0 ? v.U / v.I : NaN;
+					formula.textContent = 'R = U / I';
+				}
+				v[find] = result;
+				label.textContent = { U: 'Напряжение U', I: 'Ток I', R: 'Сопротивление R' }[find];
+				main.textContent = formatValue(result, UNITS[find]);
+				inputs[find].value = Number.isFinite(result) ? formatValue(result, '').replace(/\s/g, '') : '';
+				power.textContent = formatValue(v.U * v.I, 'Вт');
+			};
+
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('ohm-calc', OhmCalc);
+</script>
+
+<style>
+	.seg-caption {
+		align-self: center;
+		padding: 0 0.4rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+</style>

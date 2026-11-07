@@ -1,0 +1,131 @@
+---
+title: "G. Полезные ссылки"
+description: "Проверенные ссылки: документация Altium, поиск компонентов, производители плат, калькуляторы и симуляторы, учебные материалы."
+sidebar:
+  order: 7
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Все ссылки проверены при подготовке курса. Сайты меняются, поэтому если ссылка не открывается, ищи ресурс по названию.
+
+## Altium Designer
+
+<CardGrid>
+	<LinkCard
+		title="Документация Altium Designer (RU)"
+		description="Официальная документация на русском: интерфейс, редакторы, правила, выходные данные."
+		href="https://www.altium.com/ru/documentation/altium-designer"
+	/>
+	<LinkCard
+		title="Руководство: первая плата"
+		description="Официальный пошаговый туториал с мультивибратором — основа модуля 7."
+		href="https://www.altium.com/ru/documentation/altium-designer/tutorial"
+	/>
+	<LinkCard
+		title="Горячие клавиши"
+		description="Официальный справочник горячих клавиш по всем редакторам."
+		href="https://www.altium.com/documentation/altium-designer/shortcut-keys"
+	/>
+	<LinkCard
+		title="Студенческая лицензия"
+		description="База знаний Altium: получение, активация и продление бесплатной лицензии для студентов."
+		href="https://www.altium.com/ru/documentation/knowledge-base/altium-designer/student-license"
+	/>
+</CardGrid>
+
+## Компоненты и даташиты
+
+<CardGrid>
+	<LinkCard
+		title="Octopart"
+		description="Поиск компонентов по всем дистрибьюторам: цены, наличие, даташиты, сравнение аналогов."
+		href="https://octopart.com/"
+	/>
+	<LinkCard
+		title="LCSC"
+		description="Дистрибьютор компонентов, связанный с JLCPCB; удобно подбирать детали для сборки на заводе."
+		href="https://lcsc.com/"
+	/>
+</CardGrid>
+
+Даташит лучше всего брать с **сайта производителя компонента**: там самая свежая ревизия документа.
+
+## Производители печатных плат
+
+Технологические нормы производителя — главный источник чисел для правил проектирования (уроки 7.4 и 10.9).
+
+<CardGrid>
+	<LinkCard
+		title="JLCPCB — технологические возможности"
+		description="Минимальные ширины, зазоры, отверстия, материалы и покрытия."
+		href="https://jlcpcb.com/capabilities/pcb-capabilities"
+	/>
+	<LinkCard
+		title="PCBWay — технологические возможности"
+		description="Нормы изготовления плат разных классов и типов."
+		href="https://www.pcbway.com/capabilities.html"
+	/>
+	<LinkCard
+		title="Резонит — технологические особенности производства"
+		description="Российский производитель плат и сборки; нормы и требования к файлам на русском."
+		href="https://www.rezonit.ru/directory/tekhnologicheskie-osobennosti-proizvodstva/"
+	/>
+</CardGrid>
+
+## Калькуляторы, симуляторы, просмотрщики
+
+<CardGrid>
+	<LinkCard
+		title="Saturn PCB Toolkit"
+		description="Бесплатный набор калькуляторов: ток дорожек по IPC-2152, импеданс, переходные, тепло."
+		href="https://saturnpcb.com/saturn-pcb-toolkit/"
+	/>
+	<LinkCard
+		title="Falstad Circuit Simulator"
+		description="Симулятор схем прямо в браузере с анимацией токов — удобно для уроков модулей 1–3."
+		href="https://www.falstad.com/circuit/"
+	/>
+	<LinkCard
+		title="LTspice"
+		description="Бесплатный SPICE-симулятор от Analog Devices."
+		href="https://www.analog.com/en/resources/design-tools-and-calculators/ltspice-simulator.html"
+	/>
+	<LinkCard
+		title="Gerber: официальный сайт формата"
+		description="Спецификация формата Gerber и онлайн-просмотрщик от Ucamco — урок 10.8."
+		href="https://www.ucamco.com/en/gerber"
+	/>
+</CardGrid>
+
+## Учебные материалы
+
+<CardGrid>
+	<LinkCard
+		title="MIT OpenCourseWare 6.002 — Circuits and Electronics"
+		description="Университетский курс MIT по основам цепей: лекции, задачи, конспекты."
+		href="https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/"
+	/>
+	<LinkCard
+		title="All About Circuits — Textbook"
+		description="Бесплатный онлайн-учебник по постоянному и переменному току, полупроводникам и цифровой технике."
+		href="https://www.allaboutcircuits.com/textbook/"
+	/>
+</CardGrid>
+
+## Стандарты
+
+<CardGrid>
+	<LinkCard
+		title="IPC — магазин стандартов"
+		description="Стандарты IPC (2221, 2152, 7351, A-600, A-610…) и их оглавления."
+		href="https://shop.electronics.org"
+	/>
+	<LinkCard
+		title="IEC 60617 — графические символы"
+		description="Официальная онлайн-база символов МЭК (по подписке)."
+		href="https://std.iec.ch/iec60617"
+	/>
+</CardGrid>
+
+Подробно, что регулирует каждый стандарт, — в разделе [«Справочник стандартов»](../05-standards/).

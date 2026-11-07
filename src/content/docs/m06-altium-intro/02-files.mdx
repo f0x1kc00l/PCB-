@@ -1,0 +1,159 @@
+---
+title: Проект и типы файлов
+description: Что такое проект Altium; файлы .PrjPcb, .SchDoc, .PcbDoc, .SchLib, .PcbLib, .IntLib, .OutJob, .PCBDwf; группы документов в панели Projects; свободные документы.
+sidebar:
+  label: 6.2 Проект и типы файлов
+  order: 2
+duration: 25
+status: ready
+goals:
+  - понимать, чем проект отличается от отдельного документа
+  - узнавать основные типы файлов Altium по расширению
+  - читать дерево проекта в панели Projects
+  - знать, почему проект хранят и передают целой папкой
+prerequisites:
+  - m06-altium-intro/01-interface
+altium:
+  - title: "Project Management in Altium Designer"
+    url: https://www.altium.com/documentation/altium-designer/project-management-in-altium-designer
+  - title: "Projects Panel — группы документов"
+    url: https://www.altium.com/documentation/altium-designer/projects-panel
+  - title: "Integrated Libraries (*.IntLib, *.SchLib, *.PcbLib, *.LibPkg)"
+    url: https://www.altium.com/documentation/altium-designer/integrated-libraries
+  - title: "Output Jobs (*.OutJob)"
+    url: https://www.altium.com/documentation/altium-designer/preparing-for-manufacture/output-jobs
+  - title: "Setting Up a Draftsman Document (*.PCBDwf)"
+    url: https://altium.com/documentation/altium-designer/setting-up-draftsman-document
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Kbd from '../../../components/lesson/Kbd.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+import ProjectTree from '../../../components/diagrams/m06-altium-intro/ProjectTree.astro';
+
+## Проект — это не файл, а набор файлов
+
+В Altium плату проектируют не в одном файле, а в **проекте (project)** — наборе документов, из которых вместе получается конкретное изделие. Схема, плата, библиотеки, чертёж и настройки выпуска — разные файлы, а **файл проекта** связывает их и хранит настройки: правила проверки схемы, параметры выпуска и прочее.
+
+Аналогия — папка с курсовой работой: отдельно текст, рисунки, таблицы и титульный лист, плюс оглавление, которое говорит, что во что входит. Оглавление без файлов бесполезно, файлы без оглавления — просто куча.
+
+<ProjectTree />
+
+Существует несколько типов проектов: **PCB** (обычная плата — наш случай), **Multi-board** (система из нескольких плат) и **Harness** (жгуты). В курсе работаем только с PCB-проектами.
+
+## Расширения файлов
+
+| Расширение | Что это | Урок |
+|---|---|---|
+| `.PrjPcb` | файл PCB-проекта: список документов и настройки | 7.1 |
+| `.SchDoc` | лист принципиальной схемы | 7.3 |
+| `.PcbDoc` | документ платы: контур, слои, размещение, трассировка | 7.5–7.6 |
+| `.SchLib` | библиотека схемных символов | 8.2 |
+| `.PcbLib` | библиотека посадочных мест (footprint) | 8.3–8.4 |
+| `.IntLib` | интегрированная библиотека: символы, модели и параметры, скомпилированные в один файл; напрямую не редактируется | 8.1 |
+| `.LibPkg` | пакет библиотек — «проект», из которого компилируется `.IntLib` | 8.1 |
+| `.OutJob` | Output Job: настроенный набор выходных файлов (Gerber, сверловка, BOM и т. д.) | 10.6 |
+| `.PCBDwf` | чертёж платы, сделанный в Draftsman | 7.8, 10.7 |
+
+<Callout type="tip">
+  Регистр букв в расширениях для Windows не важен: в документации Altium встречаются и `.PrjPcb`, и `.PrjPCB`,
+  и `.PcbDwf`, и `.PCBDwf`. Это одни и те же файлы.
+</Callout>
+
+## Дерево проекта в панели Projects
+
+Панель **Projects** раскладывает документы проекта по **логическим группам**, а не по папкам на диске:
+
+- **Source Documents** — схемы и платы;
+- **Settings** — Output Job, файлы аннотации и прочие настройки (например, Output Job лежит в подгруппе `Settings\Output Job Files`);
+- **Libraries** — библиотеки проекта, по типам;
+- **Documentation** — известные Altium форматы документации, например PDF и текст;
+- **Other Documents** — файлы, которые Windows умеет открывать, а Altium нет;
+- **Generated** — сгенерированные результаты, например BOM;
+- **Components** и **Nets** — появляются после проверки проекта командой <MenuPath path="Project » Validate PCB Project" />.
+
+Значки рядом с документами показывают состояние: звёздочка — документ изменён и не сохранён, плюс отметки системы контроля версий, если она подключена.
+
+<Screenshot src="screenshots/m06-altium-intro/l02-projects-tree.png" alt="панель Projects: проект с группами Source Documents, Settings, Libraries" />
+
+## Свободные документы
+
+Если открыть файл схемы или платы через <Kbd keys="Ctrl+O" /> (команда **File » Open**), а он не принадлежит ни одному открытому проекту, Altium покажет его в группе **Free Documents**. Со свободным документом можно работать, но без проекта он «не знает» о других документах: схему со свободной платой синхронизировать нельзя. Чтобы привязать документ к проекту, щёлкни по нему правой кнопкой в панели Projects и выбери **Add to Project**.
+
+## Как создать и наполнить проект
+
+Коротко, подробно — в уроке [7.1](../../m07-multivibrator/01-project-schematic/):
+
+1. <MenuPath path="File » New » Project" /> — откроется диалог **Create Project**: место хранения, тип проекта (**PCB**), шаблон, имя.
+2. Правый щелчок по проекту в Projects → **Add New to Project** → нужный тип документа (**Schematic**, **PCB**, **Output Job File**, **Draftsman Document** и т. д.).
+3. Новый документ не сохранён, пока ты его не сохранишь: правый щелчок по документу → **Save As**, затем сохрани проект.
+
+<Callout type="altium">
+  У Altium есть служебные папки, которые появляются рядом с проектом: туда складываются, например, сгенерированные
+  выходные файлы и локальная история изменений. Их имена и состав зависят от настроек и версии
+  **[ПРОВЕРИТЬ]** в AD 26. Правило простое: в архив и в систему контроля версий кладут весь проект целиком, а
+  сгенерированное при необходимости пересобирают.
+</Callout>
+
+<Mistakes
+  items={[
+    {
+      problem: 'Отправил коллеге только .PrjPcb, а он видит пустой проект',
+      why: 'Файл проекта хранит только ссылки на документы, а не сами документы.',
+      fix: 'Передавай всю папку проекта (архивом) или выложи проект в Workspace.',
+    },
+    {
+      problem: 'Схема открыта, а синхронизация с платой не работает',
+      why: 'Документ открыт как свободный (Free Documents) и не входит в проект.',
+      fix: 'Открой сам `.PrjPcb` или добавь документ в проект: правый щелчок → **Add to Project**.',
+    },
+    {
+      problem: 'Пытаюсь отредактировать компонент в .IntLib',
+      why: 'Интегрированная библиотека — скомпилированный файл, её нельзя править напрямую.',
+      fix: 'Редактируй исходные `.SchLib` / `.PcbLib` из пакета `.LibPkg` и перекомпилируй. Подробно — модуль 8.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Что хранится в файле .PrjPcb?',
+      options: ['Схема и плата целиком', 'Список документов проекта и его настройки', 'Только Gerber-файлы'],
+      answer: 1,
+      explain: 'Файл проекта ссылается на документы и хранит настройки. Сами документы — отдельные файлы.',
+    },
+    {
+      q: 'В каком файле нарисована трассировка платы?',
+      options: ['.SchDoc', '.PcbLib', '.PcbDoc', '.OutJob'],
+      answer: 2,
+      explain: '.PcbDoc — документ платы. .PcbLib — библиотека посадочных мест, .OutJob — настройки выпуска.',
+    },
+    {
+      q: 'Чем .IntLib отличается от .SchLib?',
+      options: [
+        'Ничем, это синонимы',
+        '.IntLib — скомпилированная библиотека с символами, моделями и параметрами; напрямую не редактируется',
+        '.IntLib хранит только 3D-модели',
+      ],
+      answer: 1,
+      explain: 'IntLib собирается из исходных библиотек пакета .LibPkg и используется для размещения компонентов.',
+    },
+    {
+      q: 'Когда в панели Projects появляются группы Components и Nets?',
+      options: ['Сразу при создании проекта', 'После проверки проекта (Project » Validate)', 'Только после выпуска Gerber'],
+      answer: 1,
+      explain: 'Эти группы строятся из модели проекта, которая создаётся при проверке (валидации).',
+    },
+  ]}
+/>
+
+<Assignment time={20}>
+  Создай пустой PCB-проект `Sandbox`, добавь в него схему, плату и Output Job, сохрани все документы в одну папку.
+  Открой папку в проводнике Windows и сравни с деревом в панели Projects: какие файлы лежат на диске, а какие группы
+  есть только в панели? Закрой проект, открой лист схемы через <Kbd keys="Ctrl+O" /> и найди его в Free Documents.
+</Assignment>

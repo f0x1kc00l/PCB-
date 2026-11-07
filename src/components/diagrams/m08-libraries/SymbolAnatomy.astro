@@ -1,0 +1,47 @@
+---
+/** Рис. 8.2: анатомия символа — корпус, выводы, их номера (Designator) и имена (Name), электрический конец вывода. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="8.2" caption="Символ стабилизатора LM1117. Номер вывода (Designator) должен совпадать с номером площадки посадочного места, имя (Name) — подсказка для человека. Провод на схеме цепляется только к внешнему концу вывода (отмечен точкой), поэтому концы выводов должны лежать на сетке схемы.">
+	<svg viewBox="0 0 640 260" role="img" aria-label="Прямоугольный символ с выводами: слева 3 VIN, справа 2 VOUT и 4 VOUT, снизу 1 GND. Над корпусом U? и LM1117-3.3. Подписи объясняют номер, имя и электрический конец вывода.">
+		<!-- корпус и выводы -->
+		<rect class="ln" x="220" y="60" width="180" height="120" />
+		<path class="ln" d="M160 100 H220 M400 100 H460 M400 140 H460 M310 180 V230" />
+		<circle cx="160" cy="100" r="4.5" class="fill-acc" />
+		<circle cx="460" cy="100" r="4.5" class="fill-acc" />
+		<circle cx="460" cy="140" r="4.5" class="fill-acc" />
+		<circle cx="310" cy="230" r="4.5" class="fill-acc" />
+		<!-- имена внутри -->
+		<g class="t t-s">
+			<text x="226" y="104">VIN</text>
+			<text x="394" y="104" text-anchor="end">VOUT</text>
+			<text x="394" y="144" text-anchor="end">VOUT</text>
+			<text x="310" y="174" text-anchor="middle">GND</text>
+		</g>
+		<!-- номера снаружи -->
+		<g class="t t-s t-mono">
+			<text x="186" y="94">3</text>
+			<text x="430" y="94">2</text>
+			<text x="430" y="134">4</text>
+			<text x="316" y="204">1</text>
+		</g>
+		<!-- обозначение и комментарий -->
+		<text class="t t-acc" x="220" y="50">U?</text>
+		<text class="t t-mono" x="400" y="50" text-anchor="end">LM1117-3.3</text>
+
+		<!-- выноски -->
+		<g class="t t-s t-mut">
+			<text x="10" y="132">конец вывода (hotspot):</text>
+			<text x="10" y="146">сюда цепляется провод</text>
+			<text x="480" y="66">Designator «2» = номер</text>
+			<text x="480" y="80">площадки на плате</text>
+			<text x="480" y="176">Name «VOUT» —</text>
+			<text x="480" y="190">подпись для человека</text>
+			<text x="10" y="24">Designator компонента</text>
+			<text x="10" y="38">с «?» — номер даст аннотация</text>
+			<text x="630" y="246" text-anchor="end">вывод 4 — фланец, тоже VOUT</text>
+		</g>
+		<path class="ln-thin" d="M90 122 L156 103 M478 76 L440 90 M478 180 L398 146 M180 34 L214 44" />
+	</svg>
+</Figure>

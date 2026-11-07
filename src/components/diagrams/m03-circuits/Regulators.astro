@@ -1,0 +1,54 @@
+---
+/** Рис. 3.4: параметрический стабилизатор на стабилитроне и линейный стабилизатор (LDO). */
+import Figure from '../Figure.astro';
+import { resH, zenerUp, resV, capV, gnd, dot } from './sym';
+---
+
+<Figure n="3.4" caption="Слева: стабилитрон держит на выходе своё напряжение, а лишнее падает на балластном резисторе. Годится для малых токов и опорных напряжений. Справа: линейный стабилизатор (LDO) с конденсаторами на входе и выходе. Всё, что не дошло до нагрузки, он превращает в тепло: P = (Uвх − Uвых)·I.">
+	<svg viewBox="0 0 660 250" role="img" aria-label="Слева: 9 вольт через резистор 270 Ом на узел 5,1 вольта, к узлу подключены стабилитрон и нагрузка. Справа: 12 вольт, конденсатор, микросхема LDO, конденсатор, выход 5 вольт 100 миллиампер.">
+		<!-- ===== Стабилитрон ===== -->
+		<text class="t" x="10" y="18" font-weight="700">На стабилитроне</text>
+		<circle class="ln" cx="20" cy="60" r="4" />
+		<text class="t t-s t-acc" x="10" y="46">+9 В</text>
+		<g set:html={resH(24, 130, 60)} />
+		<text class="t t-s" x="77" y="44" text-anchor="middle">R 270 Ом</text>
+		<path class="ln" d="M130 60 H260" />
+		<g set:html={dot(160, 60)} />
+		<g set:html={dot(230, 60)} />
+		<g set:html={zenerUp(160, 60, 170)} />
+		<text class="t t-s" x="176" y="118">VD1</text>
+		<text class="t t-s t-mut" x="176" y="133">5,1 В</text>
+		<g set:html={resV(230, 60, 170)} />
+		<text class="t t-s" x="244" y="118">Rн</text>
+		<path class="ln" d="M20 170 H260" />
+		<circle class="ln" cx="20" cy="170" r="4" />
+		<circle class="ln" cx="264" cy="60" r="4" />
+		<text class="t t-s t-acc" x="250" y="46">5,1 В</text>
+		<g set:html={gnd(140, 170)} />
+
+		<!-- ===== LDO ===== -->
+		<text class="t" x="330" y="18" font-weight="700">Линейный стабилизатор (LDO)</text>
+		<circle class="ln" cx="340" cy="60" r="4" />
+		<text class="t t-s t-acc" x="330" y="46">+12 В</text>
+		<path class="ln" d="M344 60 H460 M540 60 H640" />
+		<g set:html={dot(390, 60)} />
+		<g set:html={capV(390, 60, 170)} />
+		<text class="t t-s" x="404" y="112">Cвх</text>
+		<rect class="ln" x="460" y="40" width="80" height="60" rx="3" />
+		<text class="t" x="500" y="66" text-anchor="middle" font-weight="700">LDO</text>
+		<text class="t t-s t-mut" x="466" y="58">IN</text>
+		<text class="t t-s t-mut" x="512" y="58">OUT</text>
+		<text class="t t-s t-mut" x="488" y="94">GND</text>
+		<path class="ln" d="M500 100 V170" />
+		<g set:html={dot(590, 60)} />
+		<g set:html={capV(590, 60, 170)} />
+		<text class="t t-s" x="604" y="112">Cвых</text>
+		<path class="ln" d="M340 170 H640" />
+		<g set:html={dot(500, 170)} />
+		<circle class="ln" cx="644" cy="60" r="4" />
+		<text class="t t-s t-acc" x="606" y="46">+5 В</text>
+		<g set:html={gnd(450, 170)} />
+		<text class="t t-s" x="330" y="222">Нагрузка 100 мА:</text>
+		<text class="t t-s" x="330" y="238">P = (12 − 5) · 0,1 = 0,7 Вт тепла в корпусе</text>
+	</svg>
+</Figure>

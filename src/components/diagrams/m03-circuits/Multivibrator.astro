@@ -1,0 +1,96 @@
+---
+/**
+ * Схема мультивибратора из руководства Altium (уроки 3.8, 3.9 и модуль 7):
+ * Q1, Q2 — BC547; R1, R2 — 100 кОм (базы); R3, R4 — 1 кОм (коллекторы); C1, C2 — 22 нФ; P1 — разъём питания 12 В.
+ * C1 соединяет коллектор Q2 с базой Q1, C2 — коллектор Q1 с базой Q2.
+ *
+ *   <Multivibrator n="3.6" caption="…" />              — просто схема
+ *   <Multivibrator n="3.7" caption="…" state="A" />    — фаза 1: Q1 открыт, Q2 закрыт
+ *   <Multivibrator n="3.8" caption="…" state="B" />    — фаза 2: Q2 открыт, Q1 закрыт
+ */
+import Figure from '../Figure.astro';
+import { npn, resV, capH, dot, gnd } from './sym';
+
+interface Props {
+	n: string;
+	caption: string;
+	state?: 'A' | 'B';
+}
+const { n, caption, state } = Astro.props;
+const q1 = state === 'A' ? 'ln-acc' : 'ln';
+const q2 = state === 'B' ? 'ln-acc' : 'ln';
+const title =
+	state === 'A' ? 'Фаза 1: Q1 открыт, Q2 закрыт' : state === 'B' ? 'Фаза 2: Q2 открыт, Q1 закрыт' : '';
+---
+
+<Figure n={n} caption={caption}>
+	<svg viewBox="0 0 640 330" role="img" aria-label={`Мультивибратор на двух транзисторах BC547: R1 и R2 по 100 кОм в базах, R3 и R4 по 1 кОм в коллекторах, конденсаторы C1 и C2 по 22 нФ перекрёстно соединяют коллектор одного транзистора с базой другого. ${title}`}>
+		{title && <text class="t t-acc" x="320" y="18" text-anchor="middle">{title}</text>}
+		<!-- разъём питания P1 -->
+		<rect class="ln" x="14" y="150" width="28" height="56" rx="3" />
+		<text class="t t-s" x="28" y="142" text-anchor="middle">P1</text>
+		<circle cx="42" cy="164" r="3" class="fill-cur" />
+		<circle cx="42" cy="192" r="3" class="fill-cur" />
+		<path class="ln" d="M42 164 H60 V50 M42 192 H60 V300" />
+		<!-- шины -->
+		<path class="ln" d="M60 50 H500 M60 300 H500" />
+		<text class="t t-s t-acc" x="68" y="42">12V</text>
+		<text class="t t-s t-acc" x="68" y="318">GND</text>
+		<g set:html={dot(140, 50) + dot(250, 50) + dot(390, 50) + dot(140, 300)} />
+
+		<!-- резисторы -->
+		<g set:html={resV(140, 50, 130) + resV(250, 50, 130) + resV(390, 50, 130) + resV(500, 50, 130)} />
+		<text class="t t-s" x="128" y="88" text-anchor="end">R3</text>
+		<text class="t t-s t-mut" x="128" y="102" text-anchor="end">1 кОм</text>
+		<text class="t t-s" x="262" y="88">R1</text>
+		<text class="t t-s t-mut" x="262" y="102">100 кОм</text>
+		<text class="t t-s" x="378" y="88" text-anchor="end">R2</text>
+		<text class="t t-s t-mut" x="378" y="102" text-anchor="end">100 кОм</text>
+		<text class="t t-s" x="512" y="88">R4</text>
+		<text class="t t-s t-mut" x="512" y="102">1 кОм</text>
+
+		<!-- коллекторные и базовые проводники -->
+		<path class="ln" d="M140 130 V204 M500 130 V204 M250 130 V230 H176 M390 130 V230 H464" />
+		<!-- транзисторы: Q1 зеркальный (база справа), Q2 обычный -->
+		<g set:html={npn(146, 230, true, q1) + npn(494, 230, false, q2)} />
+		<path class="ln" d="M140 256 V300 M500 256 V300" />
+		<text class="t t-s" x="110" y="226" text-anchor="end">Q1</text>
+		<text class="t t-s t-mut" x="110" y="240" text-anchor="end">BC547</text>
+		<text class="t t-s" x="530" y="226">Q2</text>
+		<text class="t t-s t-mut" x="530" y="240">BC547</text>
+
+		<!-- C2: коллектор Q1 → база Q2 (пересекает проводник R1 без соединения) -->
+		<path class="ln" d="M140 150 H300 M340 150 H390" />
+		<g set:html={capH(300, 340, 150) + dot(140, 150) + dot(390, 150)} />
+		<text class="t t-s" x="320" y="132" text-anchor="middle">C2 22 нФ</text>
+		<!-- C1: коллектор Q2 → база Q1 (пересекает проводник R2 без соединения) -->
+		<path class="ln" d="M500 180 H460 M420 180 H250" />
+		<g set:html={capH(420, 460, 180) + dot(500, 180) + dot(250, 180)} />
+		<text class="t t-s" x="440" y="206" text-anchor="middle">C1 22 нФ</text>
+
+		{
+			state === 'A' && (
+				<g>
+					<text class="t t-s t-acc" x="134" y="170" text-anchor="end">≈ 0,1 В</text>
+					<text class="t t-s t-acc" x="256" y="222">≈ 0,65 В</text>
+					<text class="t t-s t-acc" x="384" y="252" text-anchor="end">от −11 В вверх</text>
+					<text class="t t-s t-acc" x="506" y="170">→ 12 В</text>
+					<path class="ln-acc" d="M402 108 V126 M397 120 L402 126 L407 120" />
+					<path class="ln-acc" d="M488 108 V126 M483 120 L488 126 L493 120" />
+				</g>
+			)
+		}
+		{
+			state === 'B' && (
+				<g>
+					<text class="t t-s t-acc" x="506" y="170">≈ 0,1 В</text>
+					<text class="t t-s t-acc" x="384" y="222" text-anchor="end">≈ 0,65 В</text>
+					<text class="t t-s t-acc" x="256" y="252">от −11 В вверх</text>
+					<text class="t t-s t-acc" x="134" y="170" text-anchor="end">→ 12 В</text>
+					<path class="ln-acc" d="M238 108 V126 M233 120 L238 126 L243 120" />
+					<path class="ln-acc" d="M152 108 V126 M147 120 L152 126 L157 120" />
+				</g>
+			)
+		}
+	</svg>
+</Figure>

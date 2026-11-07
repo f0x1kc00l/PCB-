@@ -1,0 +1,46 @@
+---
+/**
+ * Рис. к уроку 1.3: размеры SMD-резисторов в масштабе и типовая номинальная мощность.
+ * Масштаб 40 px = 1 мм. Мощность — типовая для толстоплёночных резисторов общего применения
+ * (например, серия Yageo RC); у конкретной серии смотри даташит.
+ */
+import Figure from './Figure.astro';
+
+const S = 40; // px на мм
+const chips = [
+	{ code: '0402', metric: '1005', l: 1.0, w: 0.5, p: '1/16 Вт' },
+	{ code: '0603', metric: '1608', l: 1.6, w: 0.8, p: '1/10 Вт' },
+	{ code: '0805', metric: '2012', l: 2.0, w: 1.25, p: '1/8 Вт' },
+	{ code: '1206', metric: '3216', l: 3.2, w: 1.6, p: '1/4 Вт' },
+];
+let cursor = 20;
+const placed = chips.map((c) => {
+	const item = { ...c, x: cursor, wpx: c.l * S, hpx: c.w * S };
+	cursor += item.wpx + 36;
+	return item;
+});
+const base = 110;
+/** Число с запятой и минимум одним знаком после неё: 2 → «2,0», 1.25 → «1,25». */
+const fmt = (v: number) => v.toLocaleString('ru-RU', { minimumFractionDigits: 1 });
+---
+
+<Figure n="1.4" caption="SMD-резисторы в масштабе (сверху — полоска 1 мм). Чем больше корпус, тем больше тепла он может рассеять. Код корпуса — дюймовый (0805 = 0,08×0,05 дюйма), в скобках — метрический код.">
+	<svg viewBox={`0 0 ${cursor} 190`} role="img" aria-label="Четыре корпуса резисторов в масштабе: 0402, 0603, 0805 и 1206 с их мощностями.">
+		<!-- шкала 1 мм -->
+		<path class="ln" d={`M20 14 H${20 + S} M20 9 V19 M${20 + S} 9 V19`} />
+		<text class="t t-s" x={20 + S + 8} y="18">1 мм</text>
+		{
+			placed.map((c) => (
+				<g>
+					<rect x={c.x} y={base - c.hpx} width={c.wpx} height={c.hpx} rx="2" fill="#2a2a2a" />
+					<rect x={c.x} y={base - c.hpx} width={c.wpx * 0.2} height={c.hpx} fill="#c8c8c8" />
+					<rect x={c.x + c.wpx * 0.8} y={base - c.hpx} width={c.wpx * 0.2} height={c.hpx} fill="#c8c8c8" />
+					<text class="t t-acc" x={c.x + c.wpx / 2} y={base + 22} text-anchor="middle">{c.code}</text>
+					<text class="t t-s t-mut" x={c.x + c.wpx / 2} y={base + 38} text-anchor="middle">({c.metric})</text>
+					<text class="t t-s" x={c.x + c.wpx / 2} y={base + 56} text-anchor="middle">{fmt(c.l)}×{fmt(c.w)} мм</text>
+					<text class="t t-s" x={c.x + c.wpx / 2} y={base + 72} text-anchor="middle" font-weight="700">{c.p}</text>
+				</g>
+			))
+		}
+	</svg>
+</Figure>

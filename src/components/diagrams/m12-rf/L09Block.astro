@@ -1,0 +1,61 @@
+---
+/**
+ * Рис. к уроку 12.9: структурная схема узла LoRa 868 МГц на модуле E22-900M22S.
+ */
+import Figure from '../Figure.astro';
+
+const sigs = [
+	{ name: 'NSS', y: 80 },
+	{ name: 'SCK', y: 100 },
+	{ name: 'MOSI', y: 120 },
+	{ name: 'MISO', y: 140 },
+	{ name: 'BUSY', y: 165 },
+	{ name: 'DIO1', y: 185 },
+	{ name: 'NRST', y: 210 },
+	{ name: 'RXEN', y: 230 },
+];
+---
+
+<Figure n="12.9а" caption="Структурная схема узла. Модуль E22-900M22S (внутри SX1262) говорит с микроконтроллером по SPI (NSS, SCK, MOSI, MISO) и сигналам BUSY, DIO1 (прерывание), NRST. RXEN включает приёмный тракт внутреннего ВЧ-ключа, TXEN — передающий; TXEN часто соединяют с DIO2 модуля. С вывода ANT линия 50 Ом идёт через П-цепь (по умолчанию 0 Ом и два непаяных места) на разъём SMA. Питание 3,3 В — с керамическими конденсаторами у вывода VCC.">
+	<svg viewBox="0 0 660 320" role="img" aria-label="Слева блок микроконтроллера с восемью сигналами к модулю E22 в центре. Справа от модуля линия 50 Ом через П-цепь к разъёму SMA. Снизу питание 3,3 вольта с конденсаторами.">
+		<!-- МК -->
+		<rect x="20" y="60" width="120" height="190" rx="6" class="ln" />
+		<text class="t" x="80" y="50" text-anchor="middle" font-weight="700">МК (3,3 В)</text>
+		<!-- модуль -->
+		<rect x="260" y="60" width="150" height="190" rx="6" class="ln-acc" />
+		<text class="t" x="335" y="50" text-anchor="middle" font-weight="700">E22-900M22S</text>
+		<text class="t t-s t-mut" x="335" y="240" text-anchor="middle">SX1262 + ВЧ-ключ</text>
+		{sigs.map((s) => (
+			<g>
+				<path class="ln-thin" d={`M140 ${s.y} H260`} style="opacity:0.9" />
+				<text class="t t-s t-mono" x="250" y={s.y - 3} text-anchor="end">{s.name}</text>
+			</g>
+		))}
+		<text class="t t-s t-mut" x="150" y="76">SPI</text>
+		<!-- DIO2→TXEN петля внутри модуля сбоку -->
+		<path class="ln-dash" d="M410 200 H430 V225 H410" />
+		<text class="t t-s t-mono" x="436" y="205">DIO2</text>
+		<text class="t t-s t-mono" x="436" y="230">TXEN</text>
+		<!-- ВЧ тракт -->
+		<path class="ln-acc" d="M410 110 H600" />
+		<text class="t t-s t-mono" x="418" y="102">ANT</text>
+		<text class="t t-s" x="450" y="102">50 Ом</text>
+		<!-- П-цепь -->
+		<rect x="510" y="103" width="28" height="14" class="ln" fill="var(--sl-color-bg)" />
+		<text class="t t-s" x="524" y="96" text-anchor="middle">0 Ом</text>
+		<path class="ln" d="M500 110 V140 M548 110 V140" />
+		<rect x="493" y="140" width="14" height="24" class="ln-dash" />
+		<rect x="541" y="140" width="14" height="24" class="ln-dash" />
+		<path class="ln" d="M500 164 V176 M490 176 H510 M548 164 V176 M538 176 H558" />
+		<text class="t t-s t-mut" x="524" y="194" text-anchor="middle">DNP</text>
+		<!-- SMA -->
+		<circle cx="615" cy="110" r="14" class="ln" />
+		<circle cx="615" cy="110" r="4" class="fill-cur" />
+		<text class="t t-s" x="615" y="142" text-anchor="middle">SMA</text>
+		<!-- питание -->
+		<path class="ln" d="M335 250 V280 H200" />
+		<text class="t t-s t-mono" x="195" y="284" text-anchor="end">+3V3</text>
+		<path class="ln" d="M280 280 V291 M268 291 H292 M268 298 H292 M280 298 V308 M270 308 H290" />
+		<text class="t t-s" x="345" y="300">100 нФ + 10 мкФ у VCC</text>
+	</svg>
+</Figure>

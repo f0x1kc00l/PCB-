@@ -1,0 +1,37 @@
+---
+/** Рис. 11.8: верхний лист иерархической схемы проекта 11.2 — два символа листов, связанные портами. */
+import Figure from '../Figure.astro';
+
+const portsL = [
+	{ y: 90, n: 'UART_TX', dir: 'out' },
+	{ y: 120, n: 'UART_RX', dir: 'in' },
+	{ y: 150, n: 'DTR', dir: 'out' },
+];
+---
+
+<Figure n="11.8" caption="Верхний лист проекта: два символа листов (Sheet Symbol), за каждым — свой лист схемы. Между листами идут только три сигнала UART и сброса. Питание +5V и GND — глобальные порты питания, их не тянут через символы. Стрелки на портах показывают направление сигнала.">
+	<svg viewBox="0 0 680 240" role="img" aria-label="Два прямоугольника-символа листов: USB_Power.SchDoc с выходами UART_TX и DTR и входом UART_RX, и MCU.SchDoc с соответствующими портами. Они соединены тремя проводниками.">
+		<!-- лист 1 -->
+		<rect class="ln" x="40" y="50" width="200" height="140" fill="none" />
+		<text class="t t-acc" x="40" y="40">U_USB</text>
+		<text class="t t-s t-mono" x="40" y="208">USB_Power.SchDoc</text>
+		<!-- лист 2 -->
+		<rect class="ln" x="440" y="50" width="200" height="140" fill="none" />
+		<text class="t t-acc" x="440" y="40">U_MCU</text>
+		<text class="t t-s t-mono" x="440" y="208">MCU.SchDoc</text>
+		{
+			portsL.map((p) => (
+				<g>
+					{/* порт на правой стороне листа 1 */}
+					<path class="ln" d={p.dir === 'out' ? `M206 ${p.y - 8} H230 L240 ${p.y} L230 ${p.y + 8} H206 Z` : `M240 ${p.y - 8} H216 L206 ${p.y} L216 ${p.y + 8} H240 Z`} fill="var(--sl-color-accent-low)" />
+					<text class="t t-s t-mono" x="200" y={p.y + 4} text-anchor="end">{p.n}</text>
+					{/* порт на левой стороне листа 2 */}
+					<path class="ln" d={p.dir === 'out' ? `M440 ${p.y - 8} H464 L474 ${p.y} L464 ${p.y + 8} H440 Z` : `M474 ${p.y - 8} H450 L440 ${p.y} L450 ${p.y + 8} H474 Z`} fill="var(--sl-color-accent-low)" />
+					<text class="t t-s t-mono" x="480" y={p.y + 4}>{p.dir === 'out' ? (p.n === 'UART_TX' ? 'UART_TX' : p.n) : p.n}</text>
+					<path class="ln-acc" d={`M240 ${p.y} H440`} />
+				</g>
+			))
+		}
+		<text class="t t-s t-mut" x="340" y="182" text-anchor="middle">+5V, GND — глобальные порты питания</text>
+	</svg>
+</Figure>

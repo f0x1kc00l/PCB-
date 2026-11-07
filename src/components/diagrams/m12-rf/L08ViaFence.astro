@@ -1,0 +1,47 @@
+---
+/**
+ * Рис. к уроку 12.8: плата с ВЧ-зоной и цифровой зоной; линия 50 Ом с забором из переходных,
+ * сшивка земли по краю ВЧ-зоны, шаг ≤ λ/20.
+ */
+import Figure from '../Figure.astro';
+
+const edge: [number, number][] = [];
+for (let x = 40; x <= 360; x += 20) edge.push([x, 40]);
+for (let y = 60; y <= 200; y += 20) edge.push([360, y]);
+for (let x = 140; x <= 340; x += 20) edge.push([x, 200]);
+const fence: number[] = [];
+for (let x = 120; x <= 330; x += 18) fence.push(x);
+---
+
+<Figure n="12.8а" caption="ВЧ-узел и цифровая часть на одной плате. Земля — один сплошной полигон без разрезов. Край ВЧ-зоны и линию 50 Ом прошивают рядами переходных отверстий на нижнюю землю с шагом не больше λ/20 на верхней рабочей частоте. Цифровые линии обходят ВЧ-зону и не идут под трансивером и антенной.">
+	<svg viewBox="0 0 640 270" role="img" aria-label="Вид сверху: слева ВЧ-зона с трансивером, линией 50 Ом к разъёму и рядами переходных отверстий, справа цифровая зона с микроконтроллером; цифровые дорожки обходят ВЧ-зону.">
+		<rect x="20" y="20" width="600" height="230" rx="6" fill="var(--pcb-mask)" opacity="0.85" />
+		<rect x="28" y="28" width="584" height="214" fill="var(--pcb-copper)" opacity="0.25" />
+		<text class="t" x="40" y="62" font-weight="700">ВЧ-зона</text>
+		<text class="t" x="420" y="62" font-weight="700">цифра</text>
+		<!-- трансивер -->
+		<rect x="60" y="120" width="60" height="60" rx="3" fill="#2a2a2a" />
+		<text class="t t-s" x="90" y="110" text-anchor="middle">трансивер</text>
+		<!-- линия к разъёму -->
+		<rect x="120" y="146" width="210" height="10" fill="var(--pcb-copper)" />
+		<rect x="330" y="134" width="22" height="34" fill="#9aa3ad" />
+		<text class="t t-s" x="300" y="128">SMA</text>
+		{fence.map((x) => (
+			<g>
+				<circle cx={x} cy="134" r="3.5" fill="var(--sl-color-accent)" />
+				<circle cx={x} cy="168" r="3.5" fill="var(--sl-color-accent)" />
+			</g>
+		))}
+		<!-- сшивка края зоны -->
+		{edge.map(([x, y]) => <circle cx={x} cy={y} r="3.5" fill="var(--sl-color-accent)" />)}
+		<!-- шаг -->
+		<path class="ln" d="M120 118 H138 M120 113 V123 M138 113 V123" />
+		<text class="t t-s" x="142" y="114" font-weight="700">шаг ≤ λ/20</text>
+		<!-- МК и цифровые линии -->
+		<rect x="460" y="110" width="80" height="80" rx="3" fill="#2a2a2a" />
+		<text class="t t-s" x="500" y="208" text-anchor="middle">МК</text>
+		<path d="M460 130 H400 V234 H82 V180" fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		<path d="M460 150 H410 V224 H98 V180" fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		<text class="t t-s" x="140" y="218">SPI и прерывания — в обход ВЧ-зоны</text>
+	</svg>
+</Figure>

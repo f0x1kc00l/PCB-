@@ -1,0 +1,48 @@
+---
+/**
+ * Рис. 8.4: три уровня плотности IPC-7351B для вывода «крыло чайки».
+ * Цели выступа площадки за вывод (toe — у носка, heel — у пятки, side — по бокам), мм,
+ * для gull-wing с шагом более 0,625 мм (IPC-7351B). Масштаб 60 px = 1 мм.
+ */
+import Figure from '../Figure.astro';
+
+const S = 60;
+const footL = 1.0; // длина лапки вывода, мм (условно)
+const footW = 0.7; // ширина лапки, мм (условно)
+const levels = [
+	{ cx: 110, name: 'M — Most', lvl: 'уровень A', toe: 0.55, heel: 0.45, side: 0.05, cy: 0.5 },
+	{ cx: 320, name: 'N — Nominal', lvl: 'уровень B', toe: 0.35, heel: 0.35, side: 0.03, cy: 0.25 },
+	{ cx: 530, name: 'L — Least', lvl: 'уровень C', toe: 0.15, heel: 0.25, side: 0.01, cy: 0.1 },
+];
+const heelY = 110; // пятка лапки
+const toeY = heelY + footL * S; // носок лапки
+const n = (v: number) => v.toLocaleString('ru-RU');
+---
+
+<Figure n="8.4" caption="Один и тот же вывод и три площадки под него. Уровень M (Most) — самые большие площадки: удобно паять вручную и волной, но занимают больше места. N (Nominal) — разумный выбор для большинства плат. L (Least) — минимальные площадки для плотного монтажа. Реальные размеры ещё учитывают допуски корпуса и производства — их считает мастер.">
+	<svg viewBox="0 0 640 300" role="img" aria-label="Три варианта площадки под вывод крыло чайки: M с самым большим выступом, N средний, L минимальный. Подписаны выступы у носка, пятки, по бокам и запас courtyard.">
+		{
+			levels.map((l) => {
+				const padTop = heelY - l.heel * S;
+				const padBot = toeY + l.toe * S;
+				const padW = (footW + 2 * l.side) * S;
+				return (
+					<g>
+						<rect x={l.cx - 70} y="20" width="140" height="40" fill="#2c2c2c" />
+						<text x={l.cx} y="45" text-anchor="middle" font-size="11" style="fill:#ddd">корпус</text>
+						<rect x={l.cx - padW / 2} y={padTop} width={padW} height={padBot - padTop} rx="3" fill="var(--pcb-copper)" />
+						<rect x={l.cx - (footW * S) / 2} y="60" width={footW * S} height={toeY - 60} fill="#bdbdbd" fill-opacity="0.45" stroke="#e6e6e6" stroke-width="1.5" />
+						<path class="ln-dash" d={`M${l.cx - 60} ${heelY} H${l.cx + 60} M${l.cx - 60} ${toeY} H${l.cx + 60}`} />
+						<text class="t t-acc" x={l.cx} y="225" text-anchor="middle">{l.name}</text>
+						<text class="t t-s t-mut" x={l.cx} y="241" text-anchor="middle">{l.lvl}</text>
+						<text class="t t-s t-mono" x={l.cx} y="260" text-anchor="middle">toe {n(l.toe)} · heel {n(l.heel)}</text>
+						<text class="t t-s t-mono" x={l.cx} y="276" text-anchor="middle">side {n(l.side)} · courtyard +{n(l.cy)}</text>
+					</g>
+				);
+			})
+		}
+		<text class="t t-s t-mut" x="10" y={heelY + 4}>пятка</text>
+		<text class="t t-s t-mut" x="10" y={toeY + 4}>носок</text>
+		<text class="t t-s t-mut" x="320" y="296" text-anchor="middle">все значения — в миллиметрах</text>
+	</svg>
+</Figure>

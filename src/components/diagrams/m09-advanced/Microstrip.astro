@@ -1,0 +1,41 @@
+---
+/** Рис. 9.2: поперечное сечение микрополосковой (внешний слой) и полосковой (внутренний слой) линии. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="9.2" caption="Слева — микрополосковая линия (microstrip): дорожка на внешнем слое над опорным слоем. Справа — полосковая (stripline): дорожка внутри платы между двумя опорными слоями. Волновое сопротивление зависит от ширины w, толщины диэлектрика h, толщины меди t и диэлектрической проницаемости εr.">
+	<svg viewBox="0 0 660 230" role="img" aria-label="Два поперечных сечения: дорожка над сплошным слоем меди и дорожка между двумя слоями меди, с размерами w, h, t.">
+		<!-- ===== Microstrip ===== -->
+		<text class="t" x="10" y="18" font-weight="700">Микрополосковая (внешний слой)</text>
+		<rect x="20" y="90" width="280" height="80" fill="var(--pcb-fr4)" opacity="0.55" />
+		<rect x="20" y="170" width="280" height="10" fill="var(--pcb-copper)" />
+		<rect x="135" y="80" width="50" height="10" fill="var(--pcb-copper)" />
+		<text class="t" x="160" y="140" text-anchor="middle">диэлектрик εr</text>
+		<text class="t t-s" x="160" y="200" text-anchor="middle">опорный слой (GND)</text>
+		<!-- w -->
+		<path class="ln" d="M135 66 H185 M135 60 V72 M185 60 V72" />
+		<text class="t t-acc" x="160" y="56" text-anchor="middle">w</text>
+		<!-- h -->
+		<path class="ln" d="M240 90 V170 M234 90 H246 M234 170 H246" />
+		<text class="t t-acc" x="252" y="135">h</text>
+		<!-- t -->
+		<path class="ln-thin" d="M190 80 H210 M190 90 H210" />
+		<text class="t t-acc t-s" x="214" y="89">t</text>
+
+		<!-- ===== Stripline ===== -->
+		<text class="t" x="350" y="18" font-weight="700">Полосковая (внутренний слой)</text>
+		<rect x="360" y="60" width="280" height="10" fill="var(--pcb-copper)" />
+		<rect x="360" y="70" width="280" height="100" fill="var(--pcb-fr4)" opacity="0.55" />
+		<rect x="360" y="170" width="280" height="10" fill="var(--pcb-copper)" />
+		<rect x="475" y="115" width="50" height="10" fill="var(--pcb-copper)" />
+		<text class="t t-s" x="500" y="54" text-anchor="middle">опорный слой</text>
+		<text class="t t-s" x="500" y="200" text-anchor="middle">опорный слой</text>
+		<path class="ln" d="M590 70 V115 M584 70 H596 M584 115 H596" />
+		<text class="t t-acc" x="602" y="98">h₁</text>
+		<path class="ln" d="M590 125 V170 M584 125 H596 M584 170 H596" />
+		<text class="t t-acc" x="602" y="153">h₂</text>
+		<path class="ln" d="M475 104 H525 M475 98 V110 M525 98 V110" />
+		<text class="t t-acc" x="500" y="94" text-anchor="middle">w</text>
+		<text class="t" x="420" y="150">εr</text>
+	</svg>
+</Figure>

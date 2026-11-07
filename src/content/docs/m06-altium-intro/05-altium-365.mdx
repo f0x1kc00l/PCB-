@@ -1,0 +1,170 @@
+---
+title: Altium 365 и Workspace
+description: Что такое Altium 365 и рабочее пространство (Workspace); вход в аккаунт и подключение; проекты в Workspace и локальные проекты; варианты продукта Altium Designer, Develop, Agile.
+sidebar:
+  label: 6.5 Altium 365 и Workspace
+  order: 5
+duration: 25
+status: ready
+goals:
+  - понимать, что такое Altium 365 и рабочее пространство (Workspace)
+  - входить в аккаунт и подключаться к Workspace из Altium Designer
+  - различать проекты в Workspace и локальные проекты
+  - знать, зачем Workspace нужен для руководства, на котором построен модуль 7
+prerequisites:
+  - m06-altium-intro/02-files
+altium:
+  - title: "Руководство Altium Designer: вход, лицензия, подключение к рабочему пространству"
+    url: https://www.altium.com/ru/documentation/altium-designer/tutorial
+  - title: "Accessing Your Workspace"
+    url: https://www.altium.com/documentation/altium-designer/altium-365-workspace-access-from-within-altium-designer
+  - title: "Opening Projects and Documents (Workspace, Shared With Me, Local Projects, Recent)"
+    url: https://www.altium.com/documentation/altium-designer/opening-projects-documents
+sources:
+  - title: "Altium: Getting Started in Altium Develop (статья, сентябрь–октябрь 2026)"
+    url: https://resources.altium.com/p/getting-started-in-develop
+  - title: "Altium 365: Making Projects Available Online (учебный модуль)"
+    url: https://my.altium.com/altium-designer/getting-started/making-projects-available-online
+  - title: "KB: Apply/renew student license"
+    url: https://www.altium.com/ru/documentation/knowledge-base/altium-designer/student-license
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Kbd from '../../../components/lesson/Kbd.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+
+Altium Designer давно уже не просто программа на компьютере. Рядом с ним живёт облачная платформа **Altium 365**, и всё больше функций завязано на неё: хранение проектов, компоненты, совместная работа. Разберёмся, что это и нужно ли оно тебе для первой платы.
+
+## Что такое Altium 365 и Workspace
+
+**Altium 365** — облачная платформа Altium. Внутри неё у команды или у одного человека есть **рабочее пространство (Workspace)** — общее хранилище, в котором лежат:
+
+- **проекты** с историей версий: можно вернуться к любой сохранённой версии;
+- **компоненты** и шаблоны, общие для всех участников;
+- **выпуски (releases)** — зафиксированные комплекты файлов для производства;
+- комментарии и задачи; проект можно открыть и посмотреть в браузере без установленного Altium.
+
+Аналогия — Google Диск для плат: файлы лежат в облаке, у каждого участника своя рабочая копия на компьютере, а сервер помнит все версии и показывает, кто что поменял.
+
+Есть и вариант для компаний, которым облако не подходит, — **Enterprise Server**: такое же рабочее пространство, но на собственном сервере организации.
+
+## Варианты продукта
+
+Сейчас Altium предлагает несколько вариантов: **Altium Designer**, **Altium Develop** и **Altium Agile** (Teams и Enterprise). Workspace на Altium 365 бывает типов Develop, Agile Teams и Agile Enterprise. Набор доступных функций зависит от варианта и лицензии. Для курса это не принципиально: всё, что мы делаем, есть в любом варианте. Названия и условия меняются часто, актуальное смотри на сайте Altium.
+
+<Callout type="warning">
+  Официальное руководство Altium, на котором построен модуль 7, прямо требует **подключения к рабочему
+  пространству** с демонстрационными данными. Если Workspace у тебя нет, уроки модуля 7 всё равно можно пройти:
+  проект создаётся локально, а компоненты берутся из панели Components и Manufacturer Part Search. Где шаги
+  руководства расходятся с локальной работой, в уроках модуля 7 будет пометка.
+</Callout>
+
+## Вход в аккаунт и подключение
+
+1. **Вход.** В правом верхнем углу окна — меню текущего пользователя (**Current User**). Выбери вход в аккаунт: откроется браузер со страницей входа Altium. После входа вместо значка появится твой аватар.
+2. **Лицензия.** Там же, в меню **Current User**, есть **License Management** — проверь, что лицензия активна (пробная или студенческая, урок [0.3](../../m00-intro/03-install-altium/)). Закрыть вкладку управления лицензиями можно правым щелчком по вкладке.
+3. **Workspace.** Рядом — переключатель активного рабочего пространства. В документации он называется то **Active Workspace**, то **Active Server**, в зависимости от версии. Выбери своё пространство в разделе **My Workspaces** (твоё) или **Shared With Me** (тебя пригласили).
+
+Одновременно активно **только одно** рабочее пространство: при переключении Altium отключается от текущего. Состояние подключения видно в этом же переключателе, на странице **Data Management – Servers** настроек и в панели **Explorer**.
+
+<Screenshot src="screenshots/m06-altium-intro/l05-current-user.png" alt="меню Current User в правом верхнем углу: вход, License Management" />
+
+## Проекты: в Workspace или локально
+
+Диалог открытия проекта <MenuPath path="File » Open Project" /> показывает несколько источников:
+
+| Раздел | Что там |
+|---|---|
+| **Workspace** | проекты подключённого рабочего пространства |
+| **Shared With Me** | проекты, которыми с тобой поделились, даже если ты не в команде этого Workspace |
+| **Local Projects** | проекты в локальной папке по умолчанию (настройка **Document Path**, урок [6.4](../04-preferences/)), плюс кнопка **Browse** |
+| **Recent** | недавно открытые проекты из любых источников |
+
+**Локальный проект** — обычная папка с файлами на твоём диске. Хранение, копии и история — на тебе (архивы, Git).
+**Проект в Workspace** — у тебя на диске рабочая копия, а «главная» версия с историей хранится на сервере. Сохранённые
+изменения отправляются туда отдельным действием (**Save to Server**). Локальный проект можно выложить в Workspace —
+правым щелчком по проекту в панели Projects. В учебных материалах Altium эта команда называется **Make Project
+Available Online** **[ПРОВЕРИТЬ]** название в AD 26.
+
+<Callout type="altium">
+  При создании проекта (<MenuPath path="File » New » Project" />) диалог **Create Project** спрашивает, где его
+  хранить: в подключённом Workspace или локально. В руководстве Altium показан вариант с Workspace, а для локального
+  проекта в том же диалоге выбирается локальное расположение **[ПРОВЕРИТЬ]** точное название пункта в AD 26.
+</Callout>
+
+## Что выбрать для курса
+
+- **Есть Workspace (например, через студенческую программу или работодателя)** — используй его: получишь историю версий, доступ из браузера и возможность показать плату преподавателю или коллеге по ссылке.
+- **Нет Workspace** — работай локально, а историю веди сам: архив после каждого урока или Git-репозиторий. Для обучения этого достаточно.
+
+Студенческая лицензия Altium Designer оформляется на учебную почту и продлевается ежегодно, пока ты учишься (подробности — в базе знаний Altium по ссылке в «Ссылках» и в уроке 0.3).
+
+## Практика в Altium
+
+1. Войди в аккаунт через **Current User**, открой **License Management** и проверь статус лицензии.
+2. Открой переключатель рабочего пространства. Если в **My Workspaces** или **Shared With Me** что-то есть, подключись.
+3. Открой <MenuPath path="File » Open Project" /> и пройдись по разделам **Workspace**, **Shared With Me**, **Local Projects**, **Recent**.
+4. Если подключён Workspace — открой в нём любой демонстрационный проект. Если нет — открой через **Local Projects → Browse** проект `Sandbox` из урока [6.2](../02-files/).
+
+<Mistakes
+  items={[
+    {
+      problem: 'Руководство Altium требует Workspace, а у меня его нет',
+      why: 'Официальный tutorial рассчитан на подключённое пространство с демо-данными.',
+      fix: 'Создавай проект локально и бери компоненты из панели Components и Manufacturer Part Search. Расхождения отмечены в уроках модуля 7.',
+    },
+    {
+      problem: 'Изменения в проекте Workspace не видны коллеге',
+      why: 'Сохранение на диск (Ctrl+S) обновляет только твою рабочую копию.',
+      fix: 'Отправь изменения на сервер командой **Save to Server** в панели Projects.',
+    },
+    {
+      problem: 'Пропали компоненты и проекты из Workspace',
+      why: 'Активно другое рабочее пространство или подключение разорвано.',
+      fix: 'Проверь переключатель активного Workspace в правом верхнем углу и статус входа в аккаунт.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Что такое Workspace в Altium 365?',
+      options: [
+        'Окно редактора платы',
+        'Хранилище проектов, компонентов и выпусков с историей версий и совместным доступом',
+        'Папка Program Files с программой',
+      ],
+      answer: 1,
+      explain: 'Workspace — общее рабочее пространство на платформе Altium 365 (или на Enterprise Server).',
+    },
+    {
+      q: 'Сколько рабочих пространств может быть активно одновременно?',
+      options: ['Одно', 'Два', 'Сколько угодно'],
+      answer: 0,
+      explain: 'Активно только одно. При переключении Altium отключается от текущего.',
+    },
+    {
+      q: 'Где в диалоге File » Open Project искать проекты с твоего диска?',
+      options: ['Workspace', 'Shared With Me', 'Local Projects', 'Только через Ctrl+O'],
+      answer: 2,
+      explain: 'Local Projects показывает папку из настройки Document Path, а Browse — любую другую.',
+    },
+    {
+      q: 'Ты сохранил проект Workspace через Ctrl+S. Увидит ли коллега изменения?',
+      options: ['Да, сразу', 'Нет, нужно отправить изменения на сервер (Save to Server)', 'Только после перезапуска Altium'],
+      answer: 1,
+      explain: 'Ctrl+S сохраняет локальную рабочую копию. На сервер изменения уходят отдельным действием.',
+    },
+  ]}
+/>
+
+<Assignment time={20}>
+  Определись, как ты будешь хранить проекты курса: Workspace или локальная папка плюс Git. Запиши решение в файл
+  `README.txt` в папке курса. Если выбрал Git — создай репозиторий в папке курса и сделай первый коммит с проектом
+  `Sandbox`. Если Workspace — выложи туда `Sandbox` и открой его в браузере.
+</Assignment>

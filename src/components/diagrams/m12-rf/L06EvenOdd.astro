@@ -1,0 +1,51 @@
+---
+/**
+ * Рис. 12.6а: связанные микрополоски в разрезе, чётный и нечётный тип возбуждения (по §1.3 Малорацкого).
+ */
+import Figure from '../Figure.astro';
+
+const panel = (ox: number) => ({ ox, gnd: 150, top: 96, s1: ox + 95, s2: ox + 165, w: 40 });
+const E = panel(0);
+const O = panel(330);
+---
+
+<Figure n="12.6а" caption="Две полоски рядом — связанные линии. Любой сигнал в них раскладывается на два типа волн. Чётный: обе полоски с одним потенциалом, между ними поле «расталкивается» (магнитная стенка), ёмкость на землю меньше, Zoe больше Z0. Нечётный: потенциалы противоположны, поле замыкается с полоски на полоску (электрическая стенка — виртуальная земля посередине), Zoo меньше Z0.">
+	<svg viewBox="0 0 660 215" role="img" aria-label="Слева разрез связанных полосок с одинаковыми знаками плюс, линии поля идут вниз к земле, посередине пунктир — магнитная стенка. Справа полоски плюс и минус, линии поля идут от одной к другой, посередине пунктир — электрическая стенка.">
+		{[E, O].map((p, i) => (
+			<g>
+				<text class="t" x={p.ox + 165} y="22" text-anchor="middle" font-weight="700">{i === 0 ? 'Чётный тип (even), Zoe' : 'Нечётный тип (odd), Zoo'}</text>
+				<rect x={p.ox + 20} y={p.top + 6} width="290" height={p.gnd - p.top - 6} fill="var(--pcb-fr4)" opacity="0.35" />
+				<rect x={p.ox + 20} y={p.gnd} width="290" height="8" fill="var(--pcb-copper)" />
+				<rect x={p.s1 - p.w / 2} y={p.top} width={p.w} height="7" fill="var(--pcb-copper)" />
+				<rect x={p.s2 - p.w / 2} y={p.top} width={p.w} height="7" fill="var(--pcb-copper)" />
+				<text class="t t-acc" x={p.s1} y={p.top - 8} text-anchor="middle">+</text>
+				<text class="t t-acc" x={p.s2} y={p.top - 8} text-anchor="middle">{i === 0 ? '+' : '−'}</text>
+				<path d={`M${(p.s1 + p.s2) / 2} 44 V${p.gnd + 8}`} class="ln-dash" />
+				<text class="t t-s t-mut" x={(p.s1 + p.s2) / 2} y="40" text-anchor="middle">{i === 0 ? 'магнитная стенка' : 'электрическая стенка (≈ земля)'}</text>
+				<text class="t t-s t-mut" x={p.ox + 26} y={p.gnd + 26}>GND</text>
+			</g>
+		))}
+
+		<!-- чётный: линии поля вниз и наружу -->
+		<g class="ln-thin">
+			{[-15, -5, 5, 15].map((dx) => <path d={`M${E.s1 + dx} ${E.top + 7} V${E.gnd}`} />)}
+			{[-15, -5, 5, 15].map((dx) => <path d={`M${E.s2 + dx} ${E.top + 7} V${E.gnd}`} />)}
+			<path d={`M${E.s1 - 20} ${E.top + 3} Q${E.s1 - 50} ${E.top + 10} ${E.s1 - 55} ${E.gnd}`} />
+			<path d={`M${E.s2 + 20} ${E.top + 3} Q${E.s2 + 50} ${E.top + 10} ${E.s2 + 55} ${E.gnd}`} />
+			<path d={`M${E.s1 + 20} ${E.top + 4} Q${E.s1 + 30} ${E.top + 14} ${E.s1 + 28} ${E.gnd}`} />
+			<path d={`M${E.s2 - 20} ${E.top + 4} Q${E.s2 - 30} ${E.top + 14} ${E.s2 - 28} ${E.gnd}`} />
+		</g>
+
+		<!-- нечётный: поле между полосками -->
+		<g class="ln-thin">
+			{[-15, -5, 5, 15].map((dx) => <path d={`M${O.s1 + dx} ${O.top + 7} V${O.gnd}`} />)}
+			{[-15, -5, 5, 15].map((dx) => <path d={`M${O.s2 + dx} ${O.top + 7} V${O.gnd}`} />)}
+			<path d={`M${O.s1 + 20} ${O.top + 3} H${O.s2 - 20}`} />
+			<path d={`M${O.s1 + 18} ${O.top} Q${(O.s1 + O.s2) / 2} ${O.top - 26} ${O.s2 - 18} ${O.top}`} />
+			<path d={`M${O.s1 + 20} ${O.top + 7} Q${(O.s1 + O.s2) / 2} ${O.top + 24} ${O.s2 - 20} ${O.top + 7}`} />
+		</g>
+
+		<text class="t t-s" x="165" y="205" text-anchor="middle">ёмкость на землю меньше → Zoe &gt; Z0</text>
+		<text class="t t-s" x="495" y="205" text-anchor="middle">добавлена ёмкость между полосками → Zoo &lt; Z0</text>
+	</svg>
+</Figure>

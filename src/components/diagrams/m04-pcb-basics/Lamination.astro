@@ -1,0 +1,59 @@
+---
+/**
+ * Рис. 4.3 (урок 4.3): сборка четырёхслойной платы перед прессованием и после.
+ * Слева «пирог» в разборе, справа готовый пакет.
+ */
+import Figure from '../Figure.astro';
+
+const CU = 'var(--pcb-copper)';
+const CORE = 'var(--pcb-fr4)';
+const PP = '#d8c88a';
+const W = 230;
+---
+
+<Figure n="4.3" caption="Четырёхслойная плата собирается как бутерброд: в центре ядро (готовый ламинат с медью с двух сторон, на нём уже вытравлены внутренние слои L2 и L3), по бокам листы препрега, снаружи медная фольга. Под давлением и нагревом препрег плавится, склеивает пакет и затвердевает. Наружные слои L1 и L4 травят уже после прессования.">
+	<svg viewBox="0 0 640 250" role="img" aria-label="Слева разобранный пакет: фольга, препрег, ядро с медью, препрег, фольга. Стрелка «пресс и нагрев». Справа готовая плата со слоями L1–L4.">
+		<text class="t" x="20" y="18" font-weight="700">До прессования</text>
+		<!-- фольга L1 -->
+		<rect x="20" y="34" width={W} height="6" fill={CU} />
+		<text class="t t-s" x={W + 30} y="42">фольга → L1</text>
+		<!-- препрег -->
+		<rect x="20" y="56" width={W} height="22" fill={PP} />
+		<text class="t t-s" x={W + 30} y="71">препрег</text>
+		<!-- ядро с внутренними слоями (вытравлен рисунок) -->
+		<rect x="20" y="94" width="40" height="5" fill={CU} />
+		<rect x="80" y="94" width="90" height="5" fill={CU} />
+		<rect x="190" y="94" width="60" height="5" fill={CU} />
+		<rect x="20" y="99" width={W} height="50" fill={CORE} />
+		<rect x="20" y="149" width={W} height="5" fill={CU} />
+		<text class="t t-s" x={W + 30} y="100">L2 (рисунок вытравлен)</text>
+		<text class="t t-s" x={W + 30} y="128">ядро</text>
+		<text class="t t-s" x={W + 30} y="156">L3 (сплошной слой)</text>
+		<!-- препрег -->
+		<rect x="20" y="170" width={W} height="22" fill={PP} />
+		<text class="t t-s" x={W + 30} y="185">препрег</text>
+		<!-- фольга L4 -->
+		<rect x="20" y="208" width={W} height="6" fill={CU} />
+		<text class="t t-s" x={W + 30} y="215">фольга → L4</text>
+
+		<!-- стрелка -->
+		<path class="ln-acc" d="M420 124 H470 M460 114 L470 124 L460 134" />
+		<text class="t t-s t-acc" x="445" y="104" text-anchor="middle">пресс</text>
+		<text class="t t-s t-acc" x="445" y="152" text-anchor="middle">+ нагрев</text>
+
+		<text class="t" x="490" y="18" font-weight="700">После</text>
+		<g transform="translate(490 70)">
+			<rect x="0" y="0" width="130" height="5" fill={CU} />
+			<rect x="0" y="5" width="130" height="16" fill={PP} />
+			<rect x="0" y="21" width="20" height="4" fill={CU} />
+			<rect x="35" y="21" width="50" height="4" fill={CU} />
+			<rect x="100" y="21" width="30" height="4" fill={CU} />
+			<rect x="0" y="25" width="130" height="40" fill={CORE} />
+			<rect x="0" y="65" width="130" height="4" fill={CU} />
+			<rect x="0" y="69" width="130" height="16" fill={PP} />
+			<rect x="0" y="85" width="130" height="5" fill={CU} />
+			<text class="t t-s" x="65" y="112" text-anchor="middle">единый пакет</text>
+			<text class="t t-s t-mut" x="65" y="128" text-anchor="middle">≈ 1,6 мм</text>
+		</g>
+	</svg>
+</Figure>

@@ -1,0 +1,347 @@
+---
+/**
+ * Интерактивный стек слоёв печатной платы.
+ *
+ *   <LayerStack />            — по умолчанию двухслойная плата
+ *   <LayerStack preset="4" /> — четырёхслойная
+ *
+ * Клик (или Tab + Enter) по слою — описание справа. Толщины на рисунке
+ * сильно преувеличены для тонких слоёв, реальные значения — в описании.
+ * Типовые значения — ориентир; конкретный стек задаёт производитель.
+ */
+interface Props {
+	preset?: '2' | '4';
+}
+const { preset = '2' } = Astro.props;
+
+type Kind = 'silk' | 'mask' | 'copper' | 'core' | 'prepreg';
+interface Layer {
+	name: string; // по-русски
+	altium: string; // название в Altium
+	kind: Kind;
+	thickness: string; // типовая толщина
+	px: number; // высота полосы на рисунке
+	about: string; // назначение
+}
+
+const silkTop: Layer = {
+	name: 'Шелкография (верх)',
+	altium: 'Top Overlay',
+	kind: 'silk',
+	thickness: '≈ 10–20 мкм (краска)',
+	px: 16,
+	about: 'Надписи и контуры: позиционные обозначения (R1, C2), ключи выводов, логотип. Электрически не участвует.',
+};
+const maskTop: Layer = {
+	name: 'Паяльная маска (верх)',
+	altium: 'Top Solder',
+	kind: 'mask',
+	thickness: '≈ 10–30 мкм',
+	px: 18,
+	about:
+		'Защитный лак, обычно зелёный. Закрывает медь, кроме площадок под пайку. В Altium слой Top Solder рисует ОКНА в маске, а не саму маску. Слой Top Paste (трафарет для пасты) — это не слой платы, а данные для изготовления трафарета.',
+};
+const cu = (name: string, altium: string, about: string, thickness = '35 мкм (1 oz) — типично для внешних'): Layer => ({
+	name,
+	altium,
+	kind: 'copper',
+	thickness,
+	px: 22,
+	about,
+});
+const maskBot: Layer = { ...maskTop, name: 'Паяльная маска (низ)', altium: 'Bottom Solder' };
+const silkBot: Layer = { ...silkTop, name: 'Шелкография (низ)', altium: 'Bottom Overlay' };
+
+const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[] }> = {
+	'2': {
+		label: '2 слоя, 1,6 мм',
+		total: '≈ 1,6 мм',
+		layers: [
+			silkTop,
+			maskTop,
+			cu('Медь, верхний слой', 'Top Layer', 'Дорожки, площадки компонентов, полигоны. На двухслойке здесь обычно основная трассировка.'),
+			{
+				name: 'Диэлектрик (ядро)',
+				altium: 'Dielectric — Core',
+				kind: 'core',
+				thickness: '≈ 1,5 мм',
+				px: 120,
+				about:
+					'Стеклотекстолит FR-4: стеклоткань, пропитанная эпоксидной смолой. Даёт механическую прочность и изолирует слои меди друг от друга.',
+			},
+			cu('Медь, нижний слой', 'Bottom Layer', 'Вторая сторона: дорожки и, часто, сплошной полигон земли (GND).'),
+			maskBot,
+			silkBot,
+		],
+	},
+	'4': {
+		label: '4 слоя, 1,6 мм',
+		total: '≈ 1,6 мм',
+		layers: [
+			silkTop,
+			maskTop,
+			cu('Медь L1, верх', 'Top Layer', 'Сигнальный слой с компонентами.'),
+			{
+				name: 'Препрег',
+				altium: 'Dielectric — Prepreg',
+				kind: 'prepreg',
+				thickness: '≈ 0,1–0,2 мм',
+				px: 26,
+				about:
+					'Склеивающий слой: стеклоткань с неполимеризованной смолой. При прессовании плавится и склеивает пакет. Его толщина задаёт импеданс дорожек L1 относительно L2.',
+			},
+			cu(
+				'Медь L2, земля',
+				'Signal или Plane-слой (имя задаёшь сам)',
+				'Обычно сплошная земля GND — опорный слой для сигналов на L1. В Altium может быть слоем-плоскостью (Plane), который рисуется в негативе.',
+				'18–35 мкм',
+			),
+			{
+				name: 'Ядро',
+				altium: 'Dielectric — Core',
+				kind: 'core',
+				thickness: '≈ 1,0–1,2 мм',
+				px: 60,
+				about: 'Готовый ламинат FR-4 с медью с двух сторон, на нём травят внутренние слои L2 и L3.',
+			},
+			cu('Медь L3, питание', 'Signal или Plane-слой', 'Полигоны питания (3V3, 5V) или ещё один сигнальный слой.', '18–35 мкм'),
+			{
+				name: 'Препрег',
+				altium: 'Dielectric — Prepreg',
+				kind: 'prepreg',
+				thickness: '≈ 0,1–0,2 мм',
+				px: 26,
+				about: 'Симметрично верхнему препрегу: стек делают симметричным, чтобы плату не выгибало при нагреве.',
+			},
+			cu('Медь L4, низ', 'Bottom Layer', 'Сигнальный слой, иногда с компонентами.'),
+			maskBot,
+			silkBot,
+		],
+	},
+};
+---
+
+<layer-stack class="pcb-widget not-content" data-preset={preset}>
+	<p class="pcb-widget__title">Стек слоёв печатной платы</p>
+
+	<div class="controls">
+		<div class="pcb-segmented" role="radiogroup" aria-label="Вариант платы">
+			{
+				Object.entries(presets).map(([key, p]) => (
+					<label>
+						<input type="radio" name="stack-preset" value={key} checked={key === preset} />
+						<span>{p.label}</span>
+					</label>
+				))
+			}
+		</div>
+		<label class="via-toggle"><input type="checkbox" data-via checked /> Показать переходное отверстие</label>
+	</div>
+
+	{
+		Object.entries(presets).map(([key, p]) => (
+			<div class="stack-wrap" data-stack={key} hidden={key !== preset}>
+				<div class="stack" role="list" aria-label={`Слои: ${p.label}`}>
+					{p.layers.map((l, i) => (
+						<button
+							type="button"
+							role="listitem"
+							class:list={['layer', `layer--${l.kind}`]}
+							style={`height:${l.px}px`}
+							data-index={i}
+							aria-label={`${l.name}, ${l.thickness}`}
+						>
+							<span class="layer__name">{l.name}</span>
+						</button>
+					))}
+					<div class="via" aria-hidden="true" />
+				</div>
+				<div class="info" aria-live="polite">
+					<p class="info__hint">Нажми на слой, чтобы узнать о нём.</p>
+					{p.layers.map((l, i) => (
+						<div class="info__item" data-info={i} hidden>
+							<p class="info__name">{l.name}</p>
+							<dl>
+								<dt>В Altium</dt>
+								<dd>
+									<code>{l.altium}</code>
+								</dd>
+								<dt>Толщина</dt>
+								<dd>{l.thickness}</dd>
+							</dl>
+							<p>{l.about}</p>
+						</div>
+					))}
+					<p class="info__total">Общая толщина: {p.total}. Рисунок не в масштабе.</p>
+				</div>
+			</div>
+		))
+	}
+	<p class="footnote">
+		Типовые значения для ориентира. Точный стек (толщины препрегов, ядра, меди) берётся из технологических норм
+		производителя. Стандарт материалов — IPC-4101.
+	</p>
+</layer-stack>
+
+<script>
+	class LayerStack extends HTMLElement {
+		connectedCallback() {
+			// Радиокнопки разных экземпляров не должны мешать друг другу.
+			const group = `stack-${Math.random().toString(36).slice(2, 8)}`;
+			this.querySelectorAll<HTMLInputElement>('input[name="stack-preset"]').forEach((r) => (r.name = group));
+
+			const showPreset = (key: string) => {
+				this.querySelectorAll<HTMLElement>('[data-stack]').forEach((el) => {
+					el.hidden = el.dataset.stack !== key;
+				});
+			};
+			this.addEventListener('change', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.type === 'radio') showPreset(t.value);
+				if (t.matches('[data-via]')) this.classList.toggle('no-via', !t.checked);
+			});
+
+			this.addEventListener('click', (e) => {
+				const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.layer');
+				if (!btn) return;
+				const wrap = btn.closest<HTMLElement>('.stack-wrap')!;
+				wrap.querySelectorAll('.layer').forEach((b) => b.classList.toggle('is-active', b === btn));
+				wrap.querySelector<HTMLElement>('.info__hint')!.hidden = true;
+				wrap.querySelectorAll<HTMLElement>('[data-info]').forEach((el) => {
+					el.hidden = el.dataset.info !== btn.dataset.index;
+				});
+			});
+		}
+	}
+	customElements.define('layer-stack', LayerStack);
+</script>
+
+<style>
+	.controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.6rem;
+		margin-bottom: 0.9rem;
+	}
+	.via-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: var(--sl-text-sm);
+		cursor: pointer;
+	}
+	.via-toggle input {
+		accent-color: var(--sl-color-accent);
+	}
+	.stack-wrap:not([hidden]) {
+		display: grid;
+		grid-template-columns: minmax(14rem, 1fr) minmax(12rem, 1fr);
+		gap: 1rem;
+	}
+	@media (max-width: 42rem) {
+		.stack-wrap:not([hidden]) {
+			grid-template-columns: 1fr;
+		}
+	}
+	.stack {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		border-radius: 0.25rem;
+		overflow: hidden;
+	}
+	.layer {
+		position: relative;
+		display: flex;
+		align-items: center;
+		width: 100%;
+		min-height: 6px;
+		padding: 0 0.6rem;
+		border: 0;
+		cursor: pointer;
+		font: inherit;
+		text-align: start;
+		transition: filter 0.15s ease;
+	}
+	.layer:hover,
+	.layer:focus-visible {
+		filter: brightness(1.2);
+		outline: none;
+	}
+	.layer.is-active {
+		box-shadow: inset 0 0 0 2px var(--sl-color-white);
+		z-index: 1;
+	}
+	.layer__name {
+		position: relative;
+		z-index: 2;
+		font-size: 0.72rem;
+		line-height: 1;
+		white-space: nowrap;
+		color: #111;
+		text-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+	}
+	.layer--silk {
+		background: var(--pcb-silk);
+		border-block: 1px solid #bbb;
+	}
+	.layer--mask {
+		background: var(--pcb-mask);
+	}
+	.layer--mask .layer__name {
+		color: #fff;
+		text-shadow: none;
+	}
+	.layer--copper {
+		background: linear-gradient(180deg, #f0a96b, var(--pcb-copper) 50%, #a65d25);
+	}
+	.layer--core {
+		background: repeating-linear-gradient(45deg, var(--pcb-fr4) 0 6px, #b59e57 6px 8px);
+	}
+	.layer--prepreg {
+		background: repeating-linear-gradient(-45deg, #d8c88a 0 5px, #c2ae66 5px 7px);
+	}
+	/* Сквозное металлизированное отверстие: медная гильза через весь стек. */
+	.via {
+		position: absolute;
+		inset-block: 34px;
+		inset-inline-end: 2.2rem;
+		width: 18px;
+		border-inline: 4px solid var(--pcb-copper);
+		background: var(--sl-color-bg);
+		pointer-events: none;
+		z-index: 3;
+	}
+	.no-via .via {
+		display: none;
+	}
+	.info {
+		font-size: var(--sl-text-sm);
+	}
+	.info__hint,
+	.info__total {
+		color: var(--sl-color-gray-3);
+	}
+	.info__name {
+		margin: 0;
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	dl {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.15rem 0.6rem;
+		margin: 0.4rem 0;
+	}
+	dt {
+		color: var(--sl-color-gray-3);
+	}
+	dd {
+		margin: 0;
+	}
+	.info p {
+		margin: 0.4rem 0;
+	}
+</style>

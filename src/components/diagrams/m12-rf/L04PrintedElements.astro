@@ -1,0 +1,83 @@
+---
+/**
+ * Рис. 12.4а: реактивные элементы прямо из меди платы (вид сверху) и их эквивалент.
+ * По мотивам табл. 1.4 Малорацкого: зазор, встречно-штыревой конденсатор, низкоомный шлейф (параллельная C),
+ * высокоомный отрезок (последовательная L), короткозамкнутый шлейф (параллельная L), спиральная катушка.
+ */
+import Figure from '../Figure.astro';
+
+const cells = [
+	{ x: 0, y: 0, title: 'Зазор в линии', eq: 'последовательная C (малая)' },
+	{ x: 1, y: 0, title: 'Встречно-штыревой', eq: 'последовательная C (больше)' },
+	{ x: 2, y: 0, title: 'Широкий короткий шлейф', eq: 'параллельная C' },
+	{ x: 0, y: 1, title: 'Узкий короткий отрезок', eq: 'последовательная L' },
+	{ x: 1, y: 1, title: 'Шлейф на землю (via)', eq: 'параллельная L' },
+	{ x: 2, y: 1, title: 'Спираль', eq: 'L побольше (нужна перемычка)' },
+];
+const W = 220;
+const H = 150;
+---
+
+<Figure n="12.4а" caption="Элементы, которые можно сделать из самой дорожки. Сверху ёмкости, снизу индуктивности. Они работают как сосредоточенные, только пока их длина много меньше длины волны в линии (меньше λг/10, а для отрезков-индуктивностей — меньше λг/8).">
+	<svg viewBox={`0 0 ${3 * W} ${2 * H}`} role="img" aria-label="Шесть эскизов печатных элементов вид сверху: зазор, встречно-штыревой конденсатор, широкий шлейф, узкий отрезок, шлейф с переходным отверстием на землю и спиральная катушка, под каждым эквивалентный элемент.">
+		{cells.map((c) => (
+			<g transform={`translate(${c.x * W} ${c.y * H})`}>
+				<rect x="4" y="4" width={W - 8} height={H - 8} rx="6" class="ln-thin" />
+				<text class="t t-s" x={W / 2} y="22" text-anchor="middle" font-weight="700">{c.title}</text>
+				<text class="t t-s t-acc" x={W / 2} y={H - 14} text-anchor="middle">{c.eq}</text>
+			</g>
+		))}
+
+		<!-- 1. Зазор -->
+		<g fill="var(--pcb-copper)">
+			<rect x="20" y="66" width="85" height="12" />
+			<rect x="115" y="66" width="85" height="12" />
+		</g>
+		<path class="ln" d="M105 92 H115 M105 88 V96 M115 88 V96" />
+		<text class="t t-s" x="110" y="110" text-anchor="middle">s</text>
+
+		<!-- 2. Встречно-штыревой -->
+		<g fill="var(--pcb-copper)" transform="translate(220 0)">
+			<rect x="20" y="66" width="50" height="12" />
+			<rect x="150" y="66" width="50" height="12" />
+			<rect x="70" y="40" width="8" height="64" />
+			<rect x="142" y="40" width="8" height="64" />
+			<rect x="78" y="44" width="56" height="6" />
+			<rect x="78" y="69" width="56" height="6" />
+			<rect x="78" y="94" width="56" height="6" />
+			<rect x="86" y="56.5" width="56" height="6" />
+			<rect x="86" y="81.5" width="56" height="6" />
+		</g>
+
+		<!-- 3. Широкий шлейф (параллельная C) -->
+		<g fill="var(--pcb-copper)" transform="translate(440 0)">
+			<rect x="20" y="50" width="180" height="10" />
+			<rect x="85" y="60" width="50" height="50" />
+		</g>
+		<text class="t t-s t-mut" x="550" y="124" text-anchor="middle">низкое Z0, l &lt; λг/8</text>
+
+		<!-- 4. Узкий отрезок (последовательная L) -->
+		<g fill="var(--pcb-copper)" transform="translate(0 150)">
+			<rect x="20" y="64" width="60" height="16" />
+			<rect x="80" y="70" width="60" height="4" />
+			<rect x="140" y="64" width="60" height="16" />
+		</g>
+		<text class="t t-s t-mut" x="110" y="252" text-anchor="middle">высокое Z0, l &lt; λг/8</text>
+
+		<!-- 5. Короткозамкнутый шлейф -->
+		<g transform="translate(220 150)">
+			<rect x="20" y="40" width="180" height="10" fill="var(--pcb-copper)" />
+			<rect x="106" y="50" width="8" height="46" fill="var(--pcb-copper)" />
+			<circle cx="110" cy="100" r="9" fill="var(--pcb-copper)" />
+			<circle cx="110" cy="100" r="4" fill="var(--sl-color-bg)" />
+			<text class="t t-s t-mut" x="128" y="104">via на GND</text>
+		</g>
+
+		<!-- 6. Спираль -->
+		<g transform="translate(440 150)">
+			<path d="M110 82 h14 v-24 h-28 v38 h42 v-52 h-56 v66 h70 v-80 h-84 v80" fill="none" stroke="var(--pcb-copper)" stroke-width="4" />
+			<path d="M110 82 L196 82" class="ln-dash" />
+			<text class="t t-s t-mut" x="212" y="74" text-anchor="end">перемычка</text>
+		</g>
+	</svg>
+</Figure>

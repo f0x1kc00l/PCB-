@@ -1,0 +1,53 @@
+---
+/**
+ * Рис. к уроку 1.2: вольт-амперные характеристики резисторов (прямые) и диода (кривая).
+ * Масштаб: 1 В = 68 px по горизонтали, 1 мА = 4,6 px по вертикали. Начало координат (50, 260).
+ */
+import Figure from './Figure.astro';
+
+const x = (u: number) => 50 + u * 68;
+const y = (ma: number) => 260 - ma * 4.6;
+const line = (r: number) => {
+	const uMax = Math.min(5, (50 * r) / 1000); // ограничиваем графиком 50 мА
+	return `M${x(0)} ${y(0)} L${x(uMax)} ${y((uMax / r) * 1000)}`;
+};
+// Диод: условная экспонента, точки (U, мА)
+const diode = [
+	[0, 0],
+	[0.4, 0],
+	[0.5, 0.1],
+	[0.6, 1],
+	[0.65, 3],
+	[0.7, 10],
+	[0.73, 20],
+	[0.76, 35],
+	[0.78, 50],
+]
+	.map(([u, i], k) => `${k ? 'L' : 'M'}${x(u).toFixed(1)} ${y(i).toFixed(1)}`)
+	.join(' ');
+const ticksU = [1, 2, 3, 4, 5];
+const ticksI = [10, 20, 30, 40, 50];
+---
+
+<Figure n="1.3" caption="У резистора ток растёт пропорционально напряжению: ВАХ — прямая, и чем круче наклон, тем меньше сопротивление. У диода зависимость нелинейная: почти ноль до ~0,6 В, потом резкий рост. Закон Ома в форме R = const к диоду не применим.">
+	<svg viewBox="0 0 430 300" role="img" aria-label="График тока от напряжения: прямые для 100, 220 и 1000 Ом и кривая диода, резко растущая после 0,6 вольта.">
+		<!-- сетка и оси -->
+		{ticksU.map((u) => <line class="ln-thin" x1={x(u)} y1={y(0)} x2={x(u)} y2={y(50)} />)}
+		{ticksI.map((i) => <line class="ln-thin" x1={x(0)} y1={y(i)} x2={x(5)} y2={y(i)} />)}
+		<path class="ln" d={`M${x(0)} ${y(0)} H${x(5.3)} M${x(0)} ${y(0)} V${y(54)}`} />
+		{ticksU.map((u) => <text class="t t-s t-mut" x={x(u)} y={y(0) + 16} text-anchor="middle">{u}</text>)}
+		{ticksI.map((i) => <text class="t t-s t-mut" x={x(0) - 8} y={y(i) + 4} text-anchor="end">{i}</text>)}
+		<text class="t t-s" x={x(5.3)} y={y(0) + 30} text-anchor="end">U, В</text>
+		<text class="t t-s" x={x(0) - 8} y={y(54) - 4} text-anchor="end">I, мА</text>
+		<!-- резисторы -->
+		<path class="ln-acc" d={line(100)} />
+		<path class="ln-acc" d={line(220)} opacity="0.75" />
+		<path class="ln-acc" d={line(1000)} opacity="0.5" />
+		<text class="t t-acc t-s" x={x(3.3)} y={y(40)}>100 Ом</text>
+		<text class="t t-acc t-s" x={x(4.4)} y={y(20) - 8}>220 Ом</text>
+		<text class="t t-acc t-s" x={x(4.4)} y={y(4.4) - 8}>1 кОм</text>
+		<!-- диод -->
+		<path d={diode} fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		<text class="t t-s" x={x(0.85)} y={y(44)} fill="var(--pcb-altium)">диод</text>
+	</svg>
+</Figure>

@@ -1,0 +1,55 @@
+---
+/** Рис. 2.4 (урок 2.4): обозначение диода, корпус с полоской катода; защита от переполюсовки и диод на катушке реле. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="2.4" caption="Слева: треугольник показывает направление прямого тока, черта — катод; на корпусе катод отмечен полоской. В центре: последовательный диод защищает схему от батареи, вставленной наоборот. Справа: диод параллельно катушке реле гасит выброс напряжения при выключении.">
+	<svg viewBox="0 0 660 250" role="img" aria-label="Слева символ диода с подписями анод и катод и корпус с полоской катода. В центре батарея, последовательный диод и нагрузка. Справа ключ, катушка реле и диод параллельно катушке, включённый катодом к плюсу.">
+		<!-- ===== Символ ===== -->
+		<text class="t" x="10" y="22" font-weight="700">Анод и катод</text>
+		<path class="ln" d="M20 80 H100 M118 80 H190" />
+		<polygon points="70,64 70,96 100,80" class="ln" />
+		<path class="ln" d="M70 80 H100" />
+		<path class="ln" d="M100 64 V96" />
+		<text class="t t-s" x="40" y="60">анод A</text>
+		<text class="t t-s" x="120" y="60">катод K</text>
+		<path class="ln-acc" d="M30 112 H170 M162 106 L170 112 L162 118" />
+		<text class="t t-acc t-s" x="100" y="132" text-anchor="middle">прямой ток</text>
+		<!-- корпус -->
+		<path class="ln" d="M20 190 H60 M160 190 H190" />
+		<rect x="60" y="174" width="100" height="32" rx="6" fill="#2a2a2a" />
+		<rect x="138" y="174" width="12" height="32" fill="#c8c8c8" />
+		<text class="t t-s" x="144" y="226" text-anchor="middle">полоска = катод</text>
+
+		<!-- ===== Защита от переполюсовки ===== -->
+		<text class="t" x="230" y="22" font-weight="700">От переполюсовки</text>
+		<path class="ln" d="M250 70 V110 M250 126 V200 H420 V160 M420 110 V70 H360 M330 70 H250" />
+		<path class="ln" d="M232 110 H268" />
+		<path d="M240 126 H260" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="226" y="106">+</text>
+		<polygon points="330,58 330,82 356,70" class="ln" />
+		<path class="ln" d="M356 58 V82" />
+		<text class="t t-s" x="343" y="48" text-anchor="middle">VD1</text>
+		<rect class="ln" x="396" y="110" width="48" height="50" />
+		<text class="t t-s" x="420" y="140" text-anchor="middle">схема</text>
+
+		<!-- ===== Диод на реле ===== -->
+		<text class="t" x="470" y="22" font-weight="700">Гашение выброса</text>
+		<path class="ln" d="M540 40 V64 M540 136 V160 M540 40 H610 V80 M610 120 V160 H540" />
+		<!-- катушка -->
+		<path class="ln" d="M540 64 A9 9 0 0 1 540 82 A9 9 0 0 1 540 100 A9 9 0 0 1 540 118 A9 9 0 0 1 540 136" />
+		<text class="t t-s" x="520" y="104" text-anchor="end">реле K1</text>
+		<!-- диод катодом вверх -->
+		<polygon points="598,120 622,120 610,96" class="ln" />
+		<path class="ln" d="M598 96 H622" />
+		<text class="t t-s" x="628" y="112">VD2</text>
+		<text class="t t-s" x="540" y="34" text-anchor="middle">+12 В</text>
+		<!-- ключ -->
+		<path class="ln" d="M540 160 V178 M540 210 V230" />
+		<path class="ln" d="M540 210 L556 182" />
+		<circle cx="540" cy="178" r="3" class="fill-cur" />
+		<circle cx="540" cy="210" r="3" class="fill-cur" />
+		<text class="t t-s" x="562" y="200">ключ</text>
+		<path class="ln" d="M526 230 H554 M531 236 H549 M536 242 H544" />
+	</svg>
+</Figure>

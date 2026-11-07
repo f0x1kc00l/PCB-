@@ -1,0 +1,71 @@
+---
+/**
+ * Рис. 4.4 (урок 4.4): виды переходных отверстий в четырёхслойной плате.
+ * Сквозное, глухое (blind), скрытое (buried), микропереход (лазерный).
+ */
+import Figure from '../Figure.astro';
+
+const CU = 'var(--pcb-copper)';
+const BG = 'var(--sl-color-bg)';
+// уровни медных слоёв L1..L4 (верх каждого слоя)
+const L = [60, 100, 180, 220];
+const T = 6; // толщина меди на рисунке
+const X0 = 30;
+const X1 = 650;
+---
+
+<Figure n="4.4" caption="Сквозное отверстие проходит через всю плату — самое дешёвое, его делают все. Глухое (blind) выходит на одну наружную сторону и заканчивается внутри, скрытое (buried) соединяет только внутренние слои и снаружи не видно. Микропереход — маленькое глухое отверстие, прожжённое лазером на глубину одного слоя. Каждый вид сложнее и дороже предыдущего.">
+	<svg viewBox="0 0 680 290" role="img" aria-label="Разрез четырёхслойной платы с четырьмя видами переходных отверстий: сквозное, глухое, скрытое и микропереход.">
+		<!-- диэлектрики -->
+		<rect x={X0} y={L[0] + T} width={X1 - X0} height={L[1] - L[0] - T} fill="#d8c88a" />
+		<rect x={X0} y={L[1] + T} width={X1 - X0} height={L[2] - L[1] - T} fill="var(--pcb-fr4)" />
+		<rect x={X0} y={L[2] + T} width={X1 - X0} height={L[3] - L[2] - T} fill="#d8c88a" />
+		<!-- слои меди (фрагменты у отверстий + подписи) -->
+		{L.map((ly, i) => (
+			<g>
+				<rect x={X0} y={ly} width="40" height={T} fill={CU} />
+				<text class="t t-s" x={X0 - 6} y={ly + 6} text-anchor="end">L{i + 1}</text>
+			</g>
+		))}
+
+		<!-- 1. сквозное: L1–L4 -->
+		<rect x="100" y={L[0]} width="60" height={T} fill={CU} />
+		<rect x="100" y={L[3]} width="60" height={T} fill={CU} />
+		<rect x="100" y={L[1]} width="60" height={T} fill={CU} />
+		<rect x="122" y={L[0]} width="16" height={L[3] + T - L[0]} fill={BG} />
+		<rect x="118" y={L[0]} width="4" height={L[3] + T - L[0]} fill={CU} />
+		<rect x="138" y={L[0]} width="4" height={L[3] + T - L[0]} fill={CU} />
+
+		<!-- 2. глухое (механическое с контролем глубины): L1–L2 -->
+		<rect x="250" y={L[0]} width="60" height={T} fill={CU} />
+		<rect x="250" y={L[1]} width="60" height={T} fill={CU} />
+		<rect x="272" y={L[0]} width="16" height={L[1] + T - L[0]} fill={BG} />
+		<rect x="268" y={L[0]} width="4" height={L[1] + T - L[0]} fill={CU} />
+		<rect x="288" y={L[0]} width="4" height={L[1] + T - L[0]} fill={CU} />
+
+		<!-- 3. скрытое: L2–L3 -->
+		<rect x="400" y={L[1]} width="60" height={T} fill={CU} />
+		<rect x="400" y={L[2]} width="60" height={T} fill={CU} />
+		<rect x="422" y={L[1]} width="16" height={L[2] + T - L[1]} fill={BG} />
+		<rect x="418" y={L[1]} width="4" height={L[2] + T - L[1]} fill={CU} />
+		<rect x="438" y={L[1]} width="4" height={L[2] + T - L[1]} fill={CU} />
+
+		<!-- 4. микропереход (лазер, конус, заполнен медью): L1–L2 -->
+		<rect x="545" y={L[0]} width="50" height={T} fill={CU} />
+		<rect x="550" y={L[1]} width="40" height={T} fill={CU} />
+		<polygon points={`560,${L[0]} 580,${L[0]} 574,${L[1]} 566,${L[1]}`} fill={CU} />
+
+		<!-- подписи -->
+		<g class="t t-s">
+			<text x="130" y="256" text-anchor="middle" font-weight="700">сквозное</text>
+			<text x="130" y="272" text-anchor="middle">L1–L4</text>
+			<text x="280" y="256" text-anchor="middle" font-weight="700">глухое (blind)</text>
+			<text x="280" y="272" text-anchor="middle">L1–L2</text>
+			<text x="430" y="256" text-anchor="middle" font-weight="700">скрытое (buried)</text>
+			<text x="430" y="272" text-anchor="middle">L2–L3</text>
+			<text x="570" y="256" text-anchor="middle" font-weight="700">микропереход</text>
+			<text x="570" y="272" text-anchor="middle">лазер, L1–L2</text>
+		</g>
+		<text class="t t-s t-mut" x="360" y="36" text-anchor="middle">препрег / ядро / препрег — толщины не в масштабе</text>
+	</svg>
+</Figure>

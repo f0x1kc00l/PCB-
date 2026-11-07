@@ -1,0 +1,149 @@
+---
+/**
+ * Калькулятор ширины дорожки по току (IPC-2221B).
+ * Сама формула и пределы применимости — в src/lib/ipc2221.ts.
+ *
+ *   <TraceWidthCalc />  или  <TraceWidthCalc current="2" oz="1" />
+ */
+interface Props {
+	current?: string;
+	oz?: string;
+	deltaT?: string;
+}
+const { current = '1', oz = '1', deltaT = '10' } = Astro.props;
+const uid = `tw-${Math.random().toString(36).slice(2, 8)}`;
+const copper = [
+	{ oz: '0.5', label: '0,5 oz (18 мкм)' },
+	{ oz: '1', label: '1 oz (35 мкм)' },
+	{ oz: '2', label: '2 oz (70 мкм)' },
+	{ oz: '3', label: '3 oz (105 мкм)' },
+];
+---
+
+<trace-width-calc class="pcb-widget pcb-calc not-content">
+	<p class="pcb-widget__title">Ширина дорожки по току (IPC-2221)</p>
+
+	<div class="fields">
+		<label>
+			Ток I, А
+			<input name="current" value={current} inputmode="decimal" autocomplete="off" />
+		</label>
+		<label>
+			Толщина меди
+			<select name="oz">
+				{copper.map((c) => <option value={c.oz} selected={c.oz === oz}>{c.label}</option>)}
+			</select>
+		</label>
+		<label>
+			Допустимый перегрев ΔT, °C
+			<input name="deltaT" value={deltaT} inputmode="decimal" autocomplete="off" />
+			<span class="hint">10 °C — осторожно, 20–30 °C — обычно</span>
+		</label>
+		<label>
+			Длина дорожки, мм
+			<input name="length" value="50" inputmode="decimal" autocomplete="off" />
+			<span class="hint">для расчёта падения напряжения</span>
+		</label>
+	</div>
+
+	<div class="pcb-segmented" role="radiogroup" aria-label="Слой" style="margin-top: 0.8rem">
+		<label><input type="radio" name={`${uid}-layer`} value="external" checked /><span>Внешний слой</span></label>
+		<label><input type="radio" name={`${uid}-layer`} value="internal" /><span>Внутренний слой</span></label>
+	</div>
+
+	<div class="results">
+		<div class="result result--main"><span>Минимальная ширина</span><output data-out="mm">—</output></div>
+		<div class="result"><span>То же в mil</span><output data-out="mil">—</output></div>
+		<div class="result"><span>Сечение</span><output data-out="area">—</output></div>
+		<div class="result"><span>Сопротивление / падение U</span><output data-out="r">—</output></div>
+		<div class="result"><span>Потери мощности</span><output data-out="p">—</output></div>
+	</div>
+
+	<div class="trace-viz" aria-hidden="true">
+		<div class="trace-viz__board"><div class="trace-viz__trace" data-viz></div></div>
+		<span class="hint" data-viz-label></span>
+	</div>
+
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		Формула IPC-2221 (ревизии B и C): I = k·ΔT<sup>0,44</sup>·A<sup>0,725</sup>, k = 0,048 (внешний) / 0,024 (внутренний), A — сечение в
+		mil². Это минимум по нагреву, а не рекомендация. Новый стандарт IPC-2152 точнее, особенно для внутренних
+		слоёв. Окончательную ширину сверяй с технологическими нормами производителя и добавляй запас.
+	</p>
+</trace-width-calc>
+
+<script>
+	import { parseValue, formatNumber } from '../../lib/units';
+	import { traceWidth, type LayerKind } from '../../lib/ipc2221';
+
+	class TraceWidthCalc extends HTMLElement {
+		connectedCallback() {
+			const val = (n: string) => this.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${n}"]`)!;
+			const out = (n: string) => this.querySelector(`[data-out="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const viz = this.querySelector<HTMLElement>('[data-viz]')!;
+			const vizLabel = this.querySelector('[data-viz-label]')!;
+
+			const update = () => {
+				const current = parseValue(val('current').value);
+				const deltaT = parseValue(val('deltaT').value);
+				const lengthMm = parseValue(val('length').value);
+				const copperOz = Number(val('oz').value);
+				const layer = (this.querySelector<HTMLInputElement>('input[type="radio"]:checked')?.value ??
+					'external') as LayerKind;
+
+				const okCurrent = current > 0;
+				const okDt = deltaT > 0;
+				val('current').setAttribute('aria-invalid', String(!okCurrent));
+				val('deltaT').setAttribute('aria-invalid', String(!okDt));
+				if (!okCurrent || !okDt) {
+					['mm', 'mil', 'area', 'r', 'p'].forEach((n) => (out(n).textContent = '—'));
+					warn.innerHTML = '';
+					return;
+				}
+
+				const r = traceWidth({ current, copperOz, layer, deltaT, lengthMm: lengthMm > 0 ? lengthMm : undefined });
+				out('mm').textContent = `${formatNumber(r.widthMm)} мм`;
+				out('mil').textContent = `${formatNumber(r.widthMil)} mil`;
+				out('area').textContent = `${formatNumber(r.areaMil2)} mil² (${formatNumber((r.widthMm * r.thicknessUm) / 1000)} мм²)`;
+				out('r').textContent =
+					r.resistance !== undefined
+						? `${formatNumber(r.resistance * 1000)} мОм / ${formatNumber(r.voltageDrop! * 1000)} мВ`
+						: '—';
+				out('p').textContent = r.powerLoss !== undefined ? `${formatNumber(r.powerLoss * 1000)} мВт` : '—';
+
+				// Наглядная ширина: масштаб 1 мм = 24 px, ограничено шириной блока.
+				viz.style.height = `${Math.min(Math.max(r.widthMm * 24, 2), 96)}px`;
+				vizLabel.textContent = `Дорожка ${formatNumber(r.widthMm)} мм в масштабе (1 мм ≈ 24 px)`;
+
+				warn.innerHTML = r.warnings.map((w) => `<li>${w}</li>`).join('');
+			};
+
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('trace-width-calc', TraceWidthCalc);
+</script>
+
+<style>
+	.trace-viz {
+		margin-top: 1rem;
+	}
+	.trace-viz__board {
+		display: flex;
+		align-items: center;
+		min-height: 3rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.35rem;
+		background: var(--pcb-mask);
+	}
+	.trace-viz__trace {
+		width: 100%;
+		height: 4px;
+		border-radius: 2px;
+		background: var(--pcb-copper);
+		transition: height 0.2s ease;
+	}
+</style>

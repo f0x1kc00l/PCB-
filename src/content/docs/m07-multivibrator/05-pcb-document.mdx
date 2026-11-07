@@ -1,0 +1,202 @@
+---
+title: Документ печатной платы
+description: Создаём .PcbDoc, задаём начало координат и контур 30×30 мм в Board Planning Mode, настраиваем стек слоёв, сетку и отображение, переносим схему на плату через ECO.
+sidebar:
+  label: 7.5 Документ печатной платы
+  order: 5
+duration: 45
+status: ready
+goals:
+  - добавить документ платы в проект
+  - задать начало координат и контур платы нужного размера
+  - настроить стек слоёв двухслойной платы и сетку
+  - перенести схему на плату через Engineering Change Order (ECO) и понимать, что при этом происходит
+prerequisites:
+  - m07-multivibrator/04-design-rules
+  - m04-pcb-basics/03-layers-copper
+altium:
+  - title: Создание и настройка документа печатной платы (руководство, RU)
+    url: https://www.altium.com/ru/documentation/altium-designer/tutorial/creating-configuring-pcb-document
+  - title: Creating and Configuring the PCB Document (EN)
+    url: https://www.altium.com/documentation/altium-designer/tutorial/creating-configuring-pcb-document
+sources:
+  - title: IPC-4101 — материалы базовых диэлектриков (FR-4)
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Kbd from '../../../components/lesson/Kbd.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+import LayerStack from '../../../components/interactive/LayerStack.astro';
+import TutorialFlow from '../../../components/diagrams/m07-multivibrator/TutorialFlow.astro';
+import BoardOutline from '../../../components/diagrams/m07-multivibrator/BoardOutline.astro';
+
+Схема готова и проверена, правила заданы. Теперь создаём саму плату: её контур, слои и сетку. В конце урока перенесём на неё компоненты и соединения из схемы.
+
+<TutorialFlow current={5} />
+
+## Шаг 1. Добавляем документ платы
+
+1. Правый клик по проекту → **Add New to Project » PCB**. Откроется новый документ платы, он появится в **Source Documents**.
+2. Правый клик по нему → **Save As**, имя `Multivibrator` → **Save**. Файл ляжет рядом с проектом.
+3. Правый клик по проекту → **Save**.
+
+Навигация такая же, как в схеме: зум — колесо с <Kbd keys="Ctrl" />, панорама — правой кнопкой, вся плата в окне — <Kbd keys="Ctrl+PgDn" />.
+
+## Шаг 2. Начало координат и единицы
+
+По умолчанию новая плата — прямоугольник 6×4 дюйма, а единицы — mil.
+
+1. Приблизь левый нижний угол контура.
+2. <MenuPath path="Edit » Origin » Set" /> и щёлкни точно в левый нижний угол контура.
+3. <MenuPath path="View » Toggle Units" /> — переключись на миллиметры. Текущие единицы видны в строке состояния внизу окна.
+
+**Почему так.** Когда начало координат в углу платы, координаты в строке состояния — это прямо расстояния от края. Удобно задавать размер платы, ставить крепёжные отверстия и потом сверять чертёж (урок 7.8).
+
+## Шаг 3. Контур 30×30 мм
+
+<BoardOutline />
+
+1. <MenuPath path="View » Grids » Set Global Snap Grid" />, введи `5` → **OK**. Шаг 5 мм удобен, чтобы точно попасть в размер.
+2. Отдали вид, чтобы видеть всю плату с краями.
+3. <MenuPath path="View » Board Planning Mode" /> (<Kbd keys="1" />) — область платы станет зелёной.
+4. <MenuPath path="Design » Edit Board Shape" /> — на углах и серединах сторон появятся маркеры.
+   - Тащи верхнюю сторону вниз, пока в строке состояния Y не станет **30mm**.
+   - Тащи правую сторону влево, пока X не станет **30mm**.
+   - Щелчок в пустом месте — выход из редактирования.
+5. <MenuPath path="View » 2D Layout Mode" /> (<Kbd keys="2" />) — обратно в обычный режим.
+6. Верни сетку для размещения деталей: <MenuPath path="View » Grids » Set Global Snap Grid" /> → `1` мм.
+7. Сохрани плату.
+
+<Screenshot src="screenshots/m07-multivibrator/l05-board-planning.png" alt="Board Planning Mode: контур платы с маркерами, строка состояния X 30mm Y 30mm" />
+
+**Почему 30×30 мм.** Девять деталей с запасом помещаются, а маленькая плата дешевле: производители считают цену по площади, и у многих есть специальная цена на платы до 100×100 мм.
+
+## Шаг 4. Умолчания для обозначений
+
+Это настройка программы, а не проекта: она действует на все твои платы.
+
+1. Кнопка **Preferences** (шестерёнка) вверху справа → **PCB Editor** → **Defaults**.
+2. В разделе **Designator** проверь: **Autoposition** = Left-Above, **Text Height** = `1.5mm`, **Font Type** = TrueType, **Font** = Arial.
+3. В разделе **Comment** проверь, что видимость выключена.
+4. **OK**.
+
+**Почему так.** Высота шелкографии 1,5 мм читается на плате без лупы. Слишком мелкий текст производитель может не напечатать: минимальная высота и толщина линии шелкографии есть в его нормах. Комментарий (номинал) на шелкографии только загромождает маленькую плату.
+
+## Шаг 5. Отображение слоёв
+
+1. Открой панель **View Configuration** (кнопка **Panels**).
+2. На вкладке **Layers and Colors** оставь видимыми **Top Layer** и **Bottom Layer**. Скрой пары слоёв компонентов (**Component Layer Pairs**, кроме **Overlay**), механические слои (**Mechanical Layers**), **Drill Guide** и **Drill Drawing**.
+3. На вкладке **View Options**, в разделе **Additional Options**, включи **Pad Nets** и **Pad Numbers** — на площадках будут видны имя цепи и номер вывода.
+
+## Шаг 6. Стек слоёв
+
+1. <MenuPath path="Design » Layer Stack Manager" />. Стек по умолчанию — ядро-диэлектрик, два слоя меди, маска и шелкография сверху и снизу. Это ровно наша двухслойная плата.
+2. В панели **Properties**, раздел **Board**, включи **Stack Symmetry**.
+3. Кнопкой в ячейке **Material** выбери материалы: **Top Solder** и **Bottom Solder** — `SM-001`, **Top Layer** и **Bottom Layer** — `CF-004`, **Dielectric 1** — `Core-043`.
+4. На вкладке **Via Types** проверь, что есть тип **Thru 1:2** — сквозное отверстие с первого на второй слой.
+5. <MenuPath path="File » Save to PCB" />, затем закрой вкладку стека: правый клик по ярлыку → **Close Multivibrator.PcbDoc [Stackup]**.
+
+<LayerStack preset="2" />
+
+**Почему так.** Материалы в Layer Stack Manager — это записи библиотеки материалов Altium с толщиной и диэлектрической проницаемостью. Для простой платы они влияют в основном на итоговую толщину и на документацию. Для высокоскоростных — ещё и на импеданс (урок [9.2](../../m09-advanced/02-layer-stack-manager/)). Симметричный стек меньше коробит при пайке. Реальный стек всё равно задаёт производитель: сверь его со своим заказом (урок [4.3](../../m04-pcb-basics/03-layers-copper/)).
+
+<Callout type="altium">
+  Коды материалов `SM-001`, `CF-004`, `Core-043` взяты из руководства и относятся к встроенной библиотеке материалов
+  Altium. В твоей версии библиотеки набор может отличаться **[ПРОВЕРИТЬ]**. Если такого кода нет, выбери ближайший:
+  паяльная маска, медная фольга 1 oz (35 мкм), ядро FR-4 нужной толщины.
+</Callout>
+
+## Шаг 7. Сетка
+
+1. Панель **Properties** (ничего не выделено) → вкладка **General** → область **Grid Manager**.
+2. Выбери **Global Board Snap Grid** и открой редактор кнопкой — диалог **Cartesian Grid Editor**.
+3. **Step X** = `1mm` (Step Y связан и поменяется сам).
+4. Мелкую сетку (**Fine**) сделай светлее, крупную (**Coarse**) — линиями (**Lines**), затем **Darker**. **Multiplier** оставь **5x Grid Step**.
+5. **OK**, сохрани плату.
+
+## Шаг 8. Переносим схему на плату (ECO)
+
+1. Перейди на вкладку схемы.
+2. <MenuPath path="Design » Update PCB Document Multivibrator.PcbDoc" />. Откроется диалог **Engineering Change Order**: список того, что будет добавлено на плату — компоненты, цепи, классы, правила.
+3. **Validate Changes** — в колонке **Status – Check** должны стоять зелёные галочки. Если что-то не прошло, закрой диалог, посмотри панель **Messages** и исправь схему.
+4. **Execute Changes** — галочки появятся в колонке **Status – Done**.
+5. Закрой диалог. Плата откроется на переднем плане.
+
+<Screenshot src="screenshots/m07-multivibrator/l05-eco.png" alt="диалог Engineering Change Order после Validate Changes и Execute Changes" />
+
+Компоненты лягут **рядом с платой**, а между площадками одной цепи протянутся тонкие **линии связей (connection lines, «резинки»)**. Площадки транзисторов могут подсветиться зелёным: сработало правило зазора 0,25 мм — выводы TO-92 стоят ближе. <MenuPath path="Tools » Reset Error Markers" /> только убирает подсветку, само нарушение остаётся. Разберёмся с ним в уроке 7.7.
+
+**Почему так.** ECO — единственный правильный путь изменений из схемы в плату. Схема — источник истины о соединениях. Если поменял схему, снова выполни **Update PCB Document**, и Altium покажет только разницу. Рисовать соединения на плате вручную «мимо схемы» нельзя: схема и плата разойдутся.
+
+<Mistakes
+  items={[
+    {
+      problem: 'Контур получился не 30×30 мм',
+      why: 'Начало координат не в углу платы или сетка мелкая, и сторона «не доехала».',
+      fix: 'Поставь origin точно в угол (Edit » Origin » Set), сетку 5 мм, затем Design » Edit Board Shape и смотри координаты в строке состояния.',
+    },
+    {
+      problem: 'В ECO ошибки, компоненты не переносятся',
+      why: 'У компонента нет посадочного места или в схеме ошибки проверки.',
+      fix: 'Закрой ECO, исправь ошибки из Messages (урок 7.3), проверь, что у всех компонентов есть footprint, и повтори Update.',
+    },
+    {
+      problem: 'После правки схемы на плате ничего не поменялось',
+      why: 'Изменения не переносятся автоматически.',
+      fix: 'Design » Update PCB Document … из схемы, затем Validate и Execute.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Какой режим включают клавишей 1, чтобы редактировать контур платы?',
+      options: ['2D Layout Mode', 'Board Planning Mode', '3D Layout Mode'],
+      answer: 1,
+      explain: '1 — Board Planning Mode, 2 — 2D Layout Mode, 3 — 3D Layout Mode.',
+    },
+    {
+      q: 'Что делает Tools » Reset Error Markers?',
+      options: [
+        'Исправляет нарушения правил',
+        'Убирает подсветку нарушений, но не сами нарушения',
+        'Удаляет правила',
+      ],
+      answer: 1,
+      explain: 'Нарушение останется и снова появится при проверке DRC.',
+    },
+    {
+      q: 'Зачем ставить начало координат в левый нижний угол платы?',
+      options: [
+        'Так требует производитель',
+        'Координаты в строке состояния становятся расстояниями от края платы',
+        'Иначе не работает трассировка',
+      ],
+      answer: 1,
+      explain: 'Это удобно для задания размеров и размещения. Производитель берёт размеры из Gerber, а не из origin.',
+    },
+    {
+      q: 'Как правильно перенести изменения схемы на плату?',
+      options: [
+        'Нарисовать дорожки вручную',
+        'Design » Update PCB Document из схемы, затем Validate и Execute Changes',
+        'Скопировать компоненты через буфер обмена',
+      ],
+      answer: 1,
+      explain: 'Только через ECO схема и плата остаются согласованными.',
+    },
+  ]}
+/>
+
+<Assignment time={45}>
+  1. Создай плату 30×30 мм, настрой стек, сетку и отображение, перенеси схему через ECO.
+  2. Открой стек в Layer Stack Manager и выпиши итоговую толщину платы. Сравни со стандартными толщинами у производителей
+     (чаще всего 1,6 мм).
+  3. Временно удали со схемы R4 и выполни Update PCB Document. Посмотри, какие изменения предлагает ECO, и закрой диалог
+     **без** Execute Changes. Верни R4 в схему (<Kbd keys="Ctrl+Z" />) и убедись, что повторный Update не предлагает ничего.
+</Assignment>

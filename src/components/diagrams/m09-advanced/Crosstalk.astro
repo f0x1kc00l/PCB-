@@ -1,0 +1,33 @@
+---
+/** Рис. 9.7: перекрёстные помехи между параллельными дорожками — ближние и дальние. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="9.7" caption="Быстрый сигнал на дорожке-«агрессоре» наводит помеху на соседнюю дорожку-«жертву» через электрическое и магнитное поле. Помеха на ближнем к источнику конце называется ближней (NEXT), на дальнем — дальней (FEXT). Она растёт с длиной параллельного участка и падает с расстоянием s между дорожками и с приближением опорного слоя (меньше h).">
+	<svg viewBox="0 0 660 220" role="img" aria-label="Две параллельные дорожки: верхняя — агрессор с источником сигнала, нижняя — жертва. На участке параллельности отмечено расстояние s, стрелки показывают ближнюю и дальнюю помеху на концах жертвы.">
+		<!-- агрессор -->
+		<rect x="20" y="50" width="50" height="30" rx="3" class="ln" />
+		<text class="t t-s" x="45" y="69" text-anchor="middle">TX</text>
+		<path class="ln-acc" d="M70 65 H600" />
+		<text class="t t-acc t-s" x="330" y="56" text-anchor="middle">агрессор: быстрый фронт</text>
+		<!-- жертва -->
+		<path class="ln" d="M70 110 H600" />
+		<circle cx="70" cy="110" r="4" class="fill-cur" />
+		<circle cx="600" cy="110" r="4" class="fill-cur" />
+		<text class="t t-s" x="330" y="130" text-anchor="middle">жертва</text>
+		<!-- зона связи -->
+		<path class="ln-dash" d="M150 80 V95 M520 80 V95" />
+		<path class="ln" d="M150 160 H520 M150 154 V166 M520 154 V166" />
+		<text class="t t-s" x="335" y="180" text-anchor="middle">длина параллельного участка</text>
+		<path class="ln" d="M560 65 V110 M554 65 H566 M554 110 H566" />
+		<text class="t t-s" x="572" y="92">s</text>
+		<!-- наводки -->
+		<path d="M110 72 Q100 90 110 103" fill="none" stroke="var(--pcb-altium)" stroke-width="1.6" />
+		<path d="M250 72 Q240 90 250 103" fill="none" stroke="var(--pcb-altium)" stroke-width="1.6" />
+		<path d="M390 72 Q380 90 390 103" fill="none" stroke="var(--pcb-altium)" stroke-width="1.6" />
+		<text class="t t-s" x="20" y="150" fill="var(--pcb-altium)">NEXT</text>
+		<text class="t t-s" x="610" y="150" fill="var(--pcb-altium)">FEXT</text>
+		<path d="M45 140 L62 116" fill="none" stroke="var(--pcb-altium)" stroke-width="1.6" />
+		<path d="M625 140 L608 116" fill="none" stroke="var(--pcb-altium)" stroke-width="1.6" />
+	</svg>
+</Figure>

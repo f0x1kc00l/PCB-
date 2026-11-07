@@ -1,0 +1,38 @@
+---
+/**
+ * Рис. 12.5г: два приёма согласования «из меди»: четвертьволновый трансформатор и одиночный шлейф.
+ * Размеры — для FR-4 εr = 4,3, h = 0,2 мм, 2,45 ГГц (Hammerstad–Jensen, src/lib/microstrip.ts).
+ */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="12.5г" caption="Слева — четвертьволновый трансформатор: отрезок длиной λг/4 с волновым сопротивлением Z = √(Z1·Z2) превращает 25 Ом в 50 Ом (размеры для FR-4, h = 0,2 мм, 2,45 ГГц). Справа — одиночный шлейф: на расстоянии d от нагрузки к линии подключают отрезок длиной l, который гасит реактивную часть.">
+	<svg viewBox="0 0 660 230" role="img" aria-label="Слева вид сверху: узкая дорожка 50 Ом, более широкий отрезок 35,4 Ом длиной лямбда на четыре 16,5 мм, широкая дорожка 25 Ом. Справа: линия к нагрузке и боковой шлейф длиной эль на расстоянии дэ от нагрузки.">
+		<text class="t" x="10" y="20" font-weight="700">λг/4-трансформатор</text>
+		<rect x="10" y="98" width="90" height="8" fill="var(--pcb-copper)" />
+		<rect x="100" y="93" width="120" height="18" fill="var(--pcb-copper)" />
+		<rect x="220" y="85" width="80" height="34" fill="var(--pcb-copper)" />
+		<text class="t t-s" x="55" y="86" text-anchor="middle">50 Ом</text>
+		<text class="t t-s" x="55" y="130" text-anchor="middle">W 0,39 мм</text>
+		<text class="t t-s t-acc" x="160" y="80" text-anchor="middle">35,4 Ом</text>
+		<text class="t t-s" x="160" y="130" text-anchor="middle">W 0,66 мм</text>
+		<text class="t t-s" x="260" y="76" text-anchor="middle">25 Ом</text>
+		<text class="t t-s" x="260" y="138" text-anchor="middle">W 1,06 мм</text>
+		<path class="ln-acc" d="M100 152 H220 M100 146 V158 M220 146 V158" />
+		<text class="t t-s t-acc" x="160" y="172" text-anchor="middle">λг/4 ≈ 16,5 мм</text>
+		<text class="t t-s t-mut" x="160" y="200" text-anchor="middle">Z = √(50 · 25) ≈ 35,4 Ом</text>
+
+		<text class="t" x="350" y="20" font-weight="700">Одиночный шлейф</text>
+		<rect x="350" y="98" width="230" height="8" fill="var(--pcb-copper)" />
+		<rect x="580" y="84" width="24" height="36" class="ln" />
+		<text class="t t-s" x="592" y="140" text-anchor="middle">Zн</text>
+		<rect x="452" y="106" width="8" height="70" fill="var(--pcb-copper)" />
+		<text class="t t-s t-mut" x="470" y="172">конец: разомкнут</text>
+		<text class="t t-s t-mut" x="470" y="186">или via на GND</text>
+		<path class="ln-acc" d="M456 76 H580 M456 70 V82 M580 70 V82" />
+		<text class="t t-s t-acc" x="518" y="64" text-anchor="middle">d</text>
+		<path class="ln-acc" d="M440 106 V176 M434 106 H446 M434 176 H446" />
+		<text class="t t-s t-acc" x="428" y="146" text-anchor="end">l</text>
+		<text class="t t-s" x="360" y="88">50 Ом</text>
+	</svg>
+</Figure>

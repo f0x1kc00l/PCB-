@@ -1,0 +1,202 @@
+---
+/**
+ * Переопределение заголовка страницы Starlight.
+ *
+ * Выводит:
+ *  1. хлебные крошки (Главная › Модуль › Урок) — путь берётся из дерева бокового меню;
+ *  2. заголовок H1 (id="_top" обязателен: на него ссылается оглавление Starlight);
+ *  3. плашку «урок в разработке» для status: draft;
+ *  4. «паспорт урока» из frontmatter: время, цели, что знать заранее.
+ */
+import { getEntry } from 'astro:content';
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+import { isLessonId, lessonHref, withBase } from '../../lib/site';
+
+const route = Astro.locals.starlightRoute;
+const { entry, sidebar, id } = route;
+const data = entry.data;
+
+type Entry = StarlightRouteData['sidebar'][number];
+
+/** Ищет цепочку групп от корня меню до текущей страницы. */
+function findTrail(entries: Entry[], trail: Entry[] = []): Entry[] | null {
+	for (const e of entries) {
+		if (e.type === 'link' && e.isCurrent) return [...trail, e];
+		if (e.type === 'group') {
+			const found = findTrail(e.entries, [...trail, e]);
+			if (found) return found;
+		}
+	}
+	return null;
+}
+
+/** Первая ссылка внутри группы — куда ведёт клик по названию модуля в крошках. */
+function firstLink(e: Entry): string | undefined {
+	if (e.type === 'link') return e.href;
+	for (const child of e.entries) {
+		const href = firstLink(child);
+		if (href) return href;
+	}
+	return undefined;
+}
+
+const trail = findTrail(sidebar) ?? [];
+const groups = trail.filter((e) => e.type === 'group');
+const isHome = id === '' || id === 'index';
+const isLesson = isLessonId(id);
+
+// Названия уроков-пререквизитов подтягиваем из коллекции, чтобы не дублировать их во frontmatter.
+const prerequisites = await Promise.all(
+	(data.prerequisites ?? []).map(async (pid) => {
+		const e = await getEntry('docs', pid);
+		return { href: lessonHref(pid), title: e?.data.sidebar?.label ?? e?.data.title ?? pid, missing: !e };
+	}),
+);
+---
+
+{
+	!isHome && (
+		<nav class="breadcrumbs" aria-label="Хлебные крошки">
+			<ol>
+				<li>
+					<a href={withBase('/')}>Главная</a>
+				</li>
+				{groups.map((g) => (
+					<li>
+						<a href={firstLink(g)}>{g.label}</a>
+					</li>
+				))}
+				<li aria-current="page">{data.sidebar?.label ?? data.title}</li>
+			</ol>
+		</nav>
+	)
+}
+
+<h1 id="_top">{data.title}</h1>
+
+{
+	isLesson && data.status === 'draft' && (
+		<p class="draft-note" role="note">
+			🚧 Урок в разработке: здесь пока только план. Полный текст появится на этапе наполнения модуля.
+		</p>
+	)
+}
+
+{
+	isLesson && (data.duration || data.goals || prerequisites.length > 0) && (
+		<section class="lesson-passport" aria-label="Паспорт урока">
+			{data.duration && (
+				<p class="passport-time">
+					<span aria-hidden="true">⏱</span> Время: ~{data.duration} мин
+				</p>
+			)}
+			{data.goals && data.goals.length > 0 && (
+				<div>
+					<p class="passport-label">Цели урока</p>
+					<ul>
+						{data.goals.map((g) => (
+							<li>{g}</li>
+						))}
+					</ul>
+				</div>
+			)}
+			{prerequisites.length > 0 && (
+				<div>
+					<p class="passport-label">Что нужно знать заранее</p>
+					<ul>
+						{prerequisites.map((p) => (
+							<li>
+								<a href={p.href}>{p.title}</a>
+								{p.missing && <small> (урок не найден — проверь id)</small>}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+		</section>
+	)
+}
+
+{/* Запоминаем последний открытый урок для кнопки «Продолжить» на главной. */}
+{isLesson && <span hidden data-last-visited data-title={data.sidebar?.label ?? data.title} />}
+
+<script>
+	import { setLastVisited } from '../../lib/progress';
+	const marker = document.querySelector<HTMLElement>('[data-last-visited]');
+	if (marker) setLastVisited({ path: location.pathname, title: marker.dataset.title ?? document.title });
+</script>
+
+<style>
+	h1 {
+		margin-top: 0.5rem;
+		font-size: var(--sl-text-h1);
+		line-height: var(--sl-line-height-headings);
+		font-weight: 650;
+		color: var(--sl-color-white);
+	}
+	.breadcrumbs ol {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		list-style: none;
+		padding: 0;
+		margin: 1rem 0 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.breadcrumbs li {
+		margin: 0;
+	}
+	.breadcrumbs li + li::before {
+		content: '›';
+		margin-inline-end: 0.35rem;
+		color: var(--sl-color-gray-4);
+	}
+	.breadcrumbs a {
+		color: var(--sl-color-gray-2);
+		text-decoration: none;
+	}
+	.breadcrumbs a:hover {
+		color: var(--sl-color-accent-high);
+		text-decoration: underline;
+	}
+	.draft-note {
+		margin-top: 1rem;
+		padding: 0.6rem 0.9rem;
+		border: 1px dashed var(--sl-color-gray-4);
+		border-radius: 0.4rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.lesson-passport {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 2rem;
+		margin-top: 1.25rem;
+		padding: 0.9rem 1.1rem;
+		border-inline-start: 3px solid var(--sl-color-accent);
+		background: var(--sl-color-gray-6);
+		border-radius: 0 0.4rem 0.4rem 0;
+		font-size: var(--sl-text-sm);
+	}
+	.lesson-passport ul {
+		margin: 0.25rem 0 0;
+		padding-inline-start: 1.1rem;
+	}
+	.lesson-passport li {
+		margin: 0.1rem 0;
+	}
+	.lesson-passport > div {
+		flex: 1 1 16rem;
+	}
+	.passport-time {
+		flex: 1 1 100%;
+		margin: 0;
+		font-weight: 600;
+	}
+	.passport-label {
+		margin: 0.4rem 0 0;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+</style>

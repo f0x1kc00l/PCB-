@@ -1,0 +1,42 @@
+---
+/**
+ * Рис. 12.1 к уроку 12.1: короткая дорожка (сосредоточенный элемент) и длинная (линия передачи).
+ * На длинной дорожке напряжение в каждый момент разное вдоль её длины — по ней бежит волна.
+ */
+import Figure from '../Figure.astro';
+
+// Волна вдоль длинной дорожки: 1,25 длины волны на 400 px.
+const wave: string[] = [];
+for (let x = 0; x <= 400; x += 4) {
+	const y = 175 - 28 * Math.sin((2 * Math.PI * x) / 320);
+	wave.push(`${x === 0 ? 'M' : 'L'}${(120 + x).toFixed(1)} ${y.toFixed(1)}`);
+}
+---
+
+<Figure n="12.1а" caption="Сверху: дорожка много короче длины волны — в каждый момент напряжение вдоль неё почти одинаковое, это обычный проводник (сосредоточенная модель). Снизу: дорожка сравнима с длиной волны — напряжение меняется вдоль неё, по ней бежит волна, и дорожку надо считать линией передачи (распределённая модель).">
+	<svg viewBox="0 0 640 250" role="img" aria-label="Две дорожки от источника к нагрузке. Короткая: ровная линия напряжения. Длинная: вдоль дорожки нарисована синусоида — бегущая волна.">
+		<!-- ===== Короткая ===== -->
+		<text class="t" x="10" y="20" font-weight="700">Короткая: l ≪ λ</text>
+		<circle class="ln" cx="60" cy="70" r="16" />
+		<text class="t" x="60" y="75" text-anchor="middle">~</text>
+		<path class="ln" d="M76 70 H230" stroke-width="5" stroke="var(--pcb-copper)" />
+		<rect class="ln" x="230" y="58" width="40" height="24" />
+		<text class="t t-s" x="250" y="100" text-anchor="middle">нагрузка</text>
+		<path class="ln-acc" d="M80 48 H226" />
+		<text class="t t-s t-acc" x="153" y="40" text-anchor="middle">U одинаково по всей длине</text>
+		<text class="t t-s t-mut" x="320" y="66">провод, R, C, L —</text>
+		<text class="t t-s t-mut" x="320" y="82">законы Кирхгофа работают</text>
+
+		<!-- ===== Длинная ===== -->
+		<text class="t" x="10" y="130" font-weight="700">Длинная: l ≳ λ/10</text>
+		<circle class="ln" cx="60" cy="210" r="16" />
+		<text class="t" x="60" y="215" text-anchor="middle">~</text>
+		<path class="ln" d="M76 210 H560" stroke-width="5" stroke="var(--pcb-copper)" />
+		<rect class="ln" x="560" y="198" width="40" height="24" />
+		<path d={wave.join(' ')} fill="none" stroke="var(--sl-color-accent)" stroke-width="2.2" />
+		<path class="ln-thin" d="M120 175 H520" />
+		<path class="ln" d="M120 238 H440 M120 232 V244 M440 232 V244" />
+		<text class="t t-s" x="280" y="236" text-anchor="middle" dy="-4">λ (длина волны в линии)</text>
+		<text class="t t-s t-acc" x="530" y="160">бегущая волна</text>
+	</svg>
+</Figure>

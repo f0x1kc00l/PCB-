@@ -1,0 +1,39 @@
+---
+/**
+ * Рис. 6.2: проект Altium — файл проекта ссылается на документы, которые лежат отдельными файлами.
+ */
+import Figure from '../Figure.astro';
+
+const docs = [
+	{ y: 40, name: 'Sheet1.SchDoc', what: 'лист принципиальной схемы' },
+	{ y: 84, name: 'PCB1.PcbDoc', what: 'плата: размещение и трассировка' },
+	{ y: 128, name: 'MyParts.SchLib', what: 'библиотека символов' },
+	{ y: 172, name: 'MyParts.PcbLib', what: 'библиотека посадочных мест' },
+	{ y: 216, name: 'Board.PCBDwf', what: 'чертёж Draftsman' },
+	{ y: 260, name: 'Fab.OutJob', what: 'задание на выпуск файлов' },
+];
+---
+
+<Figure n="6.2" caption="Файл проекта .PrjPcb хранит не схему и не плату, а список документов и настройки проекта. Сами документы — отдельные файлы рядом с ним. Поэтому проект копируют и отправляют только целой папкой.">
+	<svg viewBox="0 0 690 300" role="img" aria-label="Слева файл проекта Multivibrator.PrjPcb, от него стрелки к шести файлам: SchDoc, PcbDoc, SchLib, PcbLib, PCBDwf и OutJob с пояснениями.">
+		<!-- папка проекта -->
+		<rect class="ln-dash" x="8" y="12" width="674" height="280" rx="8" />
+		<text class="t t-s t-mut" x="20" y="30">папка проекта на диске</text>
+		<!-- файл проекта -->
+		<rect x="30" y="126" width="170" height="52" rx="6" fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<text class="t" x="115" y="148" text-anchor="middle" font-weight="700">Multivibrator</text>
+		<text class="t t-acc t-mono" x="115" y="166" text-anchor="middle">.PrjPcb</text>
+		<text class="t t-s t-mut" x="115" y="198" text-anchor="middle">список документов</text>
+		<text class="t t-s t-mut" x="115" y="214" text-anchor="middle">+ настройки проекта</text>
+		{
+			docs.map((d) => (
+				<g>
+					<path class="ln-thin" d={`M200 152 C 240 152, 240 ${d.y}, 280 ${d.y}`} />
+					<rect class="ln" x="280" y={d.y - 16} width="150" height="30" rx="4" />
+					<text class="t t-mono t-s" x="355" y={d.y + 4} text-anchor="middle">{d.name}</text>
+					<text class="t t-s" x="442" y={d.y + 4}>{d.what}</text>
+				</g>
+			))
+		}
+	</svg>
+</Figure>

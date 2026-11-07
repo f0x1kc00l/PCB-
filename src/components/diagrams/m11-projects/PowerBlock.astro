@@ -1,0 +1,34 @@
+---
+/** Рис. 11.1: структурная схема платы питания (проект 11.1). */
+import Figure from '../Figure.astro';
+
+const blocks = [
+	{ x: 10, t: 'J1', s: 'вход 5–12 В', s2: 'DC-гнездо' },
+	{ x: 145, t: 'VT1', s: 'защита от', s2: 'переполюсовки' },
+	{ x: 280, t: 'C1, C2', s: 'входные', s2: 'конденсаторы' },
+	{ x: 415, t: 'DA1', s: 'LM1117-3.3', s2: 'LDO, SOT-223' },
+	{ x: 550, t: 'C3 → J2', s: 'выход 3,3 В', s2: 'до 0,5 А*' },
+];
+---
+
+<Figure n="11.1" caption="Структура платы питания: вход, защита от переполюсовки, линейный стабилизатор с конденсаторами и выход. Снизу — индикатор питания и контрольные точки. *Допустимый ток зависит от входного напряжения и площади меди — расчёт в уроке.">
+	<svg viewBox="0 0 680 200" role="img" aria-label="Блоки слева направо: входной разъём 5–12 В, защита от переполюсовки, входные конденсаторы, стабилизатор LM1117-3.3, выход 3,3 В. Внизу индикатор HL1 и контрольные точки TP1–TP3.">
+		{
+			blocks.map((b, i) => (
+				<g>
+					<rect class={i === 3 ? 'ln-acc' : 'ln'} x={b.x} y="30" width="118" height="70" rx="6" />
+					<text class="t t-acc" x={b.x + 59} y="54" text-anchor="middle">{b.t}</text>
+					<text class="t t-s" x={b.x + 59} y="72" text-anchor="middle">{b.s}</text>
+					<text class="t t-s t-mut" x={b.x + 59} y="88" text-anchor="middle">{b.s2}</text>
+					{i < blocks.length - 1 && <path class="ln" d={`M${b.x + 118} 65 H${b.x + 145} M${b.x + 139} 60 L${b.x + 145} 65 L${b.x + 139} 70`} />}
+				</g>
+			))
+		}
+		<rect class="ln-dash" x="415" y="130" width="253" height="56" rx="6" />
+		<text class="t t-s" x="430" y="152">HL1 + R2 — индикатор «питание есть»</text>
+		<text class="t t-s" x="430" y="172">TP1 VIN · TP2 +3V3 · TP3 GND</text>
+		<path class="ln-dash" d="M609 100 V130" />
+		<text class="t t-s t-mut" x="10" y="152">Вариант входа: USB-C (только питание, 5 В)</text>
+		<text class="t t-s t-mut" x="10" y="172">вместо J1 — см. врезку в уроке 11.1.1</text>
+	</svg>
+</Figure>

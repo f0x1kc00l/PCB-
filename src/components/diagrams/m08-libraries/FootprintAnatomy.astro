@@ -1,0 +1,60 @@
+---
+/**
+ * Рис. 8.3: анатомия посадочного места на примере SOT-223.
+ * Масштаб 30 px = 1 мм, центр (230, 150). Площадки по примеру разводки из даташита TI LM1117 (DCY).
+ */
+import Figure from '../Figure.astro';
+
+const S = 30;
+const cx = 230;
+const cy = 150;
+const row = 2.9 * S; // расстояние от центра до оси ряда площадок
+const lead = { w: 0.95 * S, h: 2.15 * S };
+const tab = { w: 3.25 * S, h: 2.15 * S };
+const xs = [-2.3, 0, 2.3].map((x) => cx + x * S);
+const exp = 3; // расширение маски (утрировано, чтобы было видно)
+---
+
+<Figure n="8.3" caption="Слои посадочного места. Медь — площадки, к которым паяется вывод. Окно маски чуть больше площадки (расширение задаётся правилом). Паста — то, что нанесут через трафарет. Шелкография не должна заходить на площадки. Courtyard — граница, ближе которой нельзя ставить соседние компоненты. Точка привязки — начало координат футпринта.">
+	<svg viewBox="0 0 660 300" role="img" aria-label="Посадочное место SOT-223 сверху: три узкие площадки снизу, широкая сверху, окна маски, паста, линии шелкографии, метка первого вывода, пунктирная граница courtyard и крестик точки привязки.">
+		<!-- courtyard -->
+		<rect x="125" y="23" width="210" height="254" fill="none" stroke="var(--pcb-altium)" stroke-width="1.5" stroke-dasharray="6 4" />
+		<!-- маска (окна) -->
+		{xs.map((x) => <rect x={x - lead.w / 2 - exp} y={cy + row - lead.h / 2 - exp} width={lead.w + 2 * exp} height={lead.h + 2 * exp} fill="none" stroke="var(--pcb-mask)" stroke-width="2" />)}
+		<rect x={cx - tab.w / 2 - exp} y={cy - row - tab.h / 2 - exp} width={tab.w + 2 * exp} height={tab.h + 2 * exp} fill="none" stroke="var(--pcb-mask)" stroke-width="2" />
+		<!-- медь -->
+		{xs.map((x) => <rect x={x - lead.w / 2} y={cy + row - lead.h / 2} width={lead.w} height={lead.h} fill="var(--pcb-copper)" />)}
+		<rect x={cx - tab.w / 2} y={cy - row - tab.h / 2} width={tab.w} height={tab.h} fill="var(--pcb-copper)" />
+		<!-- паста -->
+		{xs.map((x) => <rect x={x - lead.w / 2 + 6} y={cy + row - lead.h / 2 + 10} width={lead.w - 12} height={lead.h - 20} fill="var(--pcb-paste)" opacity="0.7" />)}
+		<rect x={cx - tab.w / 2 + 14} y={cy - row - tab.h / 2 + 12} width={tab.w - 28} height={tab.h - 24} fill="var(--pcb-paste)" opacity="0.7" />
+		<!-- номера площадок -->
+		<g class="t t-s" font-weight="700" fill="#111">
+			{xs.map((x, i) => <text x={x} y={cy + row + 5} text-anchor="middle" fill="#111">{i + 1}</text>)}
+			<text x={cx} y={cy - row + 5} text-anchor="middle" fill="#111">4</text>
+		</g>
+		<!-- шелкография: боковые линии корпуса и метка 1-го вывода -->
+		<path d="M128 108 V192 M332 108 V192" stroke="var(--sl-color-white)" stroke-width="2.5" />
+		<circle cx="135" cy="258" r="4" fill="var(--sl-color-white)" />
+		<!-- точка привязки -->
+		<path d="M220 150 H240 M230 140 V160" stroke="var(--sl-color-accent)" stroke-width="2" />
+		<circle cx="230" cy="150" r="5" fill="none" stroke="var(--sl-color-accent)" stroke-width="1.5" />
+
+		<!-- выноски справа -->
+		<g class="t t-s">
+			<text x="380" y="44">Courtyard (Top Courtyard)</text>
+			<text x="380" y="80">Окно маски (Top Solder)</text>
+			<text x="380" y="134">Шелкография (Top Overlay)</text>
+			<text x="380" y="204">Площадка, медь (Top Layer)</text>
+			<text x="380" y="252">Паста (Top Paste)</text>
+		</g>
+		<path class="ln-thin" d="M376 40 L336 40 M376 76 L285 70 M376 130 L334 132 M376 200 L313 214 M376 248 L302 248" />
+		<!-- выноски слева -->
+		<g class="t t-s">
+			<text x="10" y="138">Точка</text>
+			<text x="10" y="152">привязки (0,0)</text>
+			<text x="10" y="284">Метка вывода 1</text>
+		</g>
+		<path class="ln-thin" d="M96 147 L222 150 M100 278 L131 261" />
+	</svg>
+</Figure>

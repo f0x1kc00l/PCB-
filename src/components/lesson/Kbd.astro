@@ -1,0 +1,57 @@
+---
+/**
+ * Горячая клавиша: <Kbd keys="Ctrl+Shift+V" />  или последовательность: <Kbd keys="P, T" />
+ * «+» — нажать вместе, «,» — нажать по очереди (как в Altium: P затем T).
+ * Сама клавиша плюс: <Kbd keys="+" />, <Kbd keys="Num +" />, <Kbd keys="Ctrl++" /> или слово Plus.
+ */
+interface Props {
+	keys: string;
+}
+const { keys } = Astro.props;
+// «+» считается разделителем, только если с обеих сторон есть символы: так «Num +» и «Ctrl++» читаются верно.
+const sequence = keys
+	.split(/\s*,\s*/)
+	.map((combo) => combo.split(/(?<=\S)\s*\+\s*(?=\S)/).map((k) => (k === 'Plus' ? '+' : k)));
+---
+
+<span class="kbd-group">
+	{
+		sequence.map((combo, i) => (
+			<>
+				{i > 0 && <span class="then">затем</span>}
+				{combo.map((k, j) => (
+					<>
+						{j > 0 && <span class="plus">+</span>}
+						<kbd>{k}</kbd>
+					</>
+				))}
+			</>
+		))
+	}
+</span>
+
+<style>
+	.kbd-group {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.2rem;
+	}
+	kbd {
+		min-width: 1.6em;
+		padding: 0.05rem 0.4rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-bottom-width: 3px;
+		border-radius: 0.3rem;
+		background: var(--sl-color-gray-6);
+		font-family: var(--pcb-mono);
+		font-size: 0.8em;
+		text-align: center;
+		color: var(--sl-color-white);
+	}
+	.plus,
+	.then {
+		font-size: 0.8em;
+		color: var(--sl-color-gray-3);
+	}
+</style>

@@ -1,0 +1,49 @@
+---
+/** Рис. 3.1: соединение, пересечение, четверное соединение, метки цепей, порты питания. */
+import Figure from '../Figure.astro';
+import { dot, gnd } from './sym';
+---
+
+<Figure n="3.1" caption="Точка — соединение, пересечение без точки — проводники не связаны. Четыре проводника в одной точке лучше развести на два Т-образных соединения: точку легко потерять при печати. Одинаковые метки цепей (SDA) и одинаковые порты питания соединяют проводники без линии на схеме.">
+	<svg viewBox="0 0 660 210" role="img" aria-label="Пять примеров: Т-образное соединение с точкой, пересечение без точки, неудачный крест с точкой и правильный вариант из двух Т, две метки цепи SDA, порт питания +5V и земля.">
+		<!-- а) соединение -->
+		<text class="t t-s" x="10" y="20" font-weight="700">а) соединение</text>
+		<path class="ln" d="M15 80 H115 M65 80 V150" />
+		<g set:html={dot(65, 80, true)} />
+		<text class="t t-s t-mut" x="10" y="180">точка = контакт</text>
+
+		<!-- б) пересечение -->
+		<text class="t t-s" x="140" y="20" font-weight="700">б) пересечение</text>
+		<path class="ln" d="M140 80 H240 M190 40 V150" />
+		<text class="t t-s t-mut" x="140" y="180">нет точки = не связаны</text>
+
+		<!-- в) четверное соединение -->
+		<text class="t t-s" x="275" y="20" font-weight="700">в) четыре провода</text>
+		<path class="ln" d="M275 70 H335 M305 40 V100" />
+		<g set:html={dot(305, 70)} />
+		<path class="ln-dash" d="M283 48 L327 92 M327 48 L283 92" />
+		<path class="ln" d="M345 70 H405 M365 40 V70 M385 70 V100" />
+		<g set:html={dot(365, 70, true)} />
+		<g set:html={dot(385, 70, true)} />
+		<text class="t t-s t-mut" x="275" y="125">плохо</text>
+		<text class="t t-s t-acc" x="350" y="125">лучше</text>
+		<text class="t t-s t-mut" x="275" y="180">две «Т» вместо креста</text>
+
+		<!-- г) метки цепей -->
+		<text class="t t-s" x="430" y="20" font-weight="700">г) метки цепей</text>
+		<path class="ln" d="M430 60 H490" />
+		<text class="t t-s t-acc" x="455" y="54">SDA</text>
+		<path class="ln" d="M430 120 H490" />
+		<text class="t t-s t-acc" x="455" y="114">SDA</text>
+		<path class="ln-dash" d="M500 60 C520 75, 520 105, 500 120" />
+		<text class="t t-s t-mut" x="430" y="180">одно имя = одна цепь</text>
+
+		<!-- д) питание и земля -->
+		<text class="t t-s" x="560" y="20" font-weight="700">д) питание</text>
+		<path class="ln" d="M575 45 H605 M590 45 V75" />
+		<text class="t t-s t-acc" x="578" y="38">+5V</text>
+		<g set:html={gnd(590, 105)} />
+		<text class="t t-s t-acc" x="610" y="125">GND</text>
+		<text class="t t-s t-mut" x="560" y="180">порты питания</text>
+	</svg>
+</Figure>

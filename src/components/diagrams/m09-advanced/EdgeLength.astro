@@ -1,0 +1,28 @@
+---
+/** Рис. 9.6: фронт сигнала занимает на дорожке отрезок длиной tr·v. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="9.6" caption="Снимок напряжения вдоль дорожки в один момент времени. Фронт бежит со скоростью v ≈ 15 см/нс (FR-4) и «размазан» по дорожке на длину tr·v. При tr = 1 нс это около 15 см. Если дорожка много короче фронта, все её точки меняют напряжение почти одновременно, и её можно считать просто проводом. Если сравнима или длиннее — это линия передачи, и важны её волновое сопротивление и согласование.">
+	<svg viewBox="0 0 660 230" role="img" aria-label="Источник слева, длинная дорожка. Над дорожкой график напряжения: слева высокий уровень, в середине наклонный фронт, справа ноль. Отмечена длина фронта tr умножить на v.">
+		<!-- источник -->
+		<rect x="20" y="150" width="50" height="34" rx="3" class="ln" />
+		<text class="t t-s" x="45" y="171" text-anchor="middle">TX</text>
+		<!-- дорожка -->
+		<path class="ln-acc" d="M70 167 H610" />
+		<rect x="610" y="150" width="40" height="34" rx="3" class="ln" />
+		<text class="t t-s" x="630" y="171" text-anchor="middle">RX</text>
+		<!-- профиль напряжения -->
+		<path class="ln-thin" d="M70 120 H630" />
+		<path d="M70 60 H270 L420 120 H630" fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		<text class="t t-s" x="80" y="52" fill="var(--pcb-altium)">уже переключилось</text>
+		<text class="t t-s" x="600" y="112" text-anchor="end" fill="var(--pcb-altium)">ещё не дошло</text>
+		<path class="ln-acc" d="M440 90 H480 M472 84 L480 90 L472 96" />
+		<text class="t t-acc t-s" x="486" y="94">v ≈ 15 см/нс</text>
+		<!-- длина фронта -->
+		<path class="ln" d="M270 140 H420 M270 134 V146 M420 134 V146" />
+		<text class="t t-acc" x="345" y="206" text-anchor="middle">длина фронта ≈ tr · v</text>
+		<path class="ln-dash" d="M270 60 V146 M420 120 V146" />
+		<text class="t t-s t-mut" x="345" y="190" text-anchor="middle">tr = 1 нс → ≈ 15 см</text>
+	</svg>
+</Figure>

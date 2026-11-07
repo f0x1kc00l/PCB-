@@ -1,0 +1,35 @@
+---
+/**
+ * Рис. 7.3: контур платы 30×30 мм, начало координат в левом нижнем углу, сетка 5 мм
+ * и примерное место разъёма P1 у левого края (как в руководстве).
+ * Масштаб: 1 мм = 8 px, плата от (60, 270) вправо-вверх.
+ */
+import Figure from '../Figure.astro';
+
+const S = 8;
+const ox = 60;
+const oy = 270;
+const grid = [5, 10, 15, 20, 25];
+---
+
+<Figure n="7.3" caption="Плата учебного проекта: квадрат 30×30 мм. Начало координат (Edit » Origin » Set) ставится в левый нижний угол, поэтому координаты в строке состояния совпадают с размерами платы. Тонкие линии — сетка 5 мм, которой пользуются при редактировании контура.">
+	<svg viewBox="0 0 420 320" role="img" aria-label="Квадрат 30 на 30 миллиметров с сеткой 5 мм, начало координат в левом нижнем углу, разъём P1 у левого края.">
+		{grid.map((g) => <path class="ln-thin" d={`M${ox + g * S} ${oy} V${oy - 30 * S} M${ox} ${oy - g * S} H${ox + 30 * S}`} />)}
+		<rect x={ox} y={oy - 30 * S} width={30 * S} height={30 * S} fill="var(--pcb-mask)" opacity="0.35" />
+		<rect class="ln-acc" x={ox} y={oy - 30 * S} width={30 * S} height={30 * S} />
+		<!-- начало координат -->
+		<circle cx={ox} cy={oy} r="9" fill="none" stroke="var(--sl-color-accent)" stroke-width="2" />
+		<path class="ln-acc" d={`M${ox - 14} ${oy} H${ox + 14} M${ox} ${oy - 14} V${oy + 14}`} />
+		<text class="t t-acc t-s" x={ox + 12} y={oy + 22}>0,0</text>
+		<!-- разъём P1 у левого края -->
+		<rect x={ox + 3 * S} y={oy - 19 * S} width={3 * S} height={6 * S} fill="none" stroke="var(--pcb-silk)" stroke-width="1.5" />
+		<circle cx={ox + 4.5 * S} cy={oy - 17.7 * S} r="6" fill="var(--pcb-copper)" />
+		<circle cx={ox + 4.5 * S} cy={oy - 15.2 * S} r="6" fill="var(--pcb-copper)" />
+		<text class="t t-s" x={ox + 7 * S} y={oy - 16 * S}>P1</text>
+		<!-- размеры -->
+		<path class="ln" d={`M${ox} ${oy + 30} H${ox + 30 * S} M${ox} ${oy + 24} V${oy + 36} M${ox + 30 * S} ${oy + 24} V${oy + 36}`} />
+		<text class="t" x={ox + 15 * S} y={oy + 48} text-anchor="middle">30 мм (X)</text>
+		<path class="ln" d={`M${ox + 30 * S + 30} ${oy} V${oy - 30 * S} M${ox + 30 * S + 24} ${oy} H${ox + 30 * S + 36} M${ox + 30 * S + 24} ${oy - 30 * S} H${ox + 30 * S + 36}`} />
+		<text class="t" x={ox + 30 * S + 42} y={oy - 15 * S + 4}>30 мм (Y)</text>
+	</svg>
+</Figure>

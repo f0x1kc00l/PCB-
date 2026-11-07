@@ -1,0 +1,47 @@
+---
+/** Рис. 2.9 (урок 2.9): кварц с конденсаторами нагрузки у микроконтроллера; кнопка с подтяжкой к питанию. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="2.9" caption="Слева: кварцевый резонатор между выводами генератора микроконтроллера и два конденсатора на землю. Их ёмкость подбирают по ёмкости нагрузки CL из даташита кварца. Справа: кнопка замыкает вход на землю, резистор 10 кОм подтягивает вход к питанию, пока кнопка отпущена.">
+	<svg viewBox="0 0 640 250" role="img" aria-label="Слева микроконтроллер с выводами XTAL1 и XTAL2, между ними кварц ZQ1, от каждого вывода конденсатор 22 пикофарады на землю. Справа: питание 3,3 вольта, резистор 10 килоом к входу микроконтроллера, кнопка от входа на землю.">
+		<!-- МК -->
+		<rect class="ln" x="20" y="40" width="90" height="140" />
+		<text class="t" x="65" y="114" text-anchor="middle" font-weight="700">МК</text>
+		<text class="t t-s t-mono" x="104" y="74" text-anchor="end">XTAL1</text>
+		<text class="t t-s t-mono" x="104" y="154" text-anchor="end">XTAL2</text>
+		<path class="ln" d="M110 70 H200 V96 M110 150 H200 V124" />
+		<!-- кварц вертикально -->
+		<path class="ln" d="M186 96 H214 M186 124 H214" />
+		<rect class="ln" x="190" y="102" width="20" height="16" />
+		<text class="t" x="182" y="104" text-anchor="end">ZQ1</text>
+		<text class="t t-s t-mut" x="182" y="120" text-anchor="end">8 МГц</text>
+		<!-- C1, C2 -->
+		<circle cx="160" cy="70" r="3" class="fill-cur" />
+		<circle cx="160" cy="150" r="3" class="fill-cur" />
+		<path class="ln" d="M160 70 V36 H260 V48 M160 150 V170 H260 V160" />
+		<path d="M248 48 H272 M248 56 H272" stroke="currentColor" stroke-width="2.5" />
+		<path d="M248 160 H272 M248 152 H272" stroke="currentColor" stroke-width="2.5" />
+		<path class="ln" d="M260 56 V100 M260 152 V112 M260 100 V112" />
+		<text class="t t-s" x="278" y="56">C1 22 пФ</text>
+		<text class="t t-s" x="278" y="164">C2 22 пФ</text>
+		<path class="ln" d="M246 106 H274 M251 112 H269 M256 118 H264" />
+
+		<!-- ===== Кнопка ===== -->
+		<text class="t t-acc" x="480" y="24" text-anchor="middle">+3,3 В</text>
+		<path class="ln" d="M480 32 V50 M480 100 V130 H555" />
+		<rect class="ln" x="472" y="50" width="16" height="50" />
+		<text class="t t-s" x="496" y="80">R1 10 кОм</text>
+		<circle cx="480" cy="130" r="3" class="fill-cur" />
+		<text class="t t-s" x="560" y="134">вход МК</text>
+		<path class="ln" d="M480 130 V156 M480 196 V214" />
+		<path class="ln" d="M480 196 L462 164" />
+		<path class="ln" d="M458 172 H448 V186 H458" />
+		<circle cx="480" cy="156" r="3" class="fill-cur" />
+		<circle cx="480" cy="196" r="3" class="fill-cur" />
+		<text class="t t-s" x="496" y="184">SB1</text>
+		<path class="ln" d="M466 214 H494 M471 220 H489 M476 226 H484" />
+		<text class="t t-s t-mut" x="560" y="170">отпущена → 1</text>
+		<text class="t t-s t-mut" x="560" y="186">нажата → 0</text>
+	</svg>
+</Figure>

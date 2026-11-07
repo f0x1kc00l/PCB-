@@ -1,0 +1,15 @@
+# зависимости и сборка
+node_modules/
+dist/
+.astro/
+
+# логи и окружение
+npm-debug.log*
+.env
+.env.*
+
+# системные файлы
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json

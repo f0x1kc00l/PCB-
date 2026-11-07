@@ -1,0 +1,42 @@
+---
+/** Рис. к уроку 1.8: вольтметр подключается параллельно, амперметр — в разрыв цепи. */
+import Figure from './Figure.astro';
+
+/** Батарейка и резистор; ox — сдвиг схемы по горизонтали. */
+const battery = (ox: number) =>
+	`M${ox + 40} 50 V100 M${ox + 40} 116 V180`;
+---
+
+<Figure n="1.9" caption="Вольтметр подключают параллельно участку, на котором меряют напряжение: у него огромное входное сопротивление, и цепь почти не замечает прибор. Амперметр включают в разрыв цепи: весь ток должен пройти через него, а его собственное сопротивление очень мало.">
+	<svg viewBox="0 0 640 230" role="img" aria-label="Слева: батарея и резистор, вольтметр подключён параллельно резистору. Справа: та же цепь, амперметр включён последовательно в разрыв верхнего провода.">
+		<!-- ===== Вольтметр ===== -->
+		<text class="t" x="10" y="18" font-weight="700">Напряжение: параллельно</text>
+		<path class="ln" d={battery(0)} />
+		<path class="ln" d="M22 100 H58" />
+		<path d="M30 116 H50" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="16" y="96">+</text>
+		<path class="ln" d="M40 50 H180 V85 M180 125 V180 H40" />
+		<rect class="ln" x="173" y="85" width="14" height="40" />
+		<text class="t" x="165" y="110" text-anchor="end">R</text>
+		<circle cx="180" cy="62" r="3.5" class="fill-cur" />
+		<circle cx="180" cy="160" r="3.5" class="fill-cur" />
+		<path class="ln-acc" d="M180 62 H260 V86 M260 126 V160 H180" />
+		<circle cx="260" cy="106" r="20" fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<text class="t t-acc" x="260" y="111" text-anchor="middle">V</text>
+
+		<!-- ===== Амперметр ===== -->
+		<text class="t" x="350" y="18" font-weight="700">Ток: последовательно</text>
+		<path class="ln" d={battery(340)} />
+		<path class="ln" d="M362 100 H398" />
+		<path d="M370 116 H390" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="356" y="96">+</text>
+		<path class="ln" d="M380 50 H430 M490 50 H560 V85 M560 125 V180 H380" />
+		<circle cx="460" cy="50" r="20" fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<path class="ln-acc" d="M430 50 H440 M480 50 H490" />
+		<text class="t t-acc" x="460" y="55" text-anchor="middle">A</text>
+		<rect class="ln" x="553" y="85" width="14" height="40" />
+		<text class="t" x="577" y="110">R</text>
+		<text class="t t-s t-mut" x="460" y="92" text-anchor="middle">цепь разорвана,</text>
+		<text class="t t-s t-mut" x="460" y="107" text-anchor="middle">ток идёт через прибор</text>
+	</svg>
+</Figure>

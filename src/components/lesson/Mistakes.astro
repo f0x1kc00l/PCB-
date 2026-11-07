@@ -1,0 +1,102 @@
+---
+/**
+ * Блок «Типичные ошибки».
+ *
+ *   <Mistakes items={[
+ *     { problem: 'Плата не обновилась после правки схемы',
+ *       why: 'Изменения схемы не переносятся на плату сами',
+ *       fix: 'Выполни Design » Update PCB Document' },
+ *   ]} />
+ *
+ * Поля why и fix понимают простую разметку Markdown (`код`, **жирный**).
+ */
+interface Item {
+	problem: string;
+	why?: string;
+	fix: string;
+}
+interface Props {
+	items: Item[];
+	title?: string;
+}
+const { items, title = 'Типичные ошибки' } = Astro.props;
+
+/** Минимальный инлайн-Markdown: `код` и **жирный**. HTML экранируется. */
+function md(text: string): string {
+	return text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/`([^`]+)`/g, '<code>$1</code>')
+		.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+---
+
+<section class="mistakes not-content" aria-label={title}>
+	<p class="mistakes__title">🧯 {title}</p>
+	{
+		items.map((it) => (
+			<details>
+				<summary set:html={md(it.problem)} />
+				<div class="body">
+					{it.why && (
+						<p>
+							<span class="tag">Почему</span> <Fragment set:html={md(it.why)} />
+						</p>
+					)}
+					<p>
+						<span class="tag tag--fix">Как исправить</span> <Fragment set:html={md(it.fix)} />
+					</p>
+				</div>
+			</details>
+		))
+	}
+</section>
+
+<style>
+	.mistakes {
+		margin-block: 1.5rem;
+		border: 1px solid color-mix(in srgb, var(--pcb-bad) 40%, transparent);
+		border-radius: var(--pcb-radius);
+		overflow: hidden;
+	}
+	.mistakes__title {
+		margin: 0;
+		padding: 0.6rem 1rem;
+		font-weight: 700;
+		color: var(--pcb-bad);
+		background: color-mix(in srgb, var(--pcb-bad) 10%, transparent);
+	}
+	details {
+		border-top: 1px solid var(--sl-color-hairline);
+	}
+	summary {
+		padding: 0.6rem 1rem;
+		cursor: pointer;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.body {
+		padding: 0 1rem 0.75rem;
+		font-size: var(--sl-text-sm);
+	}
+	.body p {
+		margin: 0.35rem 0;
+	}
+	.tag {
+		display: inline-block;
+		margin-inline-end: 0.3rem;
+		padding: 0 0.4rem;
+		border-radius: 0.25rem;
+		font-size: var(--sl-text-xs);
+		font-weight: 700;
+		background: var(--sl-color-gray-5);
+		color: var(--sl-color-white);
+	}
+	.tag--fix {
+		background: var(--pcb-ok);
+		color: var(--sl-color-black);
+	}
+	code {
+		font-family: var(--pcb-mono);
+	}
+</style>

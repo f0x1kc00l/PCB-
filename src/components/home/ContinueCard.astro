@@ -1,0 +1,138 @@
+---
+/**
+ * Карточка на главной: общий прогресс, кнопка «Продолжить» к последнему открытому уроку
+ * и сброс прогресса. Пока ученик ничего не открывал — кнопка ведёт на первый урок.
+ */
+import { getCollection } from 'astro:content';
+import { isLessonId, lessonHref } from '../../lib/site';
+
+const lessons = (await getCollection('docs')).filter((d) => isLessonId(d.id));
+const total = lessons.length;
+const firstHref = lessonHref('m00-intro/01-how-course-works');
+---
+
+<section class="continue not-content" data-total={total} data-first={firstHref}>
+	<div class="continue__stats">
+		<p class="continue__label">Твой прогресс</p>
+		<p class="continue__value"><span data-done>0</span> из {total} уроков</p>
+		<div class="continue__bar" aria-hidden="true"><span data-fill></span></div>
+	</div>
+	<div class="continue__actions">
+		<a class="continue__btn" href={firstHref} data-continue>Начать курс →</a>
+		<button type="button" class="continue__reset" data-reset hidden>Сбросить прогресс</button>
+	</div>
+	<p class="continue__note">
+		Прогресс хранится только в этом браузере (localStorage). В другом браузере или после очистки данных сайта он
+		начнётся с нуля.
+	</p>
+</section>
+
+<script>
+	import { getProgress, getLastVisited, resetProgress, onProgressChange } from '../../lib/progress';
+
+	const box = document.querySelector<HTMLElement>('.continue')!;
+	const total = Number(box.dataset.total);
+	const btn = box.querySelector<HTMLAnchorElement>('[data-continue]')!;
+	const reset = box.querySelector<HTMLButtonElement>('[data-reset]')!;
+
+	function render() {
+		const done = Object.keys(getProgress()).length;
+		box.querySelector('[data-done]')!.textContent = String(Math.min(done, total));
+		box.querySelector<HTMLElement>('[data-fill]')!.style.width = `${total ? Math.min(done / total, 1) * 100 : 0}%`;
+		reset.hidden = done === 0;
+
+		const last = getLastVisited();
+		if (last) {
+			btn.href = last.path.endsWith('/') ? last.path : `${last.path}/`;
+			btn.textContent = `Продолжить: ${last.title} →`;
+		}
+	}
+
+	reset.addEventListener('click', () => {
+		if (confirm('Сбросить отметки всех пройденных уроков?')) resetProgress();
+	});
+	render();
+	onProgressChange(render);
+</script>
+
+<style>
+	.continue {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 0.75rem 1.5rem;
+		align-items: center;
+		padding: 1.1rem 1.25rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: var(--pcb-radius);
+		background: var(--sl-color-gray-6);
+	}
+	@media (max-width: 40rem) {
+		.continue {
+			grid-template-columns: 1fr;
+		}
+	}
+	.continue p {
+		margin: 0;
+	}
+	.continue__label {
+		font-size: var(--sl-text-xs);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--sl-color-gray-3);
+	}
+	.continue__value {
+		font-size: var(--sl-text-xl);
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	.continue__bar {
+		height: 0.4rem;
+		margin-top: 0.4rem;
+		border-radius: 1rem;
+		background: var(--sl-color-gray-5);
+		overflow: hidden;
+	}
+	.continue__bar span {
+		display: block;
+		width: 0;
+		height: 100%;
+		background: var(--sl-color-accent);
+	}
+	.continue__actions {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.4rem;
+	}
+	@media (max-width: 40rem) {
+		.continue__actions {
+			align-items: stretch;
+		}
+	}
+	.continue__btn {
+		padding: 0.7rem 1.2rem;
+		border-radius: 0.5rem;
+		background: var(--sl-color-accent);
+		color: var(--sl-color-black);
+		font-weight: 700;
+		text-align: center;
+		text-decoration: none;
+	}
+	.continue__btn:hover {
+		background: var(--sl-color-accent-high);
+	}
+	.continue__reset {
+		border: 0;
+		background: none;
+		color: var(--sl-color-gray-3);
+		font: inherit;
+		font-size: var(--sl-text-xs);
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	.continue__note {
+		grid-column: 1 / -1;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+</style>

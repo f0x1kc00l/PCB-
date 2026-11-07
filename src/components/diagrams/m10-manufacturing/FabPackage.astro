@@ -1,0 +1,46 @@
+---
+/** Рис. 10.1: что уходит на производство — два комплекта: изготовление платы и сборка (монтаж). */
+import Figure from '../Figure.astro';
+
+const fab = [
+	['Gerber-файлы слоёв', 'медь, маска, шелкография, контур'],
+	['Файл сверловки', 'Excellon: металлизированные и нет'],
+	['Чертёж платы (PDF)', 'размеры, стек, техтребования'],
+	['или ODB++ / IPC-2581', 'всё в одном пакете'],
+];
+const asm = [
+	['Перечень элементов (BOM)', 'что ставить: номинал, корпус, MPN'],
+	['Pick&Place (CPL)', 'куда ставить: X, Y, поворот, сторона'],
+	['Сборочный чертёж (PDF)', 'позиции, полярность, особые указания'],
+	['Gerber паяльной пасты', 'для изготовления трафарета'],
+];
+const card = (x: number, w: number, items: string[][], title: string, color: string) => ({ x, w, items, title, color });
+const cards = [card(232, 208, fab, 'Изготовление платы', 'var(--sl-color-accent)'), card(450, 236, asm, 'Сборка (монтаж)', 'var(--pcb-altium)')];
+---
+
+<Figure n="10.1" caption="Проект в Altium превращается в два комплекта файлов. Первый нужен заводу, чтобы изготовить «голую» плату, второй — монтажному участку, чтобы поставить на неё компоненты. Если заказываешь только платы и паяешь сам, второй комплект нужен тебе самому.">
+	<svg viewBox="0 0 690 290" role="img" aria-label="Проект Altium слева, стрелки к двум карточкам: изготовление платы (Gerber, сверловка, чертёж, или ODB++/IPC-2581) и сборка (BOM, Pick and Place, сборочный чертёж, Gerber пасты).">
+		<!-- проект -->
+		<rect x="20" y="105" width="170" height="90" rx="10" class="ln" />
+		<text class="t" x="105" y="138" text-anchor="middle" font-weight="700">Проект Altium</text>
+		<text class="t t-s t-mono t-mut" x="105" y="160" text-anchor="middle">.PrjPcb .SchDoc</text>
+		<text class="t t-s t-mono t-mut" x="105" y="177" text-anchor="middle">.PcbDoc .OutJob</text>
+		<path class="ln-acc" d="M190 135 C210 135 210 80 228 80 M221 75 L228 80 L221 85" />
+		<path d="M190 165 C220 165 220 220 445 220" fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		<path d="M438 215 L445 220 L438 225" fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		{
+			cards.map((c, ci) => (
+				<g>
+					<rect x={c.x} y={ci === 0 ? 20 : 120} width={c.w} height="160" rx="10" fill="none" stroke={c.color} stroke-width="2" />
+					<text class="t" x={c.x + 12} y={ci === 0 ? 42 : 142} font-weight="700" fill={c.color}>{c.title}</text>
+					{c.items.map(([a, b], i) => (
+						<g>
+							<text class="t t-s" x={c.x + 12} y={(ci === 0 ? 66 : 166) + i * 30} font-weight="600">{a}</text>
+							<text class="t t-s t-mut" x={c.x + 12} y={(ci === 0 ? 79 : 179) + i * 30} font-size="10">{b}</text>
+						</g>
+					))}
+				</g>
+			))
+		}
+	</svg>
+</Figure>

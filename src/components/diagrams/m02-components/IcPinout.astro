@@ -1,0 +1,37 @@
+---
+/** Рис. 2.8 (урок 2.8): нумерация выводов микросхемы (вид сверху) на примере корпуса DIP-8/SOIC-8 с ОУ. */
+import Figure from '../Figure.astro';
+
+const left = ['1  OUT A', '2  IN− A', '3  IN+ A', '4  V−'];
+const right = ['8  V+', '7  OUT B', '6  IN− B', '5  IN+ B'];
+---
+
+<Figure n="2.8" caption="Выводы считают от ключа (точка или выемка) против часовой стрелки, если смотреть на микросхему сверху. Пример — типовая цоколёвка сдвоенного ОУ в 8-выводном корпусе (как у LM358). Цоколёвку конкретной микросхемы всегда сверяй с даташитом.">
+	<svg viewBox="0 0 640 260" role="img" aria-label="Корпус микросхемы сверху с выемкой и точкой у вывода 1. Слева сверху вниз выводы 1–4, справа снизу вверх 5–8. Стрелка против часовой стрелки.">
+		<rect x="240" y="40" width="160" height="190" rx="6" fill="#2a2a2a" />
+		<path d="M305 40 A15 15 0 0 0 335 40" fill="var(--sl-color-bg)" />
+		<circle cx="262" cy="66" r="7" fill="#777" />
+		<text x="320" y="140" text-anchor="middle" fill="#ddd" font-family="var(--pcb-mono)" font-size="14">LM358</text>
+		<text x="320" y="160" text-anchor="middle" fill="#999" font-size="11">вид сверху</text>
+		{
+			left.map((t, i) => (
+				<g>
+					<rect x="220" y={58 + i * 46} width="20" height="16" fill="#c8c8c8" />
+					<text class="t t-mono t-s" x="212" y={70 + i * 46} text-anchor="end">{t}</text>
+				</g>
+			))
+		}
+		{
+			right.map((t, i) => (
+				<g>
+					<rect x="400" y={58 + i * 46} width="20" height="16" fill="#c8c8c8" />
+					<text class="t t-mono t-s" x="428" y={70 + i * 46}>{t}</text>
+				</g>
+			))
+		}
+		<!-- стрелка против часовой -->
+		<path class="ln-acc" d="M282 92 V200 Q282 212 294 212 H346 Q358 212 358 200 V100" />
+		<path class="ln-acc" d="M352 108 L358 100 L364 108" />
+		<text class="t t-acc t-s" x="320" y="250" text-anchor="middle">1 → 4 вниз по левой стороне, 5 → 8 вверх по правой</text>
+	</svg>
+</Figure>

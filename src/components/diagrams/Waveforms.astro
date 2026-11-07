@@ -1,0 +1,54 @@
+---
+/** Рис. к уроку 1.7: параметры синусоидального и прямоугольного сигналов. */
+import Figure from './Figure.astro';
+
+// Синус: ось y=90, амплитуда 50 px, период 200 px, начало x=40, две периода.
+const A = 50;
+const T = 200;
+const x0 = 40;
+const yc = 90;
+const pts: string[] = [];
+for (let i = 0; i <= 400; i += 4) {
+	const v = yc - A * Math.sin((2 * Math.PI * i) / T);
+	pts.push(`${i === 0 ? 'M' : 'L'}${(x0 + i).toFixed(1)} ${v.toFixed(1)}`);
+}
+const sine = pts.join(' ');
+const rms = yc - A / Math.SQRT2;
+
+// Прямоугольный: высокий уровень y=210, низкий y=260, период 160 px, импульс 60 px.
+const Tq = 160;
+const tau = 60;
+let sq = `M${x0} 260`;
+for (let k = 0; k < 2.5; k++) {
+	const s = x0 + 20 + k * Tq;
+	sq += ` H${s} V210 H${s + tau} V260`;
+}
+sq += ` H${x0 + 420}`;
+---
+
+<Figure n="1.8" caption="Сверху синусоида: амплитуда A, размах (двойная амплитуда) 2A, действующее значение A/√2 и период T. Снизу последовательность прямоугольных импульсов: длительность импульса τ и период T.">
+	<svg viewBox="0 0 640 300" role="img" aria-label="Синусоида с отмеченными амплитудой, размахом, действующим значением и периодом. Ниже прямоугольные импульсы с длительностью тау и периодом T.">
+		<!-- ===== Синус ===== -->
+		<path class="ln-thin" d={`M${x0} ${yc} H${x0 + 410}`} />
+		<path class="ln-dash" d={`M${x0} ${rms} H${x0 + 410}`} />
+		<path d={sine} fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<!-- размеры справа -->
+		<path class="ln" d={`M470 ${yc - A} V${yc + A} M465 ${yc - A} H475 M465 ${yc + A} H475`} />
+		<text class="t t-s" x="480" y={yc + 4}>размах 2A</text>
+		<path class="ln" d={`M560 ${yc} V${yc - A} M555 ${yc - A} H565 M555 ${yc} H565`} />
+		<text class="t t-s" x="570" y={yc - A / 2 + 4}>A</text>
+		<text class="t t-s" x={x0 + 345} y={rms - 6}>Uд = A/√2</text>
+		<!-- период между двумя пиками -->
+		<path class="ln-acc" d={`M${x0 + T / 4} 18 H${x0 + T / 4 + T} M${x0 + T / 4} 12 V24 M${x0 + T / 4 + T} 12 V24`} />
+		<text class="t t-acc" x={x0 + T / 4 + T / 2} y="14" text-anchor="middle">T</text>
+		
+		<!-- ===== Прямоугольные импульсы ===== -->
+		<path d={sq} fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
+		<path class="ln" d={`M${x0 + 20} 195 H${x0 + 20 + tau} M${x0 + 20} 190 V200 M${x0 + 20 + tau} 190 V200`} />
+		<text class="t" x={x0 + 20 + tau / 2} y="188" text-anchor="middle">τ</text>
+		<path class="ln-acc" d={`M${x0 + 20 + Tq} 285 H${x0 + 20 + 2 * Tq} M${x0 + 20 + Tq} 279 V291 M${x0 + 20 + 2 * Tq} 279 V291`} />
+		<text class="t t-acc" x={x0 + 20 + 1.5 * Tq} y="280" text-anchor="middle">T</text>
+		<text class="t t-s" x="480" y="226">D = τ / T</text>
+		<text class="t t-s" x="480" y="244">S = T / τ</text>
+	</svg>
+</Figure>

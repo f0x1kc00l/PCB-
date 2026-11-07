@@ -1,0 +1,57 @@
+---
+/**
+ * Путь в меню Altium: <MenuPath path="Design » Update PCB Document" />
+ * Разделители » или > превращаются в аккуратные стрелки.
+ * verify — пометка [ПРОВЕРИТЬ], если путь не сверен с актуальной версией.
+ */
+interface Props {
+	path: string;
+	verify?: boolean;
+}
+const { path, verify = false } = Astro.props;
+const parts = path.split(/\s*(?:»|>)\s*/).filter(Boolean);
+---
+
+<span class="menu-path" title={parts.join(' → ')}>
+	{
+		parts.map((p, i) => (
+			<>
+				{i > 0 && (
+					<span class="sep" aria-hidden="true">
+						›
+					</span>
+				)}
+				<span class="item">{p}</span>
+			</>
+		))
+	}
+	{verify && <span class="verify">[ПРОВЕРИТЬ]</span>}
+</span>
+
+<style>
+	.menu-path {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.2rem;
+		padding: 0.05rem 0.4rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.3rem;
+		background: var(--sl-color-gray-6);
+		font-family: var(--pcb-mono);
+		font-size: 0.875em;
+		white-space: nowrap;
+	}
+	.item {
+		color: var(--sl-color-white);
+	}
+	.sep {
+		color: var(--sl-color-accent);
+		font-weight: 700;
+	}
+	.verify {
+		margin-inline-start: 0.3rem;
+		color: var(--pcb-warn);
+		font-size: 0.8em;
+	}
+</style>

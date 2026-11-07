@@ -1,0 +1,43 @@
+---
+/** Рис. 2.6 (урок 2.6): NPN-транзистор как усилитель тока и как ключ. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="2.6" caption="Маленький ток базы управляет большим током коллектора: Iк ≈ h21э·Iб, пока транзистор не насытился. В режиме ключа базу «перекармливают» током с запасом, и транзистор полностью открывается: Uкэ падает до десятых долей вольта.">
+	<svg viewBox="0 0 640 260" role="img" aria-label="Схема ключа: от управляющего сигнала через резистор базы 1 кОм на базу NPN-транзистора VT1, в цепи коллектора нагрузка от +12 вольт, эмиттер на земле. Стрелки показывают малый ток базы и большой ток коллектора, сходящиеся в эмиттер.">
+		<!-- нагрузка и питание -->
+		<text class="t t-acc" x="330" y="26" text-anchor="middle">+12 В</text>
+		<path class="ln" d="M330 34 V54 M330 104 V128" />
+		<rect class="ln" x="316" y="54" width="28" height="50" />
+		<text class="t" x="352" y="76">нагрузка</text>
+		<text class="t t-s t-mut" x="352" y="92">(лампа, реле, LED)</text>
+		<!-- транзистор -->
+		<circle class="ln" cx="320" cy="160" r="30" />
+		<path class="ln" d="M330 128 V138 L306 150 M306 140 V180 M306 170 L330 182 V214" />
+		<polygon points="330,182 318,181 323,173" class="fill-cur" />
+		<text class="t" x="358" y="164">VT1</text>
+		<text class="t t-s t-mut" x="358" y="180">BC547</text>
+		<!-- база -->
+		<path class="ln" d="M140 160 H180 M230 160 H306" />
+		<rect class="ln" x="180" y="152" width="50" height="16" />
+		<text class="t" x="205" y="144" text-anchor="middle">R_б 1 кОм</text>
+		<circle class="ln" cx="134" cy="160" r="5" />
+		<text class="t t-s" x="128" y="186" text-anchor="middle">управление</text>
+		<text class="t t-s t-mut" x="128" y="202" text-anchor="middle">0 / 5 В</text>
+		<!-- земля -->
+		<path class="ln" d="M316 214 H344 M321 220 H339 M326 226 H334" />
+		<!-- токи -->
+		<path class="ln-acc" d="M240 176 H280 M273 170 L280 176 L273 182" />
+		<text class="t t-acc t-mono" x="258" y="196" text-anchor="middle">Iб ≈ 4,3 мА</text>
+		<path d="M300 110 V126 M294 120 L300 126 L306 120" fill="none" stroke="var(--sl-color-accent)" stroke-width="4" />
+		<text class="t t-acc t-mono" x="292" y="118" text-anchor="end">Iк до 40 мА</text>
+		<!-- пояснения справа -->
+		<g class="t t-s">
+			<text x="450" y="130">Выключен: Iб = 0 → Iк ≈ 0</text>
+			<text x="450" y="150">Включён: Uкэ ≈ 0,1–0,3 В</text>
+			<text x="450" y="170">(насыщение)</text>
+			<text x="450" y="200">Iб = (5 − 0,7) / 1 кОм</text>
+			<text x="450" y="216">≈ 4,3 мА; Iк / Iб ≈ 10</text>
+		</g>
+	</svg>
+</Figure>

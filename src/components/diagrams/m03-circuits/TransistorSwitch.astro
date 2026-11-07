@@ -1,0 +1,55 @@
+---
+/** Рис. 3.3: транзисторный ключ — светодиод от вывода МК и реле с защитным диодом. */
+import Figure from '../Figure.astro';
+import { npn, resV, resH, diodeUp, diodeDown, gnd, dot } from './sym';
+---
+
+<Figure n="3.3" caption="Слева: вывод микроконтроллера через базовый резистор управляет светодиодом от 5 В. Справа: ключ включает катушку реле на 12 В, а диод VD1 параллельно катушке (катодом к плюсу) гасит выброс напряжения при выключении.">
+	<svg viewBox="0 0 660 290" role="img" aria-label="Две схемы ключа на NPN-транзисторе: со светодиодом и токоограничивающим резистором в коллекторе, и с катушкой реле и защитным диодом.">
+		<!-- ===== Светодиод ===== -->
+		<text class="t" x="10" y="18" font-weight="700">Нагрузка — светодиод</text>
+		<rect class="ln" x="14" y="168" width="64" height="40" rx="4" />
+		<text class="t t-s" x="46" y="186" text-anchor="middle">МК</text>
+		<text class="t t-s t-mut" x="46" y="200" text-anchor="middle">3,3 В</text>
+		<g set:html={resH(78, 170, 188)} />
+		<text class="t t-s" x="124" y="172" text-anchor="middle">Rб 1 кОм</text>
+		<g set:html={npn(206, 188)} />
+		<text class="t t-s" x="232" y="192">VT1</text>
+		<!-- коллектор: светодиод и резистор от +5 В -->
+		<path class="ln" d="M170 188 H176" />
+		<path class="ln" d="M190 40 H230" />
+		<text class="t t-s t-acc" x="196" y="34">+5 В</text>
+		<g set:html={resV(212, 40, 100)} />
+		<text class="t t-s" x="226" y="74">Rк 150 Ом</text>
+		<g set:html={diodeDown(212, 100, 162, true)} />
+		<text class="t t-s" x="240" y="136">HL1</text>
+		<!-- эмиттер -->
+		<g set:html={gnd(212, 214)} />
+
+		<!-- ===== Реле ===== -->
+		<text class="t" x="340" y="18" font-weight="700">Нагрузка — катушка реле</text>
+		<rect class="ln" x="344" y="168" width="64" height="40" rx="4" />
+		<text class="t t-s" x="376" y="186" text-anchor="middle">МК</text>
+		<text class="t t-s t-mut" x="376" y="200" text-anchor="middle">3,3 В</text>
+		<g set:html={resH(408, 500, 188)} />
+		<text class="t t-s" x="454" y="172" text-anchor="middle">Rб 1 кОм</text>
+		<path class="ln" d="M500 188 H506" />
+		<g set:html={npn(536, 188)} />
+		<text class="t t-s" x="562" y="192">VT1</text>
+		<path class="ln" d="M520 40 H620" />
+		<text class="t t-s t-acc" x="526" y="34">+12 В</text>
+		<!-- катушка реле (прямоугольник по ГОСТ) -->
+		<path class="ln" d="M542 40 V72 M542 128 V162" />
+		<rect class="ln" x="530" y="72" width="24" height="56" />
+		<text class="t t-s" x="522" y="104" text-anchor="end">K1</text>
+		<!-- диод параллельно катушке: катод к +12 В -->
+		<path class="ln" d="M542 56 H600 M542 146 H600" />
+		<g set:html={dot(542, 56)} />
+		<g set:html={dot(542, 146)} />
+		<g set:html={diodeUp(600, 56, 146, false, 'ln-acc')} />
+		<text class="t t-s t-acc" x="612" y="106">VD1</text>
+		<g set:html={gnd(542, 214)} />
+		<text class="t t-s t-mut" x="340" y="262">без VD1 при выключении на коллекторе —</text>
+		<text class="t t-s t-mut" x="340" y="278">выброс в десятки и сотни вольт</text>
+	</svg>
+</Figure>

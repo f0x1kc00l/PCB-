@@ -1,0 +1,169 @@
+---
+title: Output Job и Project Releaser
+description: Output Job как «рецепт» выпуска — выходы, контейнеры, генерация; выпуск проекта через Project Releaser; что делать без рабочего пространства Altium 365.
+sidebar:
+  label: 10.6 Output Job и Project Releaser
+  order: 6
+duration: 35
+status: ready
+goals:
+  - создать Output Job с полным комплектом выходов для изготовления и сборки
+  - настроить контейнеры Folder Structure и PDF и сгенерировать файлы
+  - понимать, что делает Project Releaser и чем выпуск отличается от «просто выгрузил файлы»
+prerequisites:
+  - m10-manufacturing/02-gerber-odb
+  - m10-manufacturing/03-nc-drill
+  - m10-manufacturing/04-bom
+  - m10-manufacturing/05-pick-place
+altium:
+  - title: Preparing Manufacturing Data with Output Jobs
+    url: https://altium.com/documentation/altium-designer/preparing-manufacturing-data-with-output-jobs
+  - title: Preparing Outputs and Releasing the Project (учебник Altium, шаг 9)
+    url: https://www.altium.com/ru/documentation/altium-designer/tutorial/output-documentation-project-release
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Kbd from '../../../components/lesson/Kbd.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+import ReleaseFlow from '../../../components/diagrams/m10-manufacturing/ReleaseFlow.astro';
+
+## Зачем Output Job
+
+В уроках 10.2–10.5 мы генерировали каждый файл отдельной командой. Это работает один раз. Но плату переделывают: поправил дорожку — выгружай всё заново и не забудь ни одной галочки. Рано или поздно на завод уйдут Gerber от новой версии и сверловка от старой.
+
+**Output Job** (файл `.OutJob`) решает эту проблему: это **сохранённый рецепт выпуска**. В нём перечислены все выходы с их настройками и указано, куда класть результат. Выпуск всего комплекта — пара щелчков, и каждый раз одинаково.
+
+Аналогия: технологическая карта на кухне ресторана. Повар не вспоминает рецепт заново, а идёт по карте — поэтому блюдо всегда одинаковое.
+
+<ReleaseFlow />
+
+## Создание Output Job
+
+<MenuPath path="File » New » Output Job File" /> или правый клик по проекту в панели **Projects** → <MenuPath path="Add New to Project » Output Job File" />. Файл появляется в папке проекта **Settings\Output Job Files**. Сохрани его под понятным именем.
+
+<Callout type="tip">
+  Сделай **два** OutJob: `Fabrication.OutJob` (изготовление) и `Assembly.OutJob` (сборка). Project Releaser при первом
+  открытии сам привязывает OutJob с именами, начинающимися на «fab» и «ass», к данным изготовления и сборки.
+</Callout>
+
+## Устройство редактора OutJob
+
+- **Outputs** — список выходов по категориям: **Fabrication Outputs**, **Assembly Outputs**, **Report Outputs**, **Validation Outputs**, **Documentation Outputs** и другие. Внизу каждой категории — ссылка **Add New … Output**.
+- **Output Containers** — куда складывать результат. По умолчанию есть **PDF**, **Folder Structure** и **Video**; новые добавляются через **[Add New Output Container]**.
+- Колонка **Enabled** — связывает выход с выбранным контейнером. Включённые выходы нумеруются: это порядок генерации.
+- **Variant Choice** — для какого варианта сборки генерировать (если используешь варианты).
+
+<Screenshot src="screenshots/m10-manufacturing/l06-outjob-editor.png" alt="редактор Output Job: выходы слева, контейнеры справа" />
+
+## Наполняем Fabrication.OutJob
+
+1. **Fabrication Outputs** → **Add New Fabrication Output** → **Gerber Files** → выбрать плату. Двойной щелчок по выходу открывает тот же Gerber Setup, что в уроке 10.2: настрой слои и единицы.
+2. Так же добавь **NC Drill Files** (урок 10.3). При желании добавь **ODB++** или **IPC-2581**.
+3. **Validation Outputs** → **Design Rules Check** → плата. Отчёт DRC ляжет рядом с файлами, а Project Releaser остановит выпуск, если проверка не пройдена.
+4. Выбери контейнер **Folder Structure** и включи для всех этих выходов радиокнопки в колонке **Enabled**.
+
+## Наполняем Assembly.OutJob
+
+1. **Report Outputs** → **Bill of Materials** → ActiveBOM (урок 10.4). Формат и шаблон — в настройках выхода.
+2. **Assembly Outputs** → **Generates pick and place files** → плата (урок 10.5).
+3. **Documentation Outputs** → **Draftsman** → чертежи из урока 10.7.
+4. Свяжи BOM и чертежи с контейнером **PDF**, а Pick&Place — с **Folder Structure**.
+
+## Контейнеры и генерация
+
+Щелчок по ссылке **Change** у контейнера открывает его настройки. Главное — базовый путь:
+
+- **Release Managed** — путь задаёт процесс выпуска (Project Releaser). Это вариант по умолчанию для работы с рабочим пространством.
+- **Manually Managed** — путь задаёшь сам, можно относительный (**Use relative path**). Это вариант, если ты работаешь без Altium 365 и хочешь получить файлы в папке проекта.
+
+Для PDF-контейнера можно выбрать, собирать ли всё в один файл или делать отдельный PDF на каждый выход.
+
+Генерация: ссылка **Generate content** у контейнера или клавиша <Kbd keys="F9" />. Для папки — также <MenuPath path="Tools » Run" />, для PDF — <MenuPath path="Tools » Generate" />. Каждый контейнер генерируется отдельно: пакетной генерации всех контейнеров сразу в OutJob нет.
+
+## Project Releaser
+
+**Выпуск (release)** — это не просто «сгенерировал файлы». Это зафиксированный снимок проекта: исходники, все выходные файлы и номер ревизии, которые потом нельзя случайно поменять. По выпуску всегда можно ответить на вопрос «что именно мы отправили на завод в марте».
+
+Запуск: <MenuPath path="Project » Project Releaser" /> или правый клик по проекту → **Project Releaser**. Этапы:
+
+1. **Configure Server Release** — настройка выпуска (кнопка **Options** → вкладка **Release Options**, где назначаются Output Jobs для данных изготовления и сборки);
+2. **Validate Project** — проверки, например DRC; при ошибке выпуск останавливается;
+3. **Generate Data** — генерация всех выходов из назначенных OutJob;
+4. **Review Data** — просмотр того, что получилось;
+5. **Upload Data** — загрузка в рабочее пространство с примечанием к выпуску (Release Note);
+6. **Execution Report** — отчёт.
+
+<Callout type="altium">
+  Project Releaser в учебнике Altium показан для выпуска в подключённое рабочее пространство Altium 365 (Workspace).
+  Если ты работаешь без него, используй контейнеры с **Manually Managed** путём и генерируй файлы вручную, а ревизии
+  веди сам: папка `release/rev-A/` с архивом файлов и коротким текстом «что изменилось». Возможность локального выпуска
+  без рабочего пространства в Altium Designer 26 [ПРОВЕРИТЬ].
+</Callout>
+
+## Практика
+
+1. Создай в проекте мультивибратора `Fabrication.OutJob` и `Assembly.OutJob` по шагам выше.
+2. Для Folder Structure выбери **Manually Managed** и относительный путь `Outputs`.
+3. Сгенерируй оба комплекта. Сравни с файлами, которые ты выгружал вручную в уроках 10.2–10.5. Должно получиться то же самое.
+4. Поменяй на плате любую дорожку, снова сгенерируй и убедись, что обновились все файлы.
+
+<Mistakes
+  items={[
+    {
+      problem: 'Кнопка Generate content неактивна',
+      why: 'Ни один выход не связан с этим контейнером.',
+      fix: 'Выбери контейнер и включи радиокнопки в колонке Enabled у нужных выходов.',
+    },
+    {
+      problem: 'Выпуск остановился на этапе Validate',
+      why: 'DRC нашёл нарушения.',
+      fix: 'Исправь нарушения на плате (урок 7.7). Не отключай проверку, чтобы «проскочить».',
+    },
+    {
+      problem: 'Файлы разлетелись по странным папкам',
+      why: 'Контейнер в режиме Release Managed, а выпуск идёт без Project Releaser.',
+      fix: 'Для ручной генерации выбери Manually Managed и задай путь сам.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Главное преимущество Output Job перед ручной выгрузкой каждого файла?',
+      options: [
+        'Файлы получаются меньше',
+        'Все выходы с настройками сохранены и генерируются одинаково каждый раз',
+        'Без него Altium не выгружает Gerber',
+      ],
+      answer: 1,
+      explain: 'OutJob — повторяемый рецепт. Он исключает «забыл галочку» и смесь файлов разных версий.',
+    },
+    {
+      q: 'Что связывает выход OutJob с контейнером?',
+      options: ['Имя файла', 'Радиокнопка в колонке Enabled', 'Цвет строки'],
+      answer: 1,
+      explain: 'Выбери контейнер и включи Enabled у нужных выходов. Нумерация показывает порядок генерации.',
+    },
+    {
+      q: 'Чем выпуск через Project Releaser отличается от простой генерации файлов?',
+      options: [
+        'Ничем',
+        'Фиксирует снимок исходников и выходных данных с ревизией и проверками',
+        'Он только переименовывает файлы',
+      ],
+      answer: 1,
+      explain: 'Выпуск — неизменяемая запись «что именно ушло на завод», с проверками перед генерацией.',
+    },
+  ]}
+/>
+
+<Assignment time={30}>
+  Собери для мультивибратора два OutJob (изготовление и сборка), сгенерируй оба и упакуй результат в
+  `multivibrator-rev-A.zip`. Добавь в архив файл `README.txt`: дата, ревизия, состав архива, контактное лицо. С этим
+  архивом мы пойдём заказывать плату в уроке 10.9.
+</Assignment>

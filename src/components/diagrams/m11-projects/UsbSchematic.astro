@@ -1,0 +1,86 @@
+---
+/**
+ * Рис. 11.6: лист «USB и питание» проекта 11.2.
+ * Выводы: USB Type-C 16-pin (A/B), USBLC6-2SC6 (ST, SOT23-6), CH340C (WCH CH340DS1, SOP-16).
+ */
+import Figure from '../Figure.astro';
+import { text, wire, dot, gnd, resV, resH, capV, box } from './sym';
+
+const G = 300;
+const V = 40; // шина +5V
+const xs1 = box(20, 70, 70, 200, 'XS1', 'USB-C', [
+	{ side: 'R', at: 20, num: 'A4,B4,A9,B9', name: 'VBUS' },
+	{ side: 'R', at: 70, num: 'A6,B6', name: 'D+' },
+	{ side: 'R', at: 100, num: 'A7,B7', name: 'D−' },
+	{ side: 'R', at: 140, num: 'A5', name: 'CC1' },
+	{ side: 'R', at: 165, num: 'B5', name: 'CC2' },
+	{ side: 'R', at: 190, num: 'A1,B1,A12,B12', name: 'GND' },
+]);
+const esd = box(300, 120, 70, 80, 'DA1', 'USBLC6-2SC6', [
+	{ side: 'L', at: 20, num: '1', name: 'IO1' },
+	{ side: 'L', at: 50, num: '3', name: 'IO2' },
+	{ side: 'R', at: 20, num: '6', name: 'IO1' },
+	{ side: 'R', at: 50, num: '4', name: 'IO2' },
+	{ side: 'T', at: 35, num: '5', name: 'VBUS' },
+	{ side: 'B', at: 35, num: '2', name: 'GND' },
+], { x: 292, y: 100, anchor: 'end' });
+const ch = box(490, 90, 120, 170, 'DD1', 'CH340C', [
+	{ side: 'L', at: 50, num: '5', name: 'UD+' },
+	{ side: 'L', at: 80, num: '6', name: 'UD−' },
+	{ side: 'L', at: 120, num: '4', name: 'V3' },
+	{ side: 'T', at: 60, num: '16', name: 'VCC' },
+	{ side: 'B', at: 60, num: '1', name: 'GND' },
+	{ side: 'R', at: 30, num: '2', name: 'TXD' },
+	{ side: 'R', at: 60, num: '3', name: 'RXD' },
+	{ side: 'R', at: 90, num: '13', name: 'DTR#' },
+	{ side: 'R', at: 140, num: '7', name: 'NC' },
+], { x: 570, y: 62, anchor: 'start' });
+const parts = [
+	xs1.svg, esd.svg, ch.svg,
+	// VBUS → F1 → +5V
+	wire([[106, 90], [130, 90], [130, V], [160, V]]),
+	resH(160, 230, V, 'F1', 'PTC 0,5 А'),
+	wire([[230, V], [720, V]]),
+	text(680, V - 8, '+5V', 't t-s t-mono t-acc'),
+	dot(335, V), wire([[335, V], [335, 104]]),
+	// D+/D− через ESD к CH340C
+	wire([[106, 140], [284, 140]]),
+	wire([[106, 170], [284, 170]]),
+	wire([[386, 140], [474, 140]]),
+	wire([[386, 170], [474, 170]]),
+	text(430, 134, 'D+', 't t-s t-mono', 'middle'),
+	text(430, 164, 'D−', 't t-s t-mono', 'middle'),
+	// CC1, CC2 → по 5,1 кОм каждый
+	wire([[106, 210], [205, 210]]),
+	resV(205, 210, G, 'R1', '5,1 кОм', 'R'),
+	wire([[106, 235], [270, 235]]),
+	resV(270, 235, G, 'R2', '5,1 кОм', 'R'),
+	// GND разъёма и ESD
+	wire([[106, 260], [120, 260], [120, G]]),
+	wire([[335, 216], [335, G]]),
+	// CH340C: VCC и конденсатор C2
+	dot(550, V), wire([[550, V], [550, 74]]),
+	dot(450, V), capV(450, V, 104, 'C2', '100 нФ', false, 'L'),
+	gnd(450, 104),
+	// V3 → C1 100 нФ
+	wire([[474, 210], [450, 210]]),
+	capV(450, 210, G, 'C1', '100 нФ', false, 'L'),
+	// GND CH340C
+	wire([[550, 276], [550, G]]),
+	// общая земля
+	wire([[120, G], [550, G]]),
+	dot(205, G), dot(270, G), dot(335, G), dot(450, G),
+	gnd(280, G),
+	// выходы к листу MCU
+	text(630, 116, '→ UART_TX', 't t-s t-mono t-acc'),
+	text(630, 146, '← UART_RX', 't t-s t-mono t-acc'),
+	text(630, 176, '→ DTR', 't t-s t-mono t-acc'),
+	text(630, 226, 'не подключать', 't t-s t-mut'),
+];
+---
+
+<Figure n="11.6" caption="Лист «USB и питание». Каждый вывод CC подтянут к земле своим резистором 5,1 кОм — так источник питания понимает, что подключён потребитель, и подаёт 5 В. D+ и D− проходят сквозь USBLC6-2SC6 (выводы 1↔6 и 3↔4), её ставят вплотную к разъёму. CH340C работает от 5 В: VCC — на +5V с конденсатором 100 нФ, V3 — на отдельный конденсатор 100 нФ. Кварц CH340C не нужен: генератор встроенный.">
+	<svg viewBox="0 0 740 340" role="img" aria-label="Схема: разъём USB-C XS1 с выводами VBUS, D+, D−, CC1, CC2, GND; предохранитель F1; резисторы R1 и R2 по 5,1 кОм на CC1 и CC2; защита DA1 USBLC6-2SC6; микросхема DD1 CH340C с конденсаторами C1 и C2; выходы UART_TX, UART_RX, DTR.">
+		<g set:html={parts.join('')} />
+	</svg>
+</Figure>

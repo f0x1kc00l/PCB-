@@ -1,0 +1,72 @@
+---
+/**
+ * Рис. 12.6г: четыре вида полосковых фильтров (вид сверху, без масштаба), по §2.4 Малорацкого.
+ */
+import Figure from '../Figure.astro';
+
+const W = 330;
+const H = 150;
+const cells = [
+	{ x: 0, y: 0, title: 'ФНЧ со ступенчатым импедансом', eq: 'широкие — C на землю, узкие — L' },
+	{ x: 1, y: 0, title: 'Полосовой на связанных линиях', eq: 'резонаторы λг/2, перекрытие λг/4' },
+	{ x: 0, y: 1, title: 'Шпилечный (hairpin)', eq: 'те же резонаторы, сложенные «П»' },
+	{ x: 1, y: 1, title: 'Режекторный на шлейфах', eq: 'шлейфы λг/4 через λг/4' },
+];
+const cu = 'var(--pcb-copper)';
+---
+
+<Figure n="12.6г" caption="Четыре вида фильтров прямо из меди. Ступенчатый ФНЧ — те же L и C из урока 12.4, только в ряд. Полосовой на связанных линиях и шпилечный построены на резонаторах λг/2, шпилечный просто компактнее. Режекторный «вырезает» частоту, на которой шлейфы λг/4 становятся коротким замыканием.">
+	<svg viewBox={`0 0 ${2 * W} ${2 * H}`} role="img" aria-label="Четыре эскиза фильтров: чередование широких и узких отрезков; лесенка из параллельных полосок; ряд П-образных резонаторов; линия с двумя боковыми шлейфами.">
+		{cells.map((c) => (
+			<g transform={`translate(${c.x * W} ${c.y * H})`}>
+				<rect x="4" y="4" width={W - 8} height={H - 8} rx="6" class="ln-thin" />
+				<text class="t t-s" x={W / 2} y="22" text-anchor="middle" font-weight="700">{c.title}</text>
+				<text class="t t-s t-acc" x={W / 2} y={H - 14} text-anchor="middle">{c.eq}</text>
+			</g>
+		))}
+
+		<!-- ступенчатый ФНЧ -->
+		<g fill={cu}>
+			<rect x="20" y="72" width="40" height="6" />
+			<rect x="60" y="56" width="34" height="38" />
+			<rect x="94" y="73" width="46" height="4" />
+			<rect x="140" y="50" width="44" height="50" />
+			<rect x="184" y="73" width="46" height="4" />
+			<rect x="230" y="56" width="34" height="38" />
+			<rect x="264" y="72" width="46" height="6" />
+		</g>
+
+		<!-- полосовой на связанных линиях -->
+		<g fill={cu} transform="translate(330 0)">
+			<rect x="16" y="44" width="40" height="5" />
+			<rect x="56" y="44" width="60" height="5" />
+			<rect x="56" y="54" width="120" height="5" />
+			<rect x="116" y="64" width="120" height="5" />
+			<rect x="176" y="74" width="120" height="5" />
+			<rect x="236" y="84" width="60" height="5" />
+			<rect x="296" y="84" width="22" height="5" />
+		</g>
+		<path class="ln-acc" d="M446 108 H506 M446 103 V113 M506 103 V113" />
+		<text class="t t-s t-acc" x="476" y="124" text-anchor="middle">λг/4</text>
+
+		<!-- шпилечный -->
+		<g transform="translate(0 150)">
+			<rect x="16" y="88" width="40" height="5" fill={cu} />
+			{[0, 1, 2, 3].map((i) => (
+				<path d={`M${66 + i * 58} 93 V44 H${96 + i * 58} V93`} fill="none" stroke={cu} stroke-width="5" />
+			))}
+			<rect x="270" y="88" width="44" height="5" fill={cu} />
+		</g>
+
+		<!-- режекторный -->
+		<g fill={cu} transform="translate(330 150)">
+			<rect x="16" y="88" width="300" height="6" />
+			<rect x="96" y="42" width="6" height="46" />
+			<rect x="216" y="42" width="6" height="46" />
+		</g>
+		<path class="ln-acc" d="M429 252 H549 M429 247 V257 M549 247 V257" />
+		<text class="t t-s t-acc" x="489" y="269" text-anchor="middle">λг/4</text>
+		<text class="t t-s t-mut" x="418" y="216" text-anchor="end">λг/4</text>
+		<text class="t t-s t-mut" x="560" y="216">λг/4</text>
+	</svg>
+</Figure>

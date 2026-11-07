@@ -1,0 +1,68 @@
+---
+/**
+ * Рис. 3.2: RC-фильтр нижних частот и его АЧХ (логарифмический масштаб).
+ * АЧХ: |H| = 1 / √(1 + (f/fc)²); по оси X — 4 декады от fc/100 до 100·fc.
+ */
+import Figure from '../Figure.astro';
+import { resH, capV, gnd, dot } from './sym';
+
+// Координаты графика
+const gx0 = 330;
+const gx1 = 630;
+const gy0 = 40; // 0 дБ
+const dbPx = 3.4; // пикселей на дБ
+const decades = 4;
+const xOf = (logRel: number) => gx0 + ((logRel + 2) / decades) * (gx1 - gx0); // logRel = log10(f/fc), от −2 до +2
+const yOf = (db: number) => gy0 - db * dbPx;
+const pts: string[] = [];
+for (let k = 0; k <= 160; k++) {
+	const lr = -2 + (4 * k) / 160;
+	const db = -10 * Math.log10(1 + Math.pow(10, 2 * lr));
+	pts.push(`${k ? 'L' : 'M'}${xOf(lr).toFixed(1)} ${yOf(db).toFixed(1)}`);
+}
+const curve = pts.join(' ');
+const ticks = [
+	{ lr: -2, t: 'fc/100' },
+	{ lr: -1, t: 'fc/10' },
+	{ lr: 0, t: 'fc' },
+	{ lr: 1, t: '10·fc' },
+	{ lr: 2, t: '100·fc' },
+];
+const dbs = [0, -20, -40];
+---
+
+<Figure n="3.2" caption="RC-фильтр нижних частот: ниже частоты среза fc = 1/(2πRC) сигнал проходит почти без потерь, на fc ослаблен на 3 дБ (в 0,707 раза), выше fc спадает на 20 дБ на каждую декаду частоты (6 дБ на октаву). Пунктир — асимптоты, по которым АЧХ удобно рисовать от руки.">
+	<svg viewBox="0 0 650 240" role="img" aria-label="Слева схема: вход, резистор R, точка выхода, конденсатор C к земле. Справа график АЧХ: горизонтальная линия 0 дБ до частоты среза, затем спад 20 дБ на декаду, на частоте среза минус 3 дБ.">
+		<!-- схема -->
+		<circle class="ln" cx="24" cy="80" r="4" />
+		<text class="t" x="14" y="66">Uвх</text>
+		<g set:html={resH(28, 150, 80)} />
+		<text class="t" x="89" y="62" text-anchor="middle">R</text>
+		<path class="ln" d="M150 80 H230" />
+		<g set:html={dot(180, 80)} />
+		<g set:html={capV(180, 80, 160)} />
+		<text class="t" x="198" y="125">C</text>
+		<path class="ln" d="M180 160 V170 M24 170 H230" />
+		<g set:html={gnd(127, 170)} />
+		<circle class="ln" cx="234" cy="80" r="4" />
+		<circle class="ln" cx="24" cy="170" r="4" />
+		<circle class="ln" cx="234" cy="170" r="4" />
+		<text class="t" x="222" y="66">Uвых</text>
+
+		<!-- график -->
+		{dbs.map((d) => <line class="ln-thin" x1={gx0} y1={yOf(d)} x2={gx1} y2={yOf(d)} />)}
+		{ticks.map((tk) => <line class="ln-thin" x1={xOf(tk.lr)} y1={yOf(0) - 6} x2={xOf(tk.lr)} y2={yOf(-48)} />)}
+		<path class="ln" d={`M${gx0} ${yOf(-48)} H${gx1 + 6} M${gx0} ${yOf(-48)} V${yOf(4)}`} />
+		{dbs.map((d) => <text class="t t-s t-mut" x={gx0 - 6} y={yOf(d) + 4} text-anchor="end">{d === 0 ? '0' : '−' + Math.abs(d)}</text>)}
+		<text class="t t-s" x={gx0 - 6} y={yOf(4) - 4} text-anchor="end">дБ</text>
+		{ticks.map((tk) => <text class="t t-s t-mut" x={xOf(tk.lr)} y={yOf(-48) + 16} text-anchor="middle">{tk.t}</text>)}
+		<!-- асимптоты -->
+		<path class="ln-dash" d={`M${xOf(-2)} ${yOf(0)} H${xOf(0)} L${xOf(2)} ${yOf(-40)}`} />
+		<!-- кривая -->
+		<path d={curve} fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<!-- точка −3 дБ -->
+		<circle cx={xOf(0)} cy={yOf(-3)} r="4" class="fill-acc" />
+		<text class="t t-s t-acc" x={xOf(0) + 8} y={yOf(-3) - 6}>−3 дБ</text>
+		<text class="t t-s" x={xOf(1.05)} y={yOf(-22)}>−20 дБ/дек</text>
+	</svg>
+</Figure>

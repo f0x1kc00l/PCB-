@@ -1,0 +1,37 @@
+---
+/** Рис. 10.4: Output Job и выпуск проекта — от настроенных выходов к архиву выпуска. */
+import Figure from '../Figure.astro';
+
+const outs = ['Fabrication: Gerber, NC Drill', 'Validation: DRC', 'Report: Bill of Materials', 'Documentation: Draftsman, Pick&Place'];
+const stages = ['Configure', 'Validate', 'Generate', 'Review', 'Upload', 'Report'];
+---
+
+<Figure n="10.4" caption="Output Job (.OutJob) — «рецепт» выпуска: список настроенных выходов и контейнеры, куда они складываются (папки, PDF). Project Releaser проходит по этапам: проверка, генерация, просмотр, выгрузка в рабочее пространство. Без рабочего пространства тот же OutJob можно запускать вручную.">
+	<svg viewBox="0 0 680 270" role="img" aria-label="Слева блок OutJob со списком выходов: Gerber и NC Drill, DRC, BOM, Draftsman и Pick and Place. Стрелки к контейнерам Folder Structure и PDF. Внизу цепочка этапов Project Releaser.">
+		<rect x="20" y="20" width="270" height="150" rx="10" class="ln" />
+		<text class="t" x="34" y="44" font-weight="700">Output Job (.OutJob)</text>
+		{outs.map((o, i) => <text class="t t-s" x="34" y={70 + i * 24}>• {o}</text>)}
+		<path class="ln-acc" d="M290 70 H370 M362 64 L370 70 L362 76 M290 130 H370 M362 124 L370 130 L362 136" />
+		<rect x="372" y="44" width="150" height="50" rx="8" fill="none" stroke="var(--sl-color-accent)" stroke-width="2" />
+		<text class="t" x="447" y="66" text-anchor="middle" font-weight="700">Folder Structure</text>
+		<text class="t t-s t-mut" x="447" y="83" text-anchor="middle">Gerber, сверловка, CSV</text>
+		<rect x="372" y="106" width="150" height="50" rx="8" fill="none" stroke="var(--sl-color-accent)" stroke-width="2" />
+		<text class="t" x="447" y="128" text-anchor="middle" font-weight="700">PDF</text>
+		<text class="t t-s t-mut" x="447" y="145" text-anchor="middle">чертежи, BOM</text>
+		<path class="ln" d="M522 100 H560" />
+		<rect x="560" y="70" width="105" height="60" rx="8" class="ln" />
+		<text class="t t-s" x="612" y="96" text-anchor="middle" font-weight="700">Архив</text>
+		<text class="t t-s" x="612" y="113" text-anchor="middle" font-weight="700">выпуска</text>
+		<!-- Project Releaser -->
+		<text class="t t-s" x="20" y="208" font-weight="700">Project Releaser:</text>
+		{
+			stages.map((s, i) => (
+				<g>
+					<rect x={20 + i * 108} y="218" width="96" height="34" rx="6" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
+					<text class="t t-s" x={68 + i * 108} y="240" text-anchor="middle">{i + 1}. {s}</text>
+					{i < stages.length - 1 && <path d={`M${116 + i * 108} 235 H${128 + i * 108}`} stroke="var(--pcb-altium)" stroke-width="2" />}
+				</g>
+			))
+		}
+	</svg>
+</Figure>

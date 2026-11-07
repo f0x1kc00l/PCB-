@@ -1,0 +1,53 @@
+---
+/** Рис. к уроку 1.1: водопроводная аналогия. Слева бак и труба, справа батарейка и резистор. */
+import Figure from './Figure.astro';
+---
+
+<Figure n="1.1" caption="Разность уровней воды толкает воду по трубе, сужение ограничивает расход. Так же напряжение толкает заряды через проводник, а резистор ограничивает ток.">
+	<svg viewBox="0 0 660 250" role="img" aria-label="Слева: верхний бак с водой соединён трубой с сужением с нижним баком. Справа: батарейка, провод и резистор, по кругу течёт ток I.">
+		<!-- ===== Вода ===== -->
+		<text class="t" x="10" y="18" font-weight="700">Вода</text>
+		<!-- верхний бак -->
+		<path class="ln" d="M20 40 V150 H100 V40" />
+		<rect x="22" y="62" width="76" height="86" fill="var(--pcb-altium)" opacity="0.35" />
+		<!-- нижний бак -->
+		<path class="ln" d="M230 150 V215 H300 V150" />
+		<rect x="232" y="190" width="66" height="23" fill="var(--pcb-altium)" opacity="0.35" />
+		<!-- труба с сужением -->
+		<path class="ln" d="M100 132 H150 V138 H190 V132 H250 V160" />
+		<path class="ln" d="M100 146 H150 V142 H190 V146 H236 V160" />
+		<rect x="101" y="133" width="49" height="12" fill="var(--pcb-altium)" opacity="0.35" />
+		<rect x="190" y="133" width="45" height="12" fill="var(--pcb-altium)" opacity="0.35" />
+		<!-- стрелка потока -->
+		<path class="ln-acc" d="M112 120 H140 M134 115 L140 120 L134 125" />
+		<!-- разность уровней -->
+		<path class="ln-dash" d="M100 62 H330 M300 190 H330" />
+		<path class="ln-acc" d="M325 68 V184 M320 74 L325 68 L330 74 M320 178 L325 184 L330 178" />
+		<text class="t t-s" x="170" y="168" text-anchor="middle">сужение</text>
+		<text class="t t-acc t-s" x="108" y="108">расход</text>
+
+		<!-- ===== Электричество ===== -->
+		<text class="t" x="380" y="18" font-weight="700">Электричество</text>
+		<!-- батарейка (длинная черта — плюс) -->
+		<path class="ln" d="M420 50 V112 M420 128 V200" />
+		<path class="ln" d="M402 112 H438" />
+		<path d="M410 128 H430" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="396" y="108">+</text>
+		<!-- провода и резистор (ГОСТ — прямоугольник) -->
+		<path class="ln" d="M420 50 H600 V95 M600 155 V200 H420" />
+		<rect class="ln" x="592" y="95" width="16" height="60" />
+		<!-- стрелка тока -->
+		<path class="ln-acc" d="M480 38 H540 M532 32 L540 38 L532 44" />
+		<text class="t t-acc" x="505" y="28">I</text>
+		<text class="t" x="446" y="125">U</text>
+		<text class="t" x="618" y="130">R</text>
+
+		<!-- ===== Таблица соответствия ===== -->
+		<g class="t t-s">
+			<text x="10" y="240">Δh (давление) ≈ напряжение U</text>
+			<text x="250" y="240">расход ≈ ток I</text>
+			<text x="410" y="240">сужение ≈ сопротивление R</text>
+		</g>
+		<text class="t t-acc t-s" x="336" y="130">Δh</text>
+	</svg>
+</Figure>

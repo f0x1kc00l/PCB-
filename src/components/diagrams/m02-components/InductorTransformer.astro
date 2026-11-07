@@ -1,0 +1,42 @@
+---
+/** Рис. 2.3 (урок 2.3): катушка индуктивности с магнитным полем и трансформатор с отношением витков. */
+import Figure from '../Figure.astro';
+
+const humps = (x0: number, y: number, n: number, r = 8) => {
+	let d = `M${x0 - 30} ${y} H${x0}`;
+	for (let i = 0; i < n; i++) d += ` A${r} ${r} 0 0 1 ${x0 + (i + 1) * 2 * r} ${y}`;
+	return d + ` H${x0 + n * 2 * r + 30}`;
+};
+// Вертикальная обмотка: полуокружности вдоль оси y
+const vcoil = (x: number, y0: number, n: number, side: 1 | -1, r = 8) => {
+	let d = `M${x} ${y0 - 24} V${y0}`;
+	for (let i = 0; i < n; i++) d += ` A${r} ${r} 0 0 ${side === 1 ? 1 : 0} ${x} ${y0 + (i + 1) * 2 * r}`;
+	return d + ` V${y0 + n * 2 * r + 24}`;
+};
+---
+
+<Figure n="2.3" caption="Слева: ток через катушку создаёт магнитное поле, в котором запасается энергия. Катушка «сопротивляется» быстрому изменению тока: U = L·dI/dt. Справа: трансформатор — две обмотки на общем сердечнике; напряжения относятся как числа витков, токи — наоборот.">
+	<svg viewBox="0 0 640 260" role="img" aria-label="Слева катушка с линиями магнитного поля вокруг неё и стрелкой тока. Справа трансформатор: первичная обмотка N1, сердечник, вторичная обмотка N2, формула U2/U1 = N2/N1.">
+		<text class="t" x="20" y="22" font-weight="700">Катушка индуктивности</text>
+		<!-- линии поля -->
+		<ellipse cx="128" cy="130" rx="92" ry="40" class="ln-dash" />
+		<ellipse cx="128" cy="130" rx="122" ry="70" class="ln-dash" />
+		<path class="ln" d={humps(80, 130, 6)} />
+		<path class="ln-acc" d="M30 112 H62 M55 106 L62 112 L55 118" />
+		<text class="t t-acc" x="34" y="102">I</text>
+		<text class="t t-s t-mut" x="128" y="222" text-anchor="middle">магнитное поле</text>
+		<text class="t t-mono" x="128" y="248" text-anchor="middle">U = L · dI/dt</text>
+
+		<!-- ===== Трансформатор ===== -->
+		<text class="t" x="350" y="22" font-weight="700">Трансформатор</text>
+		<path class="ln" d={vcoil(420, 70, 6, 1)} />
+		<path class="ln" d={vcoil(540, 86, 4, -1)} />
+		<!-- сердечник -->
+		<path d="M474 50 V230 M486 50 V230" stroke="currentColor" stroke-width="2.5" />
+		<text class="t t-acc" x="380" y="150" text-anchor="end">N₁</text>
+		<text class="t t-acc" x="575" y="150">N₂</text>
+		<text class="t t-s" x="400" y="44" text-anchor="middle">первичная</text>
+		<text class="t t-s" x="560" y="44" text-anchor="middle">вторичная</text>
+		<text class="t t-mono" x="480" y="250" text-anchor="middle">U₂ / U₁ = N₂ / N₁ ;  I₂ / I₁ = N₁ / N₂</text>
+	</svg>
+</Figure>
