@@ -30,10 +30,19 @@ jobs:
           cache: npm
 
       - name: Адрес сайта
-        # Репозиторий <user>.github.io публикуется в корень, остальные — в /<repo>.
+        # Свой домен: задай переменную репозитория CUSTOM_DOMAIN (Settings › Secrets and variables ›
+        # Actions › Variables), например pcb.example.com — сайт соберётся в корень домена.
+        # Без неё: репозиторий <user>.github.io публикуется в корень, остальные — в /<repo>.
+        env:
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
         run: |
           OWNER="${GITHUB_REPOSITORY_OWNER}"
           REPO="${GITHUB_REPOSITORY#*/}"
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            echo "SITE_URL=https://${CUSTOM_DOMAIN}" >> "$GITHUB_ENV"
+            echo "BASE_PATH=/" >> "$GITHUB_ENV"
+            exit 0
+          fi
           echo "SITE_URL=https://${OWNER}.github.io" >> "$GITHUB_ENV"
           if [ "$REPO" = "${OWNER}.github.io" ]; then
             echo "BASE_PATH=/" >> "$GITHUB_ENV"
