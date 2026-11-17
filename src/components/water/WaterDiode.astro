@@ -23,7 +23,8 @@ const { n, zener = false } = Astro.props;
 	]}
 	caption="В прямую сторону заслонка открывается, только когда давление пересилит пружину — до ~0,5 В тока почти нет, после 0,7 В он растёт лавиной. В обратную сторону заслонка прижата к седлу: течёт лишь крошечная утечка. У стабилитрона рядом стоит предохранительный клапан: он открывается при обратном давлении Uст и держит его почти постоянным."
 >
-	<svg viewBox="0 0 680 280" role="img" aria-label="Горизонтальная труба с заслонкой на пружине; справа график ВАХ диода с точкой текущего режима.">
+	<div class="water__stage">
+	<svg viewBox="8 40 372 190" style="--w:372" role="img" aria-label="Горизонтальная труба с заслонкой на пружине; справа график ВАХ диода с точкой текущего режима.">
 		<g stroke-width="14">
 			<line data-p="l" class="pipe" x1="20" y1="110" x2="170" y2="110" />
 			<line data-p="r" class="pipe" x1="210" y1="110" x2="360" y2="110" />
@@ -46,6 +47,9 @@ const { n, zener = false } = Astro.props;
 		<text class="t tm" data-dir x="190" y="60" text-anchor="middle"></text>
 		<g data-d></g>
 		<!-- ВАХ -->
+		
+		</svg>
+	<svg viewBox="404 12 262 244" style="--w:262" aria-hidden="true">
 		<g transform="translate(410 20)">
 			<rect width="250" height="230" class="grid" />
 			<path data-ax d="" class="grid" />
@@ -55,6 +59,7 @@ const { n, zener = false } = Astro.props;
 			<text class="ts" x="246" y="226" text-anchor="end">U →</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Давление A − K (напряжение U)</span><input type="range" data-u min={zener ? -7 : -5} max="0.85" step="0.01" value="0.3" /><output data-uv></output></label>
 	</div>

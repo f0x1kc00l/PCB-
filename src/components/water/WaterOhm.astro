@@ -25,9 +25,9 @@ const { n } = Astro.props;
 	]}
 	caption="Цвет трубы — давление: тёмный — высокое, бледный — низкое. Всё давление насоса «теряется» на сужении — так же всё напряжение батарейки падает на резисторе. Закрой кран: расход ноль, но давление никуда не делось, теперь оно целиком приложено к крану (а напряжение — к разомкнутому ключу)."
 >
-	<svg viewBox="0 0 680 290" role="img" aria-label="Слева водяной контур: насос, труба, сужение, кран. Справа электрическая цепь: батарейка, резистор, ключ. Капли бегут со скоростью, пропорциональной току.">
+	<div class="water__stage">
+	<svg viewBox="0 8 340 282" style="--w:340" role="img" aria-label="Слева водяной контур: насос, труба, сужение, кран. Справа электрическая цепь: батарейка, резистор, ключ. Капли бегут со скоростью, пропорциональной току.">
 		<text class="th" x="175" y="22" text-anchor="middle">Вода</text>
-		<text class="th" x="505" y="22" text-anchor="middle">Электричество</text>
 		<!-- вода -->
 		<g stroke-width="12" class="pipe">
 			<polyline data-w="hi" class="pipe" points="60,122 60,50 290,50 290,106" />
@@ -39,6 +39,19 @@ const { n } = Astro.props;
 		<path data-valve d="M160 218L175 230L160 242ZM190 218L175 230L190 242Z" class="ln" />
 		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
 		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
+		<text class="ts" x="88" y="144">насос</text>
+		<text class="ts" x="276" y="144" text-anchor="end">сужение</text>
+		<text class="ts" x="175" y="262" text-anchor="middle">кран</text>
+		<!-- манометры: столбик = давление относительно нижней трубы -->
+		<g class="ts">
+			<rect x="306" y="60" width="8" height="160" class="wall" />
+			<rect data-gauge x="307" y="60" width="6" height="0" fill="var(--water-hi)" />
+			<text x="322" y="66">p</text>
+		</g>
+		<g data-dw></g>
+	</svg>
+	<svg viewBox="340 8 340 282" style="--w:340" aria-hidden="true">
+		<text class="th" x="505" y="22" text-anchor="middle">Электричество</text>
 		<!-- электричество -->
 		<g stroke-width="5">
 			<polyline data-e="hi" class="wire" points="390,132 390,50 620,50 620,110" />
@@ -53,21 +66,12 @@ const { n } = Astro.props;
 		<circle cx="490" cy="230" r="3" class="edot" />
 		<circle cx="520" cy="230" r="3" class="edot" />
 		<line data-sw x1="490" y1="230" x2="520" y2="230" class="ln" stroke-width="2.5" />
-		<text class="ts" x="88" y="144">насос</text>
-		<text class="ts" x="276" y="144" text-anchor="end">сужение</text>
-		<text class="ts" x="175" y="262" text-anchor="middle">кран</text>
 		<text class="ts" x="414" y="144">батарейка</text>
 		<text class="ts" x="600" y="144" text-anchor="end">резистор</text>
 		<text class="ts" x="505" y="262" text-anchor="middle">ключ</text>
-		<!-- манометры: столбик = давление относительно нижней трубы -->
-		<g class="ts">
-			<rect x="306" y="60" width="8" height="160" class="wall" />
-			<rect data-gauge x="307" y="60" width="6" height="0" fill="var(--water-hi)" />
-			<text x="322" y="66">p</text>
-		</g>
-		<g data-dw></g>
 		<g data-de></g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Давление насоса = напряжение U</span><input type="range" data-u min="0" max="12" step="0.5" value="6" /><output data-uv>6 В</output></label>
 		<label class="water__row"><span>Сужение = сопротивление R</span><input type="range" data-r min="1" max="20" step="1" value="3" /><output data-rv>3 Ом</output></label>

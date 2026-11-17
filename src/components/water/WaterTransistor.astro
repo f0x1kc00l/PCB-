@@ -35,7 +35,8 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 			<label><input type="radio" name={uid} value="mosfet" checked={mode === 'mosfet'} /> N-MOSFET</label>
 		</span>
 	</div>
-	<svg viewBox="0 0 680 300" role="img" aria-label="Вертикальная большая труба через нагрузку и задвижку; слева малая управляющая труба или камера с поршнем.">
+	<div class="water__stage">
+	<svg viewBox="40 8 432 290" style="--w:432" role="img" aria-label="Вертикальная большая труба через нагрузку и задвижку; слева малая управляющая труба или камера с поршнем.">
 		<g stroke-width="14">
 			<polyline data-p="vcc" class="pipe" points="300,20 300,60" />
 			<line data-p="rc" class="pipe" x1="300" y1="60" x2="300" y2="110" />
@@ -74,6 +75,9 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 			<text class="ts" x="205" y="210" text-anchor="middle">камера глухая — вода не проходит</text>
 		</g>
 		<g data-d></g>
+		
+		</svg>
+	<svg viewBox="462 16 216 158" style="--w:216;--mw:340px" aria-hidden="true">
 		<g transform="translate(470 40)">
 			<text class="th" data-mode x="0" y="0"></text>
 			<text class="t tm" data-l1 x="0" y="30"></text>
@@ -84,6 +88,7 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 			<text class="ts" x="0" y="128">ток нагрузки: от 0 до Uпит/Rк</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row" data-rowb><span>Ток базы Iб</span><input type="range" data-ib min="0" max="1" step="0.01" value="0.2" /><output data-ibv></output></label>
 		<label class="water__row" data-rowg><span>Напряжение затвор–исток Uзи</span><input type="range" data-vg min="0" max="5" step="0.05" value="1" /><output data-vgv></output></label>

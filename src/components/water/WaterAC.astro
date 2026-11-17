@@ -39,7 +39,8 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 			}
 		</span>
 	</div>
-	<svg viewBox="0 0 680 300" role="img" aria-label="Слева контур с качающимся насосом и элементами R, L, C; в центре вращающиеся векторы напряжения и тока; справа графики u, i и p за два периода.">
+	<div class="water__stage">
+	<svg viewBox="0 20 272 262" style="--w:272" role="img" aria-label="Слева контур с качающимся насосом и элементами R, L, C; в центре вращающиеся векторы напряжения и тока; справа графики u, i и p за два периода.">
 		<g stroke-width="11">
 			<polyline data-p="top" class="pipe" points="50,128 50,40 220,40 220,60" />
 			<polyline data-p="bot" class="pipe" points="220,260 50,260 50,152" />
@@ -68,6 +69,11 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 		</g>
 		<g data-d></g>
 		<!-- векторная диаграмма -->
+		
+		<!-- графики -->
+		
+		</svg>
+	<svg viewBox="262 60 146 172" style="--w:146;--mw:230px" aria-hidden="true">
 		<g transform="translate(335 140)">
 			<circle r="62" class="grid" />
 			<path d="M-70 0H70M0 -70V70" class="grid" />
@@ -78,7 +84,8 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 			<text class="ts" x="0" y="88" text-anchor="middle">векторы U и I</text>
 			<text class="ts tm" data-phi x="0" y="-74" text-anchor="middle"></text>
 		</g>
-		<!-- графики -->
+	</svg>
+	<svg viewBox="412 22 264 262" style="--w:264" aria-hidden="true">
 		<g transform="translate(420 40)">
 			<rect width="250" height="220" class="grid" />
 			<path d="M0 110H250M125 0V220" class="grid" opacity="0.6" />
@@ -92,6 +99,7 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 			<text class="ts" x="248" y="236" text-anchor="end">два периода →</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Частота f (лог.)</span><input type="range" data-f min="1" max="3" step="0.01" value="2.2" /><output data-fv></output></label>
 	</div>

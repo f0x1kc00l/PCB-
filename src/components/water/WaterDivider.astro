@@ -22,7 +22,8 @@ const { n } = Astro.props;
 	]}
 	caption="Давление «стекает» по сужениям, как по ступенькам: на каждом теряется доля, пропорциональная его сопротивлению. Подключи нагрузку — из средней точки начнёт уходить вода, через R1 пойдёт больший расход, на нём потеряется больше давления, и выход просядет."
 >
-	<svg viewBox="0 0 680 300" role="img" aria-label="Насос, верхняя труба, вертикальная труба с двумя сужениями R1 и R2, между ними манометр Uвых. Справа ответвление через сужение нагрузки.">
+	<div class="water__stage">
+	<svg viewBox="30 22 470 252" style="--w:470" role="img" aria-label="Насос, верхняя труба, вертикальная труба с двумя сужениями R1 и R2, между ними манометр Uвых. Справа ответвление через сужение нагрузки.">
 		<g stroke-width="12">
 			<polyline data-p="hi" class="pipe" points="60,128 60,40 300,40 300,70" />
 			<line data-p="r1" class="pipe" x1="300" y1="70" x2="300" y2="125" />
@@ -49,6 +50,9 @@ const { n } = Astro.props;
 		<text class="ts" x="370" y="88" text-anchor="middle">Uвых</text>
 		<g data-d></g>
 		<!-- эквивалентный генератор -->
+		
+		</svg>
+	<svg viewBox="545 30 100 112" style="--w:100;--mw:200px" aria-hidden="true">
 		<g transform="translate(540 50)">
 			<text class="ts" x="50" y="0" text-anchor="middle">эквивалент</text>
 			<rect x="10" y="14" width="80" height="80" class="wall" />
@@ -57,6 +61,7 @@ const { n } = Astro.props;
 			<text class="t tm" data-eqr x="50" y="130" text-anchor="middle">Rэ</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Сужение R1</span><input type="range" data-r1 min="1" max="20" step="1" value="10" /><output data-r1v></output></label>
 		<label class="water__row"><span>Сужение R2</span><input type="range" data-r2 min="1" max="20" step="1" value="10" /><output data-r2v></output></label>

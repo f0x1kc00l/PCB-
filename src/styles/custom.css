@@ -323,6 +323,58 @@
 	stroke-width: 1.5;
 	stroke-dasharray: 4 3;
 }
+.water__stage {
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
+	gap: 0;
+}
+.water .water__stage svg {
+	flex: var(--w) 1 0px;
+	width: auto;
+	max-width: none;
+	margin: 0;
+}
+@media (max-width: 620px) {
+	.water__stage {
+		flex-wrap: wrap;
+		gap: 0.6rem;
+	}
+	.water .water__stage svg {
+		flex: 0 0 100%;
+		max-width: var(--mw, 100%);
+	}
+	.water svg .t {
+		font-size: 14.5px;
+	}
+	.water svg .ts {
+		font-size: 12.5px;
+	}
+	.water svg .th {
+		font-size: 15.5px;
+	}
+	.water__row {
+		flex-wrap: wrap;
+		gap: 0.2rem 0.6rem;
+	}
+	.water__row > span:first-child {
+		flex-basis: 100%;
+		min-width: 0;
+	}
+	.water__row output {
+		min-width: 4.5rem;
+	}
+	.water__btns button,
+	.water__seg label {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+	}
+	.water .pcb-widget__title {
+		display: block;
+	}
+}
 .water__controls {
 	display: grid;
 	gap: 0.45rem;

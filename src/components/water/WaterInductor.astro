@@ -24,7 +24,8 @@ const { n } = Astro.props;
 	]}
 	caption="Открой кран — колесо раскручивается не сразу, расход растёт по экспоненте с τ = L/R. Закрой кран без обходного клапана — разогнанная вода врезается в кран: давление на нём подскакивает в сотни раз (гидроудар). Включи обратный клапан — вода спокойно кружит через него, пока колесо не остановится."
 >
-	<svg viewBox="0 0 680 300" role="img" aria-label="Насос, кран, сужение R и тяжёлое колесо-маховик в трубе, параллельно колесу обходная труба с обратным клапаном. Справа осциллограмма тока и напряжения на катушке.">
+	<div class="water__stage">
+	<svg viewBox="30 10 380 278" style="--w:380" role="img" aria-label="Насос, кран, сужение R и тяжёлое колесо-маховик в трубе, параллельно колесу обходная труба с обратным клапаном. Справа осциллограмма тока и напряжения на катушке.">
 		<g stroke-width="12">
 			<polyline data-p="hi" class="pipe" points="60,128 60,50 120,50" />
 			<line data-p="valve" class="pipe" x1="120" y1="50" x2="150" y2="50" />
@@ -38,7 +39,7 @@ const { n } = Astro.props;
 		<path data-valve d="M120 38L135 50L120 62ZM150 38L135 50L150 62Z" class="ln" />
 		<text class="ts" x="135" y="80" text-anchor="middle">кран</text>
 		<!-- обратный клапан на обходе: треугольник вниз -->
-		<g data-bypv><path d="M340 150L360 150L350 134Z M340 134H360" class="ln" /><text class="ts" x="368" y="146">обратный клапан</text></g>
+		<g data-bypv><path d="M340 150L360 150L350 134Z M340 134H360" class="ln" /><text class="ts" x="350" y="226" text-anchor="middle">обратный клапан</text></g>
 		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
 		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
 		<text class="ts" x="88" y="144">насос U</text>
@@ -52,6 +53,9 @@ const { n } = Astro.props;
 		<text class="t" x="284" y="210" text-anchor="end">R</text>
 		<text data-boom x="135" y="28" text-anchor="middle" class="th" fill="var(--water-danger)" style="fill:var(--water-danger)"></text>
 		<g data-d></g>
+		
+		</svg>
+	<svg viewBox="412 30 254 246" style="--w:254" aria-hidden="true">
 		<g transform="translate(420 50)">
 			<rect width="240" height="200" class="grid" />
 			<path d="M0 100H240M60 0V200M120 0V200M180 0V200" class="grid" opacity="0.5" />
@@ -62,6 +66,7 @@ const { n } = Astro.props;
 			<text class="ts" x="120" y="218" text-anchor="middle">время → (замедлено в 500 раз)</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Масса колеса L</span><input type="range" data-l min="10" max="100" step="5" value="50" /><output data-lv></output></label>
 	</div>

@@ -30,7 +30,8 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 			<label><input type="radio" name={uid} value="short" /> короткое замыкание</label>
 		</span>
 	</div>
-	<svg viewBox="0 0 680 280" role="img" aria-label="Контур: насос, предохранитель, лампа, кран; пунктиром обходная труба короткого замыкания.">
+	<div class="water__stage">
+	<svg viewBox="0 8 478 274" style="--w:478" role="img" aria-label="Контур: насос, предохранитель, лампа, кран; пунктиром обходная труба короткого замыкания.">
 		<g stroke-width="12">
 			<polyline data-p="a" class="pipe" points="60,128 60,40 140,40" />
 			<line data-p="fuse" class="pipe" x1="140" y1="40" x2="190" y2="40" stroke-width="4" />
@@ -55,6 +56,9 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
 		<text class="ts" x="88" y="144">насос 9 В</text>
 		<g data-d></g>
+		
+		</svg>
+	<svg viewBox="474 18 206 98" style="--w:206;--mw:330px" aria-hidden="true">
 		<g transform="translate(480 40)">
 			<text class="th" data-st x="0" y="0"></text>
 			<text class="t tm" data-r1 x="0" y="34"></text>
@@ -63,6 +67,7 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 			<text class="t tm" data-r4 x="0" y="106"></text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__btns">
 		<button type="button" data-fix>Поставить новый предохранитель</button>
 	</div>

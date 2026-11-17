@@ -23,7 +23,8 @@ const { n } = Astro.props;
 	]}
 	caption="У границы электроны из n-области заполнили дырки в p-области — там не осталось свободных носителей (обеднённый слой), остались только неподвижные ионы (+ и −). Их поле — плотина высотой ~0,7 В. Подай плюс на p, минус на n — плотина опускается, и носители пошли навстречу друг другу (ток). Подай наоборот — плотина растёт, слой шире, тока нет."
 >
-	<svg viewBox="0 0 680 290" role="img" aria-label="Кристалл: слева n-область с точками-электронами, справа p-область с кружками-дырками, в середине обеднённый слой с ионами. Справа рисунок плотины.">
+	<div class="water__stage">
+	<svg viewBox="0 18 480 254" style="--w:480" role="img" aria-label="Кристалл: слева n-область с точками-электронами, справа p-область с кружками-дырками, в середине обеднённый слой с ионами. Справа рисунок плотины.">
 		<text class="th" x="140" y="34" text-anchor="middle">n — катод</text>
 		<text class="th" x="340" y="34" text-anchor="middle">p — анод</text>
 		<rect x="40" y="50" width="400" height="160" rx="6" class="wall" />
@@ -35,6 +36,9 @@ const { n } = Astro.props;
 		<line x1="440" y1="130" x2="470" y2="130" class="ln" />
 		<text class="t tm" data-pol x="240" y="262" text-anchor="middle"></text>
 		<!-- плотина -->
+		
+		</svg>
+	<svg viewBox="484 26 182 190" style="--w:182;--mw:220px" aria-hidden="true">
 		<g transform="translate(490 50)">
 			<text class="ts" x="80" y="-12" text-anchor="middle">плотина (энергия)</text>
 			<rect x="0" y="0" width="170" height="160" class="grid" />
@@ -44,6 +48,7 @@ const { n } = Astro.props;
 			<g data-fall></g>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Напряжение на переходе U (p относительно n)</span><input type="range" data-u min="-5" max="0.8" step="0.01" value="0" /><output data-uv></output></label>
 	</div>

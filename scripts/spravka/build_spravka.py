@@ -35,23 +35,14 @@ for f in sorted(glob.glob(os.path.join(A,'Water*.astro_astro_type_script*.js')))
     out.append('{const{'+d+'}=window.__W;'+s[im.end():]+'}')
 js='\n'.join(out)
 css=open(os.path.join(ROOT,'src/styles/custom.css')).read()
-# TeX → SVG заранее (MathJax), чтобы справка работала офлайн
-_all=[t for v in TEX.values() for t,_ in v]+MAIN_TEX
-_svg=json.loads(subprocess.run(['node',os.path.join(os.path.dirname(__file__),'tex2svg.mjs')],input=json.dumps(_all),capture_output=True,text=True,check=True,cwd=ROOT).stdout)
-# MathJax рисует кириллицу посимвольно — склеиваем соседние <text> в одно слово
-def _merge(svg):
-    pat=re.compile(r'(<text [^>]*transform="(?:translate\(([\d.\-]+),0\) )?scale\(1,-1\)"[^>]*>)([^<]+)</text>')
-    out=[];i=0;ms=list(pat.finditer(svg))
-    k=0
-    while k<len(ms):
-        m=ms[k];j=k;txt=m.group(3)
-        while j+1<len(ms) and ms[j+1].start()==ms[j].end():
-            j+=1;txt+=ms[j].group(3)
-        out.append(svg[i:m.start()]+m.group(1)+txt+'</text>');i=ms[j].end();k=j+1
-    out.append(svg[i:]);return ''.join(out)
-SVG={t:_merge(v) for t,v in zip(_all,_svg)}
+# TeX → HTML заранее (KaTeX, шрифты встроены), чтобы справка работала офлайн
+_all=list(dict.fromkeys([t for v in TEX.values() for t,_ in v]+MAIN_TEX))
+_r=json.loads(subprocess.run(['node',os.path.join(os.path.dirname(__file__),'tex2html.mjs')],input=json.dumps(_all),capture_output=True,text=True,check=True,cwd=ROOT).stdout)
+SVG=dict(zip(_all,_r['html']))
+KATEX_CSS=_r['css']
 def mathf(tex,note=''):
-    n=f'<small>{H.escape(note)}</small>' if note else ''
+    nn=re.sub(r'([A-Za-zА-Яа-я])_([A-Za-zА-Яа-я0-9]+)',r'\1<sub>\2</sub>',H.escape(note))
+    n=f'<small>{nn}</small>' if note else ''
     return f'<span class="mf"><span class="tex" role="math" aria-label="{H.escape(tex)}">{SVG[tex]}</span>{n}</span>'
 wcss=css[css.index('/* ===================================================================\n * Водяные аналогии'):]
 wcss=re.sub(r":root \{\n\t--water-hi.*?\n\}\n:root\[data-theme='light'\] \{.*?\n\}\n","",wcss,flags=re.S)
@@ -134,7 +125,7 @@ h1{{font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1.05;margin:0 0 1
 .an p{{margin:2px 0 0}}
 .tag{{font-size:13px;font-weight:800;color:var(--water-hi)}}
 .fs{{display:flex;flex-wrap:wrap;gap:6px}}
-.mf{{display:inline-flex;flex-direction:column;gap:2px;background:var(--sl-color-gray-6);border-radius:8px;padding:8px 12px;max-width:100%}}.mf .tex{{font-size:clamp(16px,4.4vw,19px);overflow-x:auto;overflow-y:hidden;max-width:100%}}.mf .tex svg{{display:inline-block;max-width:none}}.mf small{{font-size:12.5px;color:var(--sl-color-gray-3);line-height:1.3}}
+.mf{{display:inline-flex;flex-direction:column;gap:2px;background:var(--sl-color-gray-6);border-radius:8px;padding:8px 12px;max-width:100%}}.mf .tex{{font-size:clamp(14px,3.9vw,16px);overflow-x:auto;overflow-y:hidden;max-width:100%;padding:2px 0}}.mf .tex .katex{{white-space:nowrap}}.mf small{{font-size:12.5px;color:var(--sl-color-gray-3);line-height:1.3}}
 .fs{{gap:8px}}.fs code{{font:600 15px/1.3 Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--sl-color-gray-6);border-radius:7px;padding:6px 10px;overflow-wrap:anywhere}}
 .mem{{margin:12px 0 8px;padding-left:20px}}.mem li{{margin:4px 0}}
 .book{{margin:6px 0 0;font-size:13px;color:var(--sl-color-gray-3)}}
@@ -151,6 +142,7 @@ td,th{{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;font
 footer{{padding:26px 0 40px;font-size:14px;color:var(--sl-color-gray-2)}}footer li{{margin:5px 0}}
 .hide{{display:none!important}}
 {pw}
+{KATEX_CSS}
 {wcss}
 @media(max-width:600px){{.card{{padding:14px 13px 12px}}.water__row{{flex-wrap:wrap;gap:.2rem .6rem}}.water__row>span:first-child{{flex-basis:100%;min-width:0}}.pcb-widget__title{{display:block}}.pcb-widget{{padding:.8rem .6rem}}.bar button{{padding:0 10px}}}}
 </style></head><body>

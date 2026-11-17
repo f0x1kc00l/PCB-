@@ -24,7 +24,8 @@ const { n } = Astro.props;
 	]}
 	caption="Воду в длинной трубе нельзя мгновенно разогнать — у неё инерция (индуктивность дорожки). Поэтому, когда микросхема резко открывает «кран», давление у неё падает. Бак рядом отдаёт воду сразу, а труба потом спокойно его доливает. Но бак должен стоять у самого крана: даже короткая подводка — это снова инерция."
 >
-	<svg viewBox="0 0 680 300" role="img" aria-label="Слева башня-стабилизатор, длинная труба к микросхеме справа, рядом с микросхемой бак-конденсатор. Внизу график напряжения на выводе питания.">
+	<div class="water__stage">
+	<svg viewBox="8 8 664 170" style="--w:664" role="img" aria-label="Слева башня-стабилизатор, длинная труба к микросхеме справа, рядом с микросхемой бак-конденсатор. Внизу график напряжения на выводе питания.">
 		<!-- башня -->
 		<rect x="20" y="20" width="56" height="70" rx="4" class="wall" />
 		<rect x="21" y="30" width="54" height="59" fill="var(--water-hi)" opacity="0.45" />
@@ -48,6 +49,9 @@ const { n } = Astro.props;
 		<circle data-gulp cx="540" cy="70" r="8" fill="var(--sl-color-accent)" opacity="0" />
 		<g data-d></g>
 		<!-- график V(t) у вывода -->
+		
+		</svg>
+	<svg viewBox="34 174 622 118" style="--w:622" aria-hidden="true">
 		<g transform="translate(40 190)">
 			<rect width="610" height="96" class="grid" />
 			<line data-ref x1="0" x2="610" class="grid" stroke-dasharray="4 3" />
@@ -57,6 +61,7 @@ const { n } = Astro.props;
 			<text class="ts" x="4" y="-6">напряжение на выводе питания (синяя), ток микросхемы (оранжевая), красная — допуск −5 %</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__btns">
 		<label class="water__check"><input type="checkbox" data-c checked /> поставить конденсатор</label>
 	</div>

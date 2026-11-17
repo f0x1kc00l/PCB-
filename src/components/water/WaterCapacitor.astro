@@ -23,7 +23,8 @@ const { n } = Astro.props;
 	]}
 	caption="Пока мембрана не растянута, вода идёт легко — ток максимален. Чем сильнее прогиб, тем сильнее мембрана давит в ответ, и расход затухает. Сквозь мембрану не прошло ни капли, хотя ток в цепи был: так конденсатор «пропускает» перемены и не пропускает постоянный ток."
 >
-	<svg viewBox="0 0 680 300" role="img" aria-label="Слева насос и трёхходовой кран, сужение R, бак с мембраной. Справа осциллограмма напряжения на конденсаторе и тока.">
+	<div class="water__stage">
+	<svg viewBox="0 10 385 270" style="--w:385" role="img" aria-label="Слева насос и трёхходовой кран, сужение R, бак с мембраной. Справа осциллограмма напряжения на конденсаторе и тока.">
 		<g stroke-width="12">
 			<polyline data-p="hi" class="pipe" points="60,128 60,50 150,50" />
 			<line data-p="r" class="pipe" x1="150" y1="50" x2="220" y2="50" />
@@ -46,6 +47,9 @@ const { n } = Astro.props;
 		<text class="ts" x="350" y="100">C</text>
 		<g data-d></g>
 		<!-- осциллограф -->
+		
+		</svg>
+	<svg viewBox="392 30 276 248" style="--w:276" aria-hidden="true">
 		<g transform="translate(400 50)">
 			<rect width="260" height="200" class="grid" />
 			<path d="M0 50H260M0 100H260M0 150H260M65 0V200M130 0V200M195 0V200" class="grid" opacity="0.5" />
@@ -56,6 +60,7 @@ const { n } = Astro.props;
 			<text class="ts" x="130" y="218" text-anchor="middle" data-tlab>время →</text>
 		</g>
 	</svg>
+	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Сужение R</span><input type="range" data-r min="1" max="10" step="0.5" value="4.7" /><output data-rv></output></label>
 		<label class="water__row"><span>Мягкость мембраны C</span><input type="range" data-c min="47" max="470" step="1" value="220" /><output data-cv></output></label>
