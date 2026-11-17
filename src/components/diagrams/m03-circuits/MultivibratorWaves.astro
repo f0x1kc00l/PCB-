@@ -1,0 +1,94 @@
+---
+/**
+ * Рис. 3.9: напряжения на коллекторах и базах мультивибратора (12 В, Rб = 100 кОм, Rк = 1 кОм, C = 22 нФ).
+ * Модель: открытый транзистор — Uкэ ≈ 0,1 В, Uбэ ≈ 0,65 В. Закрытая база стартует с ≈ −11,2 В
+ * и экспоненциально идёт к +12 В с τ = Rб·C = 2,2 мс, пока не дойдёт до 0,65 В.
+ * Коллектор закрытого транзистора нарастает с τ = Rк·C = 22 мкс.
+ * Пробой эмиттерного перехода (|Uбэ| > VEBO) в модели НЕ учтён — см. текст урока.
+ */
+import Figure from '../Figure.astro';
+
+const Vcc = 12;
+const Vbe = 0.65;
+const Vsat = 0.1;
+const tauB = 100e3 * 22e-9; // 2,2 мс
+const tauC = 1e3 * 22e-9; // 22 мкс
+const V0 = Vbe - (Vcc - Vsat); // старт базы закрытого транзистора ≈ −11,25 В
+const tHalf = tauB * Math.log((Vcc - V0) / (Vcc - Vbe)); // ≈ 1,57 мс
+const T = 2 * tHalf;
+const span = 2.25 * T;
+
+const X0 = 70;
+const W = 560;
+const x = (t: number) => X0 + (t / span) * W;
+// 4 дорожки по 70 px; диапазон −12…+12 В
+const lanes = [
+	{ name: 'Uк1', y0: 30 },
+	{ name: 'Uб2', y0: 120 },
+	{ name: 'Uк2', y0: 210 },
+	{ name: 'Uб1', y0: 300 },
+];
+const H = 70;
+const y = (lane: number, v: number) => lanes[lane].y0 + H / 2 - (v / 12) * (H / 2);
+
+/** Коллектор: on → Vsat; off → нарастание к Vcc с τ = Rк·C. Фаза 0 — транзистор открыт. */
+function collector(lane: number, startOn: boolean): string {
+	const pts: string[] = [];
+	let on = startOn;
+	for (let t0 = 0; t0 < span; t0 += tHalf) {
+		const t1 = Math.min(t0 + tHalf, span);
+		for (let k = 0; k <= 30; k++) {
+			const t = t0 + ((t1 - t0) * k) / 30;
+			const v = on ? Vsat : Vsat + (Vcc - Vsat) * (1 - Math.exp(-(t - t0) / tauC));
+			pts.push(`${pts.length ? 'L' : 'M'}${x(t).toFixed(1)} ${y(lane, v).toFixed(1)}`);
+		}
+		on = !on;
+	}
+	return pts.join(' ');
+}
+/** База: on → Vbe; off → от V0 к Vcc с τ = Rб·C (до Vbe). */
+function base(lane: number, startOn: boolean): string {
+	const pts: string[] = [];
+	let on = startOn;
+	for (let t0 = 0; t0 < span; t0 += tHalf) {
+		const t1 = Math.min(t0 + tHalf, span);
+		for (let k = 0; k <= 40; k++) {
+			const t = t0 + ((t1 - t0) * k) / 40;
+			const v = on ? Vbe : Vcc - (Vcc - V0) * Math.exp(-(t - t0) / tauB);
+			pts.push(`${pts.length ? 'L' : 'M'}${x(t).toFixed(1)} ${y(lane, v).toFixed(1)}`);
+		}
+		on = !on;
+	}
+	return pts.join(' ');
+}
+// Фаза 1 (t от 0): Q1 открыт, Q2 закрыт.
+const paths = [collector(0, true), base(1, false), collector(2, false), base(3, true)];
+const fmt = (v: number) => v.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+---
+
+<Figure n="3.9" caption={`Расчётные осциллограммы для значений из руководства Altium. Каждая база после переключения оказывается около −11 В и по экспоненте с τ = Rб·C = 2,2 мс ползёт к +12 В. Дойдя до ≈ 0,65 В, транзистор открывается, и всё переворачивается. Полупериод ≈ ${fmt(tHalf * 1000)} мс. Пробой перехода база-эмиттер (см. текст) в модели не учтён.`}>
+	<svg viewBox="0 0 650 390" role="img" aria-label="Четыре осциллограммы: напряжение на коллекторе Q1, базе Q2, коллекторе Q2 и базе Q1. Коллекторы — прямоугольные импульсы от 0 до 12 вольт. Базы — экспоненциальный подъём от минус 11 вольт до 0,65 вольта, затем полка.">
+		{
+			lanes.map((l, i) => (
+				<g>
+					<line class="ln-thin" x1={X0} y1={y(i, 0)} x2={X0 + W} y2={y(i, 0)} />
+					<line class="ln-dash" x1={X0} y1={y(i, 12)} x2={X0 + W} y2={y(i, 12)} opacity="0.35" />
+					{(i === 1 || i === 3) && <line class="ln-dash" x1={X0} y1={y(i, -12)} x2={X0 + W} y2={y(i, -12)} opacity="0.35" />}
+					<text class="t t-acc" x="8" y={y(i, 0) + 5}>{l.name}</text>
+					<text class="t t-s t-mut" x={X0 - 6} y={y(i, 12) + 4} text-anchor="end">12</text>
+					<text class="t t-s t-mut" x={X0 - 6} y={y(i, 0) + 4} text-anchor="end">0</text>
+					{(i === 1 || i === 3) && (
+						<text class="t t-s t-mut" x={X0 - 6} y={y(i, -12) + 4} text-anchor="end">
+							−12
+						</text>
+					)}
+					<path d={paths[i]} fill="none" stroke={i % 2 === 0 ? 'var(--sl-color-accent)' : 'var(--pcb-altium)'} stroke-width="2" />
+				</g>
+			))
+		}
+		<!-- отметка полупериода -->
+		<path class="ln" d={`M${x(0)} 382 H${x(tHalf)} M${x(0)} 376 V388 M${x(tHalf)} 376 V388`} />
+		<text class="t t-s" x={x(tHalf / 2)} y="376" text-anchor="middle">{fmt(tHalf * 1000)} мс</text>
+		<text class="t t-s t-mut" x={X0 + W} y="388" text-anchor="end">U, В</text>
+	</svg>
+</Figure>

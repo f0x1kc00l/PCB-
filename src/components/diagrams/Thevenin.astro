@@ -1,0 +1,55 @@
+---
+/** Рис. к уроку 1.5: делитель напряжения и его эквивалентная схема (теорема Тевенина). */
+import Figure from './Figure.astro';
+---
+
+<Figure n="1.6" caption="Для нагрузки, подключённой к выходу A–B, делитель неотличим от источника Uэкв = 3,84 В с внутренним сопротивлением Rэкв = R1‖R2 = 3,2 кОм. Так сразу видно, насколько выход просядет под нагрузкой.">
+	<svg viewBox="0 0 640 230" role="img" aria-label="Слева делитель: 12 вольт, R1 10 кОм, R2 4,7 кОм, выход A и B. Справа эквивалент: источник 3,84 вольта и последовательный резистор 3,2 кОм к выходу A.">
+		<text class="t" x="10" y="18" font-weight="700">Делитель</text>
+		<!-- источник -->
+		<path class="ln" d="M50 40 V100 M50 116 V190" />
+		<path class="ln" d="M32 100 H68" />
+		<path d="M40 116 H60" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="26" y="96">+</text>
+		<text class="t t-mono" x="74" y="113">12 В</text>
+		<!-- R1, R2 -->
+		<path class="ln" d="M50 40 H170 V55 M170 95 V125 M170 165 V190 H50" />
+		<rect class="ln" x="163" y="55" width="14" height="40" />
+		<rect class="ln" x="163" y="125" width="14" height="40" />
+		<text class="t" x="155" y="72" text-anchor="end">R1</text>
+		<text class="t t-s t-mut" x="155" y="87" text-anchor="end">10 кОм</text>
+		<text class="t" x="155" y="142" text-anchor="end">R2</text>
+		<text class="t t-s t-mut" x="155" y="157" text-anchor="end">4,7 кОм</text>
+		<!-- выход -->
+		<circle cx="170" cy="110" r="4" class="fill-cur" />
+		<path class="ln" d="M170 110 H250 M170 190 H250" />
+		<circle class="ln" cx="254" cy="110" r="4" />
+		<circle class="ln" cx="254" cy="190" r="4" />
+		<text class="t" x="266" y="114">A</text>
+		<text class="t" x="266" y="194">B</text>
+
+		<!-- стрелка -->
+		<path class="ln-acc" d="M300 150 H350 M340 140 L350 150 L340 160" />
+		<text class="t t-acc t-s" x="325" y="132" text-anchor="middle">то же</text>
+		<text class="t t-acc t-s" x="325" y="176" text-anchor="middle">для нагрузки</text>
+
+		<text class="t" x="390" y="18" font-weight="700">Эквивалентный источник</text>
+		<!-- Uэкв -->
+		<path class="ln" d="M420 80 V128 M420 144 V190" />
+		<path class="ln" d="M402 128 H438" />
+		<path d="M410 144 H430" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="396" y="124">+</text>
+		<text class="t t-acc" x="446" y="132">Uэкв</text>
+		<text class="t t-mono t-s" x="446" y="148">3,84 В</text>
+		<!-- Rэкв -->
+		<path class="ln" d="M420 80 H480 M520 80 H580 V110 M420 190 H580" />
+		<rect class="ln" x="480" y="73" width="40" height="14" />
+		<text class="t t-acc" x="500" y="64" text-anchor="middle">Rэкв</text>
+		<text class="t t-mono t-s" x="500" y="104" text-anchor="middle">3,2 кОм</text>
+		<circle class="ln" cx="584" cy="110" r="4" />
+		<circle class="ln" cx="584" cy="190" r="4" />
+		<path class="ln" d="M580 190 H580" />
+		<text class="t" x="596" y="114">A</text>
+		<text class="t" x="596" y="194">B</text>
+	</svg>
+</Figure>

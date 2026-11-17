@@ -1,0 +1,49 @@
+---
+/**
+ * Рис. 10.2: двухслойная плата «в разобранном виде» — какой Gerber-файл описывает какой слой.
+ * Расширения — те, что Altium даёт при именовании filename.* (layer-specific extensions).
+ */
+import Figure from '../Figure.astro';
+
+const layers = [
+	{ ext: '.GTO', name: 'Top Overlay — шелкография сверху', fill: 'var(--pcb-silk)', stroke: '#999' },
+	{ ext: '.GTP', name: 'Top Paste — паста (для трафарета)', fill: 'var(--pcb-paste)', stroke: 'none' },
+	{ ext: '.GTS', name: 'Top Solder — окна в маске сверху', fill: 'var(--pcb-mask)', stroke: 'none' },
+	{ ext: '.GTL', name: 'Top Layer — медь сверху', fill: 'var(--pcb-copper)', stroke: 'none' },
+	{ ext: '.TXT', name: 'NC Drill — сверловка (Excellon)', fill: 'none', stroke: 'currentColor' },
+	{ ext: '.GBL', name: 'Bottom Layer — медь снизу', fill: 'var(--pcb-copper)', stroke: 'none' },
+	{ ext: '.GBS', name: 'Bottom Solder — окна в маске снизу', fill: 'var(--pcb-mask)', stroke: 'none' },
+	{ ext: '.GBP', name: 'Bottom Paste — паста снизу', fill: 'var(--pcb-paste)', stroke: 'none' },
+	{ ext: '.GBO', name: 'Bottom Overlay — шелкография снизу', fill: 'var(--pcb-silk)', stroke: '#999' },
+	{ ext: '.GM1 / .GKO', name: 'Mechanical 1 / Keep-Out — контур платы', fill: 'none', stroke: 'var(--sl-color-accent)' },
+];
+const step = 27;
+---
+
+<Figure n="10.2" caption="Каждый слой платы — отдельный Gerber-файл, сверловка — отдельный файл Excellon. Расширения показаны в варианте Altium «имя.*» (у каждого слоя своё расширение). Какой механический слой несёт контур, решаешь ты сам, и об этом нужно сообщить заводу.">
+	<svg viewBox="0 0 680 300" role="img" aria-label="Стопка слоёв двухслойной платы в изометрии со списком файлов: шелкография, паста, маска, медь, сверловка, медь снизу, маска, паста, шелкография, контур.">
+		{
+			layers.map((l, i) => {
+				const y = 14 + i * step;
+				const pts = `30,${y + 10} 150,${y} 250,${y + 10} 130,${y + 20}`;
+				return (
+					<g>
+						{l.ext === '.TXT' ? (
+							<g>
+								<polygon points={pts} fill="none" stroke="currentColor" stroke-dasharray="3 3" opacity="0.6" />
+								<ellipse cx="110" cy={y + 10} rx="6" ry="3" class="fill-cur" />
+								<ellipse cx="160" cy={y + 8} rx="4" ry="2" class="fill-cur" />
+								<ellipse cx="190" cy={y + 12} rx="4" ry="2" class="fill-cur" />
+							</g>
+						) : (
+							<polygon points={pts} fill={l.fill} stroke={l.stroke} stroke-width="1.5" opacity={l.fill === 'none' ? 1 : 0.9} />
+						)}
+						<path class="ln-thin" d={`M252 ${y + 10} H300`} />
+						<text class="t t-mono t-acc" x="308" y={y + 14}>{l.ext}</text>
+						<text class="t t-s" x="420" y={y + 14}>{l.name}</text>
+					</g>
+				);
+			})
+		}
+	</svg>
+</Figure>

@@ -1,0 +1,39 @@
+---
+/**
+ * Рис. к уроку 12.7: два способа подвести коаксиал к линии на плате.
+ * Слева — торцевой (соосный) SMA на краю платы, справа — U.FL на поверхности.
+ */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="12.7б" caption="Слева: торцевой (соосный) переход — центральный штырь SMA ложится на дорожку, корпус разъёма паяется к земле сверху и снизу. Хороший переход, если ширина штыря близка к ширине дорожки, а земля рядом с разъёмом прошита переходными отверстиями. Справа: U.FL — крошечный разъём на поверхности платы; удобен для кабеля к антенне в корпусе, но рассчитан примерно на 30 подключений.">
+	<svg viewBox="0 0 640 250" role="img" aria-label="Слева сбоку: плата, на её край надет SMA-разъём, штырь лежит на дорожке. Справа сверху: U.FL-разъём на плате, к нему подходит линия 50 Ом.">
+		<text class="t" x="10" y="18" font-weight="700">Торцевой SMA (вид сбоку)</text>
+		<!-- плата -->
+		<rect x="150" y="110" width="200" height="40" fill="var(--pcb-fr4)" opacity="0.6" />
+		<rect x="150" y="104" width="200" height="6" fill="var(--pcb-copper)" />
+		<rect x="150" y="150" width="200" height="6" fill="var(--pcb-copper)" />
+		<text class="t t-s" x="300" y="135" text-anchor="middle">FR-4, h</text>
+		<!-- разъём -->
+		<rect x="40" y="80" width="90" height="100" rx="6" fill="#9aa3ad" opacity="0.8" />
+		<rect x="130" y="90" width="26" height="12" fill="#9aa3ad" />
+		<rect x="130" y="158" width="26" height="12" fill="#9aa3ad" />
+		<rect x="80" y="122" width="95" height="8" rx="2" fill="#e6c27a" transform="translate(0,-21)" />
+		<text class="t t-s" x="85" y="200" text-anchor="middle">корпус SMA = земля</text>
+		<text class="t t-acc t-s" x="190" y="92">штырь на дорожке</text>
+		<!-- переходные -->
+		<path class="ln-dash" d="M215 104 V156 M245 104 V156" />
+		<text class="t t-s t-mut" x="230" y="176" text-anchor="middle">переходные у разъёма</text>
+
+		<text class="t" x="390" y="18" font-weight="700">U.FL (вид сверху)</text>
+		<rect x="390" y="40" width="240" height="190" rx="6" fill="var(--pcb-mask)" opacity="0.85" />
+		<circle cx="560" cy="120" r="26" fill="#c8c8c8" />
+		<circle cx="560" cy="120" r="9" fill="#e6c27a" />
+		<rect x="532" y="150" width="56" height="10" fill="#c8c8c8" />
+		<rect x="400" y="114" width="135" height="12" fill="var(--pcb-copper)" />
+		<text class="t t-s" x="420" y="106">линия 50 Ом</text>
+		<text class="t t-s" x="560" y="185" text-anchor="middle">U.FL</text>
+		<text class="t t-s" x="560" y="201" text-anchor="middle">≈ 30 подключений</text>
+		<text class="t t-s" x="560" y="216" text-anchor="middle">высота ≈ 2,5 мм</text>
+	</svg>
+</Figure>

@@ -1,0 +1,43 @@
+---
+/** Рис. 10.3: координаты компонента в файле Pick&Place — начало координат платы, центр, поворот, сторона. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="10.3" caption="Автомат установки берёт из файла Pick&Place координаты центра компонента относительно начала координат платы (X, Y), угол поворота и сторону (Top/Bottom). Компоненты снизу автомат видит «перевёрнутыми», поэтому для нижней стороны важно, как именно CAD и завод считают X и угол.">
+	<svg viewBox="0 0 640 260" role="img" aria-label="Плата с началом координат в левом нижнем углу, компонент U1 с центром в точке X=32, Y=18 мм и поворотом 90 градусов; стрелки осей X и Y.">
+		<!-- плата -->
+		<rect x="60" y="30" width="360" height="200" rx="6" fill="var(--pcb-mask)" opacity="0.85" />
+		<!-- оси от начала координат -->
+		<path class="ln-acc" d="M60 230 H450 M440 224 L450 230 L440 236 M60 230 V10 M54 20 L60 10 L66 20" />
+		<text class="t t-acc" x="455" y="234">X</text>
+		<text class="t t-acc" x="68" y="16">Y</text>
+		<circle cx="60" cy="230" r="5" class="fill-acc" />
+		<text class="t t-s" x="20" y="252">начало координат (0; 0)</text>
+		<!-- компонент U1 (SOIC-8), повернут на 90° -->
+		<g transform="translate(220 130) rotate(-90)">
+			<rect x="-30" y="-18" width="60" height="36" rx="3" fill="#2a2a2a" />
+			{[-22, -7, 8, 23].map((d) => <rect x={d - 3} y="-30" width="6" height="12" fill="#c8c8c8" />)}
+			{[-22, -7, 8, 23].map((d) => <rect x={d - 3} y="18" width="6" height="12" fill="#c8c8c8" />)}
+			<circle cx="-22" cy="-10" r="3" fill="#ddd" />
+		</g>
+		<circle cx="220" cy="130" r="4" fill="#fff" />
+		<path class="ln-dash" d="M220 130 V230 M220 130 H60" style="color:#fff" />
+		<text class="t t-s" x="232" y="156" fill="#fff">центр U1</text>
+		<text class="t t-s t-mono" x="228" y="222" fill="#fff">X = 32 мм</text>
+		<text class="t t-s t-mono" x="66" y="182" fill="#fff">Y = 18 мм</text>
+		<!-- поворот -->
+		<path d="M262 110 A40 40 0 0 0 220 88" fill="none" stroke="#fff" stroke-width="1.5" />
+		<path d="M226 84 L220 88 L227 93" fill="none" stroke="#fff" stroke-width="1.5" />
+		<text class="t t-s" x="266" y="98" fill="#fff">90°</text>
+		<!-- строка файла -->
+		<rect x="470" y="40" width="160" height="150" rx="8" class="ln" />
+		<text class="t t-s" x="480" y="62" font-weight="700">Строка в файле</text>
+		<g class="t t-s t-mono">
+			<text x="480" y="88">Designator: U1</text>
+			<text x="480" y="108">Center-X: 32</text>
+			<text x="480" y="128">Center-Y: 18</text>
+			<text x="480" y="148">Rotation: 90</text>
+			<text x="480" y="168">Layer: TopLayer</text>
+		</g>
+	</svg>
+</Figure>

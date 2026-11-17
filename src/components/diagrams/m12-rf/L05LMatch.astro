@@ -1,0 +1,48 @@
+---
+/**
+ * Рис. 12.5б: Г-образная (L) согласующая цепь 50 Ом → антенна 20 − j30 Ом на 868 МГц.
+ * Параллельный конденсатор — со стороны источника (у него R больше), последовательная катушка — к нагрузке.
+ */
+import Figure from '../Figure.astro';
+
+const yTop = 70;
+const yGnd = 180;
+// катушка ГОСТ: полуокружности
+const coil = (x: number, n = 4, r = 9) =>
+	`M${x} ${yTop}` + Array.from({ length: n }, () => ` a${r} ${r} 0 0 1 ${2 * r} 0`).join('');
+---
+
+<Figure n="12.5б" caption="Г-образная цепь для антенны 20 − j30 Ом на 868 МГц. Источник 50 Ом больше сопротивления нагрузки, поэтому параллельный элемент ставим со стороны источника, последовательный — со стороны нагрузки. Значения расчётные; на плате их подбирают по измерению (урок 12.10).">
+	<svg viewBox="0 0 660 215" role="img" aria-label="Схема: источник с внутренним сопротивлением 50 Ом, затем конденсатор 4,5 пикофарад на землю, затем последовательная катушка 10 наногенри, затем антенна с сопротивлением 20 минус j30 Ом.">
+		<!-- источник -->
+		<circle cx="50" cy="125" r="20" class="ln" />
+		<path d="M38 125 q6 -12 12 0 t12 0" class="ln" />
+		<path d={`M50 105 V${yTop} H90 M50 145 V${yGnd}`} class="ln" />
+		<rect x="90" y={yTop - 9} width="56" height="18" class="ln" />
+		<text class="t t-s" x="118" y={yTop - 16} text-anchor="middle">50 Ом</text>
+		<text class="t t-s t-mut" x="50" y="200" text-anchor="middle">трансивер</text>
+		<path d={`M146 ${yTop} H330`} class="ln" />
+		<text class="t t-s t-mut" x="200" y={yTop - 14} text-anchor="middle">дорожка 50 Ом</text>
+
+		<!-- C на землю -->
+		<circle cx="250" cy={yTop} r="3" class="fill-cur" />
+		<path d={`M250 ${yTop} V117 M234 117 H266 M234 125 H266 M250 125 V${yGnd}`} class="ln" />
+		<text class="t t-acc" x="274" y="126">C = 4,5 пФ</text>
+		<text class="t t-s t-mut" x="274" y="142">(ряд: 4,3 или 4,7)</text>
+
+		<!-- L последовательно -->
+		<path d={coil(330)} class="ln" />
+		<path d={`M402 ${yTop} H470`} class="ln" />
+		<text class="t t-acc" x="366" y={yTop - 18} text-anchor="middle">L = 10 нГн</text>
+
+		<!-- нагрузка -->
+		<rect x="470" y={yTop - 14} width="130" height="140" rx="6" class="ln-dash" />
+		<text class="t t-s" x="535" y={yTop + 8} text-anchor="middle">антенна</text>
+		<path d={`M500 ${yTop} V88`} class="ln" />
+		<rect x="491" y="88" width="18" height="34" class="ln" />
+		<text class="t t-s" x="516" y="110">20 Ом</text>
+		<path d={`M500 122 V136 M488 136 H512 M488 142 H512 M500 142 V${yGnd}`} class="ln" />
+		<text class="t t-s" x="516" y="144">−j30 Ом</text>
+		<path d={`M50 ${yGnd} H500`} class="ln" />
+	</svg>
+</Figure>

@@ -1,0 +1,54 @@
+---
+/** Рис. 5.2: типичная компоновка небольшой платы с микроконтроллером — функциональные зоны и поток сигнала. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="5.2" caption="Компоновка «по потоку»: питание входит у края и сразу попадает на стабилизатор; микроконтроллер в центре, кварц и развязывающие конденсаторы вплотную к его выводам; чувствительная аналоговая часть подальше от импульсного питания; всё, к чему тянется рука (разъёмы, кнопки, светодиоды), — на краях.">
+	<svg viewBox="0 0 660 300" role="img" aria-label="Плата: слева разъём питания и блок стабилизатора, в центре микроконтроллер с кварцем и конденсаторами, справа аналоговый датчик, внизу кнопки и светодиоды, в углах крепёжные отверстия. Стрелка показывает поток сигнала слева направо.">
+		<!-- плата -->
+		<rect x="40" y="20" width="440" height="250" rx="10" fill="var(--pcb-mask)" opacity="0.25" />
+		<rect x="40" y="20" width="440" height="250" rx="10" class="ln" />
+		<!-- крепёжные отверстия -->
+		{[[62, 42], [458, 42], [62, 248], [458, 248]].map(([x, y]) => <circle cx={x} cy={y} r="8" class="ln" />)}
+		<!-- разъём на краю -->
+		<rect x="22" y="110" width="40" height="50" rx="3" class="ln" />
+		<text class="t t-s" x="42" y="178" text-anchor="middle">J1</text>
+		<!-- зона питания -->
+		<rect x="78" y="80" width="100" height="110" rx="6" class="ln-dash" />
+		<text class="t t-acc t-s" x="128" y="98" text-anchor="middle">Питание</text>
+		<rect x="98" y="118" width="40" height="28" rx="3" class="ln" />
+		<text class="t t-s" x="118" y="137" text-anchor="middle">LDO</text>
+		<rect x="148" y="122" width="10" height="20" class="ln" />
+		<rect x="84" y="122" width="10" height="20" class="ln" />
+		<!-- МК -->
+		<rect x="230" y="100" width="80" height="80" rx="4" class="ln" />
+		<text class="t" x="270" y="145" text-anchor="middle" font-weight="700">MCU</text>
+		{[[220, 92], [312, 92], [220, 180], [312, 180]].map(([x, y]) => <rect x={x} y={y} width="8" height="14" fill="var(--pcb-copper)" />)}
+		<rect x="252" y="70" width="36" height="16" rx="3" class="ln" />
+		<text class="t t-s" x="270" y="64" text-anchor="middle">кварц</text>
+		<!-- аналог -->
+		<rect x="370" y="80" width="90" height="90" rx="6" class="ln-dash" />
+		<text class="t t-acc t-s" x="415" y="98" text-anchor="middle">Аналог</text>
+		<rect x="395" y="115" width="40" height="30" rx="3" class="ln" />
+		<text class="t t-s" x="415" y="134" text-anchor="middle">датчик</text>
+		<!-- кнопки и светодиоды на краю -->
+		{[200, 250, 300].map((x) => <rect x={x} y="238" width="26" height="26" rx="4" class="ln" />)}
+		{[350, 380].map((x) => <circle cx={x} cy="252" r="8" fill="var(--sl-color-accent)" opacity="0.8" />)}
+		<text class="t t-s" x="290" y="228" text-anchor="middle">кнопки и индикация — у края</text>
+		<!-- поток сигнала -->
+		<path class="ln-acc" d="M90 210 H440 M432 204 L440 210 L432 216" />
+		<text class="t t-acc t-s" x="92" y="230">поток сигнала →</text>
+		<!-- легенда -->
+		<g class="t t-s">
+			<text x="500" y="40" font-weight="700">Порядок</text>
+			<text x="500" y="62">1. Механика: отверстия,</text>
+			<text x="512" y="78">разъёмы, кнопки</text>
+			<text x="500" y="100">2. Ключевые микросхемы</text>
+			<text x="500" y="122">3. Их «свита»: развязка,</text>
+			<text x="512" y="138">кварц, резисторы</text>
+			<text x="500" y="160">4. Остальное по группам</text>
+			<text x="500" y="182">5. Шумное отдельно</text>
+			<text x="512" y="198">от чувствительного</text>
+		</g>
+	</svg>
+</Figure>

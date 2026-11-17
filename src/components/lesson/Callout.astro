@@ -1,0 +1,87 @@
+---
+/**
+ * Врезка в тексте урока.
+ *
+ *   <Callout type="tip">Совет…</Callout>
+ *   <Callout type="warning">Внимание…</Callout>
+ *   <Callout type="altium">Особенность Altium…</Callout>
+ *   <Callout type="book" where="гл. 1, §1.03, с. 14">Из учебника…</Callout>
+ *
+ * title — свой заголовок вместо стандартного.
+ */
+interface Props {
+	type: 'tip' | 'warning' | 'altium' | 'book';
+	title?: string;
+	/** Для type="book": где в учебнике смотреть. */
+	where?: string;
+}
+
+const PRESETS = {
+	tip: { icon: '💡', title: 'Совет' },
+	warning: { icon: '⚠️', title: 'Внимание' },
+	altium: { icon: '🛠', title: 'Особенность Altium' },
+	book: { icon: '📖', title: 'Из учебника' },
+} as const;
+
+const { type, title, where } = Astro.props;
+const preset = PRESETS[type];
+---
+
+<aside class:list={['callout', `callout--${type}`]} aria-label={title ?? preset.title}>
+	<p class="callout__title">
+		<span aria-hidden="true">{preset.icon}</span>
+		{title ?? preset.title}
+		{where && <span class="callout__ref">{where}</span>}
+	</p>
+	<div class="callout__body"><slot /></div>
+</aside>
+
+<style>
+	.callout {
+		--c: var(--pcb-tip);
+		--c-bg: var(--pcb-tip-bg);
+		margin-block: 1.25rem;
+		padding: 0.75rem 1rem;
+		border-inline-start: 4px solid var(--c);
+		border-radius: 0 var(--pcb-radius) var(--pcb-radius) 0;
+		background: var(--c-bg);
+	}
+	.callout--warning {
+		--c: var(--pcb-warn);
+		--c-bg: var(--pcb-warn-bg);
+	}
+	.callout--altium {
+		--c: var(--pcb-altium);
+		--c-bg: var(--pcb-altium-bg);
+	}
+	.callout--book {
+		--c: var(--pcb-book);
+		--c-bg: var(--pcb-book-bg);
+	}
+	.callout__title {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.4rem;
+		margin: 0;
+		font-weight: 700;
+		color: var(--c);
+	}
+	.callout__ref {
+		font-weight: 500;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.callout__ref::before {
+		content: '· ';
+	}
+	.callout__body {
+		margin-top: 0.35rem;
+	}
+	.callout__body > :global(:first-child) {
+		margin-top: 0;
+	}
+	.callout__body > :global(:last-child) {
+		margin-bottom: 0;
+	}
+</style>

@@ -1,0 +1,75 @@
+---
+/**
+ * Кнопка «Урок пройден». Ставит/снимает отметку текущей страницы в localStorage.
+ * Боковое меню и главная подписаны на изменения и обновляются сразу.
+ */
+---
+
+<lesson-complete class="not-content">
+	<button type="button" aria-pressed="false">
+		<span class="box" aria-hidden="true"></span>
+		<span class="label">Отметить урок пройденным</span>
+	</button>
+</lesson-complete>
+
+<script>
+	import { isDone, setDone, onProgressChange } from '../../lib/progress';
+
+	class LessonComplete extends HTMLElement {
+		connectedCallback() {
+			const btn = this.querySelector('button')!;
+			const label = this.querySelector('.label')!;
+			const path = location.pathname;
+
+			const render = () => {
+				const done = isDone(path);
+				btn.setAttribute('aria-pressed', String(done));
+				label.textContent = done ? 'Урок пройден ✓ (нажми, чтобы снять отметку)' : 'Отметить урок пройденным';
+			};
+
+			btn.addEventListener('click', () => setDone(path, !isDone(path)));
+			onProgressChange(render);
+			render();
+		}
+	}
+	customElements.define('lesson-complete', LessonComplete);
+</script>
+
+<style>
+	button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.65rem 1.1rem;
+		border: 1px solid var(--sl-color-accent);
+		border-radius: 0.5rem;
+		background: transparent;
+		color: var(--sl-color-white);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	button:hover {
+		background: var(--sl-color-accent-low);
+	}
+	.box {
+		width: 1.1rem;
+		height: 1.1rem;
+		border: 2px solid var(--sl-color-accent);
+		border-radius: 0.25rem;
+		display: grid;
+		place-items: center;
+	}
+	button[aria-pressed='true'] {
+		background: var(--sl-color-accent);
+		color: var(--sl-color-black);
+	}
+	button[aria-pressed='true'] .box {
+		border-color: var(--sl-color-black);
+	}
+	button[aria-pressed='true'] .box::after {
+		content: '✓';
+		font-size: 0.8rem;
+		line-height: 1;
+	}
+</style>

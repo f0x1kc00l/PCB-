@@ -1,0 +1,135 @@
+---
+/**
+ * Законы Кирхгофа на воде: насос и две параллельные ветви с сужениями R1 и R2.
+ * В узле расход делится (закон токов), перепад давления на обеих ветвях одинаков (закон напряжений).
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-kirchhoff"
+	n={n}
+	title="Кирхгоф на воде: развилка труб"
+	map={[
+		['развилка', 'узел'],
+		['расход в узел = расход из узла', 'ΣI = 0'],
+		['перепад давления по любому пути одинаков', 'ΣU = 0 по контуру'],
+	]}
+	caption="Капли везде идут с одинаковой густотой, поэтому скорость капель — это расход. Сложи скорости в двух ветвях — получишь скорость в общей трубе. Обе ветви соединяют одну и ту же верхнюю трубу с одной и той же нижней, поэтому перепад давления на них одинаков (манометры справа)."
+>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Насос слева, верхняя труба раздваивается на две вертикальные ветви с сужениями R1 и R2, внизу ветви сливаются и возвращаются к насосу.">
+		<g stroke-width="12">
+			<polyline data-p="hi" class="pipe" points="60,128 60,50 520,50 520,104" />
+			<line data-p="hi2" class="pipe" x1="300" y1="50" x2="300" y2="104" />
+			<line data-p="r1" class="pipe" x1="300" y1="104" x2="300" y2="186" />
+			<line data-p="r2" class="pipe" x1="520" y1="104" x2="520" y2="186" />
+			<polyline data-p="lo" class="pipe" points="300,186 300,250 60,250 60,152" />
+			<polyline data-p="lo2" class="pipe" points="520,186 520,250 300,250" />
+		</g>
+		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
+		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
+		<circle cx="300" cy="50" r="5" class="edot" />
+		<circle cx="300" cy="250" r="5" class="edot" />
+		<text class="ts" x="88" y="144">насос U</text>
+		<text class="t" x="285" y="150" text-anchor="end">R1</text>
+		<text class="t" x="505" y="150" text-anchor="end">R2</text>
+		<text class="ts" x="300" y="36" text-anchor="middle">узел A</text>
+		<text class="ts" x="300" y="276" text-anchor="middle">узел B</text>
+		<text class="t tm" data-i x="160" y="40" text-anchor="middle">I</text>
+		<text class="t tm" data-i1 x="312" y="216">I1</text>
+		<text class="t tm" data-i2 x="532" y="216">I2</text>
+		<g data-d></g>
+		<!-- манометры перепада на ветвях -->
+		<g>
+			<rect x="600" y="60" width="10" height="180" class="wall" />
+			<rect data-g1 x="601" y="60" width="8" height="0" fill="var(--water-hi)" />
+			<rect x="630" y="60" width="10" height="180" class="wall" />
+			<rect data-g2 x="631" y="60" width="8" height="0" fill="var(--water-hi)" />
+			<text class="ts" x="605" y="258" text-anchor="middle">ΔpR1</text>
+			<text class="ts" x="635" y="272" text-anchor="middle">ΔpR2</text>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Насос U</span><input type="range" data-u min="0" max="12" step="0.5" value="9" /><output data-uv></output></label>
+		<label class="water__row"><span>Сужение R1</span><input type="range" data-r1 min="1" max="20" step="1" value="3" /><output data-r1v></output></label>
+		<label class="water__row"><span>Сужение R2</span><input type="range" data-r2 min="1" max="20" step="1" value="9" /><output data-r2v></output></label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, $ } from '../../lib/water';
+
+	class WaterKirchhoff extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			let U = 9,
+				R1 = 3,
+				R2 = 9,
+				ang = 0;
+			const g = $(r, '[data-d]');
+			const sp = 15;
+			// общая часть до узла A, ветви и общая часть от узла B
+			const trunkIn = new Drops(g, new Path([[60, 140], [60, 50], [300, 50]]), sp);
+			const top2 = new Drops(g, new Path([[300, 50], [520, 50]]), sp);
+			const b1 = new Drops(g, new Path([[300, 50], [300, 250]]), sp);
+			const b2 = new Drops(g, new Path([[520, 50], [520, 250]]), sp);
+			const bot2 = new Drops(g, new Path([[520, 250], [300, 250]]), sp);
+			const trunkOut = new Drops(g, new Path([[300, 250], [60, 250], [60, 140]]), sp);
+			let I = 0,
+				I1 = 0,
+				I2 = 0;
+			const P = (k: string) => $(r, `[data-p="${k}"]`);
+			const upd = () => {
+				I1 = U / R1;
+				I2 = U / R2;
+				I = I1 + I2;
+				$(r, '[data-uv]').textContent = fm(U, 1) + ' В';
+				$(r, '[data-r1v]').textContent = R1 + ' Ом';
+				$(r, '[data-r2v]').textContent = R2 + ' Ом';
+				const on = U > 0 ? 1 : 0;
+				paint([P('hi'), P('hi2')], on);
+				paint([P('lo'), P('lo2')], 0);
+				paint([P('r1'), P('r2')], 0.5 * on);
+				P('r1').setAttribute('stroke-width', Math.max(2, 10 / Math.sqrt(R1)).toFixed(1));
+				P('r2').setAttribute('stroke-width', Math.max(2, 10 / Math.sqrt(R2)).toFixed(1));
+				$(r, '[data-i]').textContent = `I = ${fm(I, 2)} А`;
+				$(r, '[data-i1]').textContent = `I1 = ${fm(I1, 2)} А`;
+				$(r, '[data-i2]').textContent = `I2 = ${fm(I2, 2)} А`;
+				const h = (178 * U) / 12;
+				for (const k of ['[data-g1]', '[data-g2]']) {
+					$(r, k).setAttribute('y', String(239 - h));
+					$(r, k).setAttribute('height', String(h));
+				}
+				const Req = (R1 * R2) / (R1 + R2);
+				$(r, '[data-fx]').textContent = `I = I1 + I2 = ${fm(I1, 2)} + ${fm(I2, 2)} = ${fm(I, 2)} А`;
+				$(r, '[data-fx2]').textContent = `Перепад на R1 = I1·R1 = ${fm(I1 * R1, 2)} В, на R2 = I2·R2 = ${fm(I2 * R2, 2)} В — одинаково, это U насоса. Эквивалентное сопротивление R1‖R2 = ${fm(Req, 2)} Ом: меньше меньшего — две трубы пропускают больше одной.`;
+			};
+			upd();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-u]')) U = +t.value;
+				if (t.matches('[data-r1]')) R1 = +t.value;
+				if (t.matches('[data-r2]')) R2 = +t.value;
+				upd();
+			});
+			const k = 7;
+			animate(r, (dt) => {
+				trunkIn.step(k * I * dt);
+				trunkOut.step(k * I * dt);
+				top2.step(k * I2 * dt);
+				bot2.step(k * I2 * dt);
+				b1.step(k * I1 * dt);
+				b2.step(k * I2 * dt);
+				ang += 15 * I * dt;
+				$(r, '[data-imp]').setAttribute('transform', `rotate(${ang.toFixed(1)} 60 140)`);
+			});
+		}
+	}
+	customElements.define('water-kirchhoff', WaterKirchhoff);
+</script>

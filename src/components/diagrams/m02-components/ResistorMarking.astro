@@ -1,0 +1,56 @@
+---
+/** Рис. 2.1 (урок 2.1): цветовая маркировка выводного резистора и коды на SMD-резисторах. */
+import Figure from '../Figure.astro';
+
+// 4,7 кОм ±5 %: жёлтый (4), фиолетовый (7), красный (×100), золотой (±5 %)
+const bands = [
+	{ x: 228, color: '#f2d21b', label: '4', role: '1-я цифра' },
+	{ x: 258, color: '#7d3fbf', label: '7', role: '2-я цифра' },
+	{ x: 288, color: '#d22b2b', label: '×100', role: 'множитель' },
+	{ x: 338, color: '#c9a34a', label: '±5 %', role: 'допуск' },
+];
+const smd = [
+	{ code: '472', rule: '47 · 10²', value: '4,7 кОм', note: '3 цифры, обычно 5 %' },
+	{ code: '4701', rule: '470 · 10¹', value: '4,7 кОм', note: '4 цифры, обычно 1 %' },
+	{ code: '01A', rule: '100 · 1', value: '100 Ом', note: 'EIA-96, 1 %' },
+	{ code: '4R7', rule: 'R = запятая', value: '4,7 Ом', note: 'малые номиналы' },
+];
+---
+
+<Figure n="2.1" caption="Сверху: резистор 4,7 кОм ±5 % в четырёхполосной цветовой маркировке. Снизу: как тот же порядок величин записывают на SMD-корпусах.">
+	<svg viewBox="0 0 640 300" role="img" aria-label="Выводной резистор с полосами жёлтая, фиолетовая, красная, золотая — 4,7 кОм ±5 %. Ниже четыре SMD-резистора с кодами 472, 4701, 01A и 4R7 и их расшифровкой.">
+		<!-- выводы и корпус -->
+		<path class="ln" d="M80 80 H200 M380 80 H560" />
+		<rect x="200" y="56" width="180" height="48" rx="22" fill="#d9c49a" stroke="currentColor" stroke-width="1.5" />
+		{bands.map((b) => <rect x={b.x} y="56" width="14" height="48" fill={b.color} />)}
+		{
+			bands.map((b, i) => (
+				<g>
+					<path class="ln-thin" d={`M${b.x + 7} 108 V${130 + (i % 2) * 22}`} />
+					<text class="t t-acc t-s" x={b.x + 7} y={146 + (i % 2) * 22} text-anchor="middle">
+						{b.label}
+					</text>
+				</g>
+			))
+		}
+		<text class="t" x="440" y="146">47 · 100 = 4700 Ом</text>
+		<text class="t t-s t-mut" x="320" y="30" text-anchor="middle">1-я цифра · 2-я цифра · множитель · допуск</text>
+
+		<!-- SMD -->
+		{
+			smd.map((s, i) => (
+				<g>
+					<rect x={30 + i * 152} y="196" width="92" height="40" rx="3" fill="#2a2a2a" />
+					<rect x={30 + i * 152} y="196" width="16" height="40" fill="#c8c8c8" />
+					<rect x={106 + i * 152} y="196" width="16" height="40" fill="#c8c8c8" />
+					<text x={76 + i * 152} y="222" text-anchor="middle" fill="#f2f2f2" font-family="var(--pcb-mono)" font-size="14" font-weight="700">
+						{s.code}
+					</text>
+					<text class="t t-s t-mono" x={76 + i * 152} y="256" text-anchor="middle">{s.rule}</text>
+					<text class="t t-acc" x={76 + i * 152} y="274" text-anchor="middle">{s.value}</text>
+					<text class="t t-s t-mut" x={76 + i * 152} y="292" text-anchor="middle">{s.note}</text>
+				</g>
+			))
+		}
+	</svg>
+</Figure>

@@ -1,0 +1,42 @@
+---
+/** Рис. 5.7: плохое и хорошее размещение развязывающего конденсатора — площадь петли. */
+import Figure from '../Figure.astro';
+const cu = 'var(--pcb-copper)';
+
+/** Микросхема с выводами VCC (сверху) и GND (снизу); ox — сдвиг панели. */
+const chip = (ox: number) => ({ x: ox + 40, y: 60 });
+---
+
+<Figure n="5.7" caption="Ток подзаряда микросхемы бежит по петле «вывод питания → конденсатор → земля → вывод земли». Слева конденсатор далеко, петля большая: её индуктивность мешает быстро отдавать ток, а сама петля излучает. Справа конденсатор вплотную к выводам, переходные отверстия в землю прямо у его площадки — петля минимальна.">
+	<svg viewBox="0 0 660 230" role="img" aria-label="Слева: конденсатор далеко от микросхемы, длинные дорожки образуют большую заштрихованную петлю. Справа: конденсатор рядом с выводами, короткие соединения и переходные отверстия в землю, петля маленькая.">
+		{[0, 340].map((ox) => {
+			const c = chip(ox);
+			return (
+				<g>
+					<rect x={c.x} y={c.y} width="90" height="110" rx="4" class="ln" />
+					<text class="t" x={c.x + 45} y={c.y + 60} text-anchor="middle" font-weight="700">IC</text>
+					<rect x={c.x + 90} y={c.y + 14} width="16" height="10" fill={cu} />
+					<rect x={c.x + 90} y={c.y + 86} width="16" height="10" fill={cu} />
+					<text class="t t-s" x={c.x + 84} y={c.y + 23} text-anchor="end">VCC</text>
+					<text class="t t-s" x={c.x + 84} y={c.y + 95} text-anchor="end">GND</text>
+				</g>
+			);
+		})}
+		<!-- плохо: конденсатор далеко -->
+		<path d="M146 79 H270 V151 H146 Z" fill="var(--pcb-bad)" opacity="0.16" />
+		<path d="M146 79 H270 V100 M270 132 V151 H146" fill="none" stroke={cu} stroke-width="4" />
+		<rect x="260" y="100" width="20" height="32" rx="2" class="ln" />
+		<text class="t t-s" x="290" y="120">C</text>
+		<text class="t t-s" x="160" y="200" fill="var(--pcb-bad)">далеко: большая петля</text>
+		<!-- хорошо: рядом -->
+		<path d="M486 79 H500 V102 M500 128 V151 H486" fill="none" stroke={cu} stroke-width="4" />
+		<path d="M486 79 H500 V151 H486 Z" fill="var(--pcb-ok)" opacity="0.18" />
+		<rect x="490" y="102" width="20" height="26" rx="2" class="ln" />
+		<text class="t t-s" x="518" y="120">C 100 нФ</text>
+		<circle cx="520" cy="151" r="6" fill={cu} />
+		<circle cx="520" cy="151" r="2.5" fill="var(--sl-color-bg)" />
+		<path d="M506 151 H514" stroke={cu} stroke-width="4" />
+		<text class="t t-s t-mut" x="530" y="166">via в землю</text>
+		<text class="t t-s" x="430" y="200" fill="var(--pcb-ok)">рядом: маленькая петля</text>
+	</svg>
+</Figure>

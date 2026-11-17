@@ -1,0 +1,33 @@
+---
+/**
+ * Рамка для анимированных водяных аналогий: заголовок, анимация, подпись.
+ * Внутрь кладут <svg> и элементы управления.
+ */
+interface Props {
+	title: string;
+	n?: string;
+	caption?: string;
+	/** Тег кастомного элемента, который оживляет анимацию. */
+	tag: string;
+	/** Пары «вода → электричество» для строки-легенды. */
+	map?: [string, string][];
+}
+const { title, n, caption, tag: Tag, map = [] } = Astro.props;
+---
+
+<Tag class="pcb-widget water not-content">
+	<p class="pcb-widget__title">{n && <span>Рис. {n}.</span>} {title}</p>
+	<slot />
+	{
+		map.length > 0 && (
+			<ul class="water__map" aria-label="Соответствие воды и электричества">
+				{map.map(([w, e]) => (
+					<li>
+						<b>{w}</b> → {e}
+					</li>
+				))}
+			</ul>
+		)
+	}
+	{caption && <p class="water__note">{caption}</p>}
+</Tag>

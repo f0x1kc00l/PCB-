@@ -1,0 +1,61 @@
+---
+/** Рис. 9.8: иерархическая схема — верхний лист с символами листов и дочерние листы с портами. */
+import Figure from '../Figure.astro';
+
+/** Лист-иконка с загнутым углом. */
+const sheet = (x: number, y: number) => `M${x} ${y} H${x + 120} L${x + 136} ${y + 16} V${y + 70} H${x} Z M${x + 120} ${y} V${y + 16} H${x + 136}`;
+---
+
+<Figure n="9.8" caption="Верхний лист (Top.SchDoc) содержит только символы листов (Sheet Symbol) и связи между их входами (Sheet Entry). Каждый символ ссылается на свой дочерний лист, где та же цепь выведена портом (Port) с тем же именем. Так схема платы из проекта 11.2 делится на понятные блоки: питание, USB и микроконтроллер.">
+	<svg viewBox="0 0 660 320" role="img" aria-label="Верхний лист с тремя символами листов USB, POWER и MCU, соединёнными цепями VBUS, +5V, USB_D_P и USB_D_N. Стрелки вниз к трём дочерним листам с портами.">
+		<!-- верхний лист -->
+		<rect x="10" y="10" width="640" height="170" rx="6" class="ln-dash" />
+		<text class="t t-s t-mut" x="22" y="28">Top.SchDoc</text>
+
+		<!-- символ USB -->
+		<rect x="40" y="50" width="130" height="100" rx="2" class="ln" />
+		<text class="t" x="105" y="44" text-anchor="middle" font-weight="700">U_USB</text>
+		<text class="t t-s" x="164" y="78" text-anchor="end">VBUS</text>
+		<text class="t t-s" x="164" y="108" text-anchor="end">USB_D_P</text>
+		<text class="t t-s" x="164" y="132" text-anchor="end">USB_D_N</text>
+
+		<!-- символ POWER -->
+		<rect x="265" y="50" width="130" height="60" rx="2" class="ln" />
+		<text class="t" x="330" y="44" text-anchor="middle" font-weight="700">U_POWER</text>
+		<text class="t t-s" x="271" y="78">VBUS</text>
+		<text class="t t-s" x="389" y="98" text-anchor="end">+5V</text>
+
+		<!-- символ MCU -->
+		<rect x="490" y="50" width="130" height="100" rx="2" class="ln" />
+		<text class="t" x="555" y="44" text-anchor="middle" font-weight="700">U_MCU</text>
+		<text class="t t-s" x="496" y="98">+5V</text>
+		<text class="t t-s" x="496" y="118">USB_D_P</text>
+		<text class="t t-s" x="496" y="138">USB_D_N</text>
+
+		<!-- связи -->
+		<path class="ln-acc" d="M170 74 H265" />
+		<path class="ln-acc" d="M395 94 H490" />
+		<path class="ln-acc" d="M170 104 H220 V114 H490" />
+		<path class="ln-acc" d="M170 128 H230 V134 H490" />
+
+		<!-- стрелки вниз -->
+		<path class="ln-dash" d="M105 150 V205 M99 197 L105 205 L111 197" />
+		<path class="ln-dash" d="M330 110 V205 M324 197 L330 205 L336 197" />
+		<path class="ln-dash" d="M555 150 V205 M549 197 L555 205 L561 197" />
+
+		<!-- дочерние листы -->
+		<path d={sheet(37, 215)} class="ln" />
+		<text class="t t-s" x="105" y="240" text-anchor="middle">USB.SchDoc</text>
+		<text class="t t-s t-mut" x="105" y="262" text-anchor="middle">порты: VBUS,</text>
+		<text class="t t-s t-mut" x="105" y="276" text-anchor="middle">USB_D_P, USB_D_N</text>
+
+		<path d={sheet(262, 215)} class="ln" />
+		<text class="t t-s" x="330" y="240" text-anchor="middle">POWER.SchDoc</text>
+		<text class="t t-s t-mut" x="330" y="262" text-anchor="middle">порты: VBUS, +5V</text>
+
+		<path d={sheet(487, 215)} class="ln" />
+		<text class="t t-s" x="555" y="240" text-anchor="middle">MCU.SchDoc</text>
+		<text class="t t-s t-mut" x="555" y="262" text-anchor="middle">порты: +5V,</text>
+		<text class="t t-s t-mut" x="555" y="276" text-anchor="middle">USB_D_P, USB_D_N</text>
+	</svg>
+</Figure>

@@ -1,0 +1,101 @@
+---
+/**
+ * Переопределение бокового меню Starlight.
+ *
+ * Над стандартным меню выводит прогресс курса, а сами ссылки на пройденные уроки
+ * помечает галочкой. Прогресс живёт в браузере (localStorage), поэтому
+ * разметка рендерится пустой, а заполняется скриптом на клиенте.
+ */
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+
+type Entry = StarlightRouteData['sidebar'][number];
+
+/** Все ссылки на уроки (папки mNN-…) из дерева меню. */
+function collectLessons(entries: Entry[]): string[] {
+	return entries.flatMap((e) =>
+		e.type === 'link' ? (/\/m\d\d-[^/]+\/[^/]+\/?$/.test(e.href) ? [e.href] : []) : collectLessons(e.entries),
+	);
+}
+
+const lessons = collectLessons(Astro.locals.starlightRoute.sidebar);
+---
+
+<div class="course-progress" data-lessons={JSON.stringify(lessons)}>
+	<div class="course-progress__head">
+		<span>Прогресс курса</span>
+		<span class="course-progress__count" data-count>0 / {lessons.length}</span>
+	</div>
+	<div
+		class="course-progress__bar"
+		role="progressbar"
+		aria-label="Пройдено уроков"
+		aria-valuemin="0"
+		aria-valuemax={lessons.length}
+		aria-valuenow="0"
+	>
+		<span data-fill></span>
+	</div>
+</div>
+
+<Default><slot /></Default>
+
+<script>
+	import { getProgress, normalizePath, onProgressChange } from '../../lib/progress';
+
+	function render() {
+		const box = document.querySelector<HTMLElement>('.course-progress');
+		if (!box) return;
+		const lessons: string[] = JSON.parse(box.dataset.lessons ?? '[]');
+		const done = getProgress();
+		const count = lessons.filter((href) => done[normalizePath(href)]).length;
+
+		box.querySelector('[data-count]')!.textContent = `${count} / ${lessons.length}`;
+		const bar = box.querySelector<HTMLElement>('[role="progressbar"]')!;
+		bar.setAttribute('aria-valuenow', String(count));
+		const pct = lessons.length ? (count / lessons.length) * 100 : 0;
+		box.querySelector<HTMLElement>('[data-fill]')!.style.width = `${pct}%`;
+
+		// Галочки у пройденных уроков в меню.
+		document.querySelectorAll<HTMLAnchorElement>('.sidebar-content a[href]').forEach((a) => {
+			const key = normalizePath(new URL(a.href).pathname);
+			a.classList.toggle('is-done', Boolean(done[key]));
+		});
+	}
+
+	render();
+	onProgressChange(render);
+</script>
+
+<style>
+	.course-progress {
+		margin-bottom: 1rem;
+		padding: 0.6rem 0.7rem;
+		border: 1px solid var(--sl-color-hairline);
+		border-radius: 0.5rem;
+		font-size: var(--sl-text-xs);
+	}
+	.course-progress__head {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 0.4rem;
+		color: var(--sl-color-gray-2);
+		font-weight: 600;
+	}
+	.course-progress__count {
+		font-variant-numeric: tabular-nums;
+	}
+	.course-progress__bar {
+		height: 0.4rem;
+		border-radius: 1rem;
+		background: var(--sl-color-gray-5);
+		overflow: hidden;
+	}
+	.course-progress__bar span {
+		display: block;
+		height: 100%;
+		width: 0;
+		background: var(--sl-color-accent);
+		transition: width 0.3s ease;
+	}
+</style>

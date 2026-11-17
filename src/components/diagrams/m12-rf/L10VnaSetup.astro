@@ -1,0 +1,54 @@
+---
+/**
+ * Рис. к уроку 12.10: подключение NanoVNA. Калибровка SOLT в плоскости разъёмов кабелей,
+ * затем S11 (антенна на порту 1) и S21 (фильтр между портами 1 и 2).
+ */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="12.10а" caption="Порт 1 (CH0) излучает и принимает отражённый сигнал — по нему меряют S11. Порт 2 (CH1) только принимает — по нему меряют S21. Калибруют на концах тех кабелей, которые потом подключат к плате: Open, Short, Load на порту 1, затем Thru между кабелями (и Isolation — с нагрузками на обоих портах). Плоскость калибровки — конец кабеля; всё, что дальше, прибор считает «измеряемым устройством».">
+	<svg viewBox="0 0 660 270" role="img" aria-label="Слева прибор NanoVNA с портами CH0 и CH1. Сверху показаны три калибровочные меры Open, Short, Load на конце кабеля порта 1. Справа внизу: антенна на кабеле порта 1 для измерения S11, и фильтр между кабелями обоих портов для S21.">
+		<!-- прибор -->
+		<rect x="20" y="70" width="150" height="120" rx="8" class="ln" />
+		<rect x="36" y="86" width="90" height="60" rx="3" class="ln-thin" />
+		<text class="t t-s" x="81" y="120" text-anchor="middle">экран</text>
+		<text class="t" x="95" y="62" text-anchor="middle" font-weight="700">NanoVNA</text>
+		<circle cx="170" cy="105" r="8" class="ln-acc" />
+		<circle cx="170" cy="160" r="8" class="ln" />
+		<text class="t t-s t-mono" x="150" y="94" text-anchor="end">CH0</text>
+		<text class="t t-s t-mono" x="150" y="182" text-anchor="end">CH1</text>
+		<!-- кабели -->
+		<path class="ln-acc" d="M178 105 C230 105 240 105 290 105" />
+		<path class="ln" d="M178 160 C230 160 240 160 290 160" />
+		<path class="ln-dash" d="M292 40 V230" />
+		<text class="t t-s t-acc" x="296" y="36">плоскость калибровки</text>
+
+		<!-- калибровочные меры -->
+		<text class="t" x="320" y="70" font-weight="700">1. Калибровка</text>
+		<g>
+			<rect x="320" y="84" width="50" height="22" rx="3" class="ln" />
+			<text class="t t-s" x="345" y="99" text-anchor="middle">Open</text>
+			<rect x="378" y="84" width="50" height="22" rx="3" class="ln" />
+			<text class="t t-s" x="403" y="99" text-anchor="middle">Short</text>
+			<rect x="436" y="84" width="58" height="22" rx="3" class="ln" />
+			<text class="t t-s" x="465" y="99" text-anchor="middle">Load 50</text>
+			<rect x="502" y="84" width="50" height="22" rx="3" class="ln" />
+			<text class="t t-s" x="527" y="99" text-anchor="middle">Thru</text>
+			<text class="t t-s t-mut" x="320" y="124">на порту 1 → затем Thru между кабелями → Done → Save</text>
+		</g>
+
+		<!-- S11 -->
+		<text class="t" x="320" y="160" font-weight="700">2. S11</text>
+		<rect x="370" y="146" width="112" height="22" rx="3" class="ln-acc" />
+		<text class="t t-s" x="426" y="161" text-anchor="middle">плата + антенна</text>
+		<text class="t t-s t-mut" x="492" y="161">← кабель CH0</text>
+
+		<!-- S21 -->
+		<text class="t" x="320" y="215" font-weight="700">3. S21</text>
+		<text class="t t-s t-mono" x="380" y="215">CH0 →</text>
+		<rect x="425" y="200" width="70" height="22" rx="3" class="ln" />
+		<text class="t t-s" x="460" y="215" text-anchor="middle">фильтр</text>
+		<text class="t t-s t-mono" x="502" y="215">→ CH1</text>
+		<text class="t t-s t-mut" x="320" y="245">Без калибровки цифры на экране — это кабель, а не плата.</text>
+	</svg>
+</Figure>

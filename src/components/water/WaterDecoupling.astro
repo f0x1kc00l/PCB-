@@ -1,0 +1,184 @@
+---
+/**
+ * Развязывающий конденсатор = маленький бак-гидроаккумулятор прямо у потребителя.
+ * Источник (стабилизатор) далеко, труба-дорожка длинная и «тяжёлая» (индуктивность).
+ * Микросхема пьёт воду рывками — без бака давление у неё проседает на фронтах (L·dI/dt).
+ * Модель: L1, R1 — дорожка; C — конденсатор; L2 — подводка от конденсатора к выводу (зависит от расстояния).
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-decoupling"
+	n={n}
+	title="Развязка питания: бак у самого крана"
+	map={[
+		['водонапорная башня', 'стабилизатор'],
+		['длинная труба', 'дорожка питания (R + L)'],
+		['бак у крана', 'конденсатор 100 нФ'],
+		['кран, который открывают рывками', 'микросхема (импульсный ток)'],
+	]}
+	caption="Воду в длинной трубе нельзя мгновенно разогнать — у неё инерция (индуктивность дорожки). Поэтому, когда микросхема резко открывает «кран», давление у неё падает. Бак рядом отдаёт воду сразу, а труба потом спокойно его доливает. Но бак должен стоять у самого крана: даже короткая подводка — это снова инерция."
+>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Слева башня-стабилизатор, длинная труба к микросхеме справа, рядом с микросхемой бак-конденсатор. Внизу график напряжения на выводе питания.">
+		<!-- башня -->
+		<rect x="20" y="20" width="56" height="70" rx="4" class="wall" />
+		<rect x="21" y="30" width="54" height="59" fill="var(--water-hi)" opacity="0.45" />
+		<text class="ts" x="48" y="106" text-anchor="middle">стабилизатор 3,3 В</text>
+		<g stroke-width="9">
+			<polyline data-p="line" class="pipe" points="76,70 420,70" />
+			<polyline data-p="l2" class="pipe" points="420,70 540,70" />
+			<line data-p="cap" class="pipe" x1="0" y1="70" x2="0" y2="98" />
+		</g>
+		<!-- «пружина» трубы: волнистый участок = индуктивность -->
+		<text class="ts" x="250" y="56" text-anchor="middle">дорожка 30 мм: L1 ≈ 30 нГн, R1 ≈ 0,05 Ом</text>
+		<g data-capg>
+			<rect data-capbox x="0" y="98" width="44" height="50" rx="5" class="wall" />
+			<rect data-capw x="0" y="100" width="42" height="46" fill="var(--water-hi)" opacity="0.5" />
+			<text class="ts" data-capt x="0" y="164" text-anchor="middle">C = 100 нФ</text>
+		</g>
+		<!-- микросхема -->
+		<rect x="540" y="44" width="110" height="60" rx="4" fill="var(--sl-color-gray-6)" class="wall" />
+		<text class="t" x="595" y="70" text-anchor="middle">микросхема</text>
+		<text class="ts tm" data-vchip x="595" y="90" text-anchor="middle"></text>
+		<circle data-gulp cx="540" cy="70" r="8" fill="var(--sl-color-accent)" opacity="0" />
+		<g data-d></g>
+		<!-- график V(t) у вывода -->
+		<g transform="translate(40 190)">
+			<rect width="610" height="96" class="grid" />
+			<line data-ref x1="0" x2="610" class="grid" stroke-dasharray="4 3" />
+			<line data-lim x1="0" x2="610" stroke="var(--water-danger)" stroke-width="1" stroke-dasharray="2 3" />
+			<polyline data-tv class="tr-u" />
+			<polyline data-ti class="tr-i" />
+			<text class="ts" x="4" y="-6">напряжение на выводе питания (синяя), ток микросхемы (оранжевая), красная — допуск −5 %</text>
+		</g>
+	</svg>
+	<div class="water__btns">
+		<label class="water__check"><input type="checkbox" data-c checked /> поставить конденсатор</label>
+	</div>
+	<div class="water__controls">
+		<label class="water__row"><span>Расстояние конденсатор → вывод</span><input type="range" data-dist min="1" max="30" step="1" value="2" /><output data-distv></output></label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, si, Scope, $ } from '../../lib/water';
+
+	const VS = 3.3,
+		L1 = 30e-9,
+		R1 = 0.05,
+		C = 100e-9,
+		ESR = 0.02,
+		IPK = 0.1,
+		IQ = 0.02,
+		PER = 200e-9,
+		TR = 5e-9,
+		DUTY = 0.25,
+		LMM = 1e-9; // ≈ 1 нГн на мм подводки
+	function iload(t: number) {
+		const x = t % PER;
+		const on = PER * DUTY;
+		if (x < TR) return IQ + (IPK * x) / TR;
+		if (x < on) return IQ + IPK;
+		if (x < on + TR) return IQ + IPK * (1 - (x - on) / TR);
+		return IQ;
+	}
+	class WaterDecoupling extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			let cap = true,
+				dist = 2,
+				t = 0,
+				I1 = IQ,
+				Va = VS - IQ * R1,
+				minV = VS;
+			const g = $(r, '[data-d]');
+			const line = new Drops(g, new Path([[76, 70], [540, 70]]), 15);
+			const sc = new Scope([$(r, '[data-tv]'), $(r, '[data-ti]')], { x: 0, y: 0, w: 610, h: 96 }, 300);
+			// бак ставим на расстоянии dist от микросхемы (масштаб 4 px/мм)
+			const place = () => {
+				const x = 540 - 4 * dist - 22;
+				$(r, '[data-capbox]').setAttribute('x', String(x));
+				$(r, '[data-capw]').setAttribute('x', String(x + 1));
+				$(r, '[data-capt]').setAttribute('x', String(x + 22));
+				$(r, '[data-p="cap"]').setAttribute('x1', String(x + 22));
+				$(r, '[data-p="cap"]').setAttribute('x2', String(x + 22));
+				$(r, '[data-p="line"]').setAttribute('points', `76,70 ${x + 22},70`);
+				$(r, '[data-p="l2"]').setAttribute('points', `${x + 22},70 540,70`);
+				($(r, '[data-capg]') as SVGGElement).style.display = cap ? '' : 'none';
+				($(r, '[data-p="cap"]') as SVGElement).style.display = cap ? '' : 'none';
+				$(r, '[data-distv]').textContent = `${dist} мм`;
+				minV = VS;
+			};
+			place();
+			r.addEventListener('input', (e) => {
+				const tg = e.target as HTMLInputElement;
+				if (tg.matches('[data-c]')) cap = tg.checked;
+				if (tg.matches('[data-dist]')) dist = +tg.value;
+				place();
+				sc.clear();
+			});
+			const yOf = (v: number) => 96 - ((v - 2.6) / 0.9) * 96; // шкала 2,6…3,5 В
+			$(r, '[data-ref]').setAttribute('y1', yOf(VS).toFixed(1));
+			$(r, '[data-ref]').setAttribute('y2', yOf(VS).toFixed(1));
+			$(r, '[data-lim]').setAttribute('y1', yOf(VS * 0.95).toFixed(1));
+			$(r, '[data-lim]').setAttribute('y2', yOf(VS * 0.95).toFixed(1));
+			let prevIl = iload(0);
+			// 1 с экрана = 400 нс модели (замедление в 2,5 млн раз)
+			const SCALE = 400e-9;
+			const H = 0.02e-9;
+			let acc = 0;
+			animate(r, (dt) => {
+				const T = dt * SCALE;
+				const n = Math.round(T / H);
+				let Vchip = VS;
+				for (let k = 0; k < n; k++) {
+					t += H;
+					const il = iload(t);
+					const dil = (il - prevIl) / H;
+					prevIl = il;
+					const L2 = LMM * dist + 1e-9;
+					if (cap) {
+						// L1 dI1/dt = VS − R1·I1 − Va ;  C dVc/dt = I1 − il ;  Va = Vc + ESR·(I1 − il)
+						const Vc = Va - ESR * (I1 - il);
+						I1 += ((VS - R1 * I1 - Va) / L1) * H;
+						const Vc2 = Vc + ((I1 - il) / C) * H;
+						Va = Vc2 + ESR * (I1 - il);
+						Vchip = Va - L2 * dil;
+					} else {
+						I1 = il;
+						Va = VS - R1 * il;
+						Vchip = VS - R1 * il - (L1 + L2) * dil;
+					}
+					minV = Math.min(minV, Vchip);
+					acc += H;
+					if (acc >= 2e-9) {
+						acc = 0;
+						sc.push([(96 - yOf(Vchip)) / 96, (0.35 * il) / (IPK + IQ)]);
+					}
+				}
+				sc.draw([true, true]);
+				const il = iload(t);
+				line.step(260 * I1 * dt);
+				$(r, '[data-gulp]').setAttribute('opacity', String(Math.min(1, (il - IQ) / IPK)));
+				paint([$(r, '[data-p="line"]')], 0.85);
+				paint([$(r, '[data-p="l2"]'), $(r, '[data-p="cap"]')], Math.max(0, Math.min(1, (Vchip - 2.6) / 0.8)));
+				$(r, '[data-vchip]').textContent = `${fm(Vchip, 2)} В`;
+				const dip = VS - minV;
+				$(r, '[data-fx]').textContent = `Минимум на выводе: ${fm(minV, 2)} В (провал ${si(dip, 'В')})`;
+				$(r, '[data-fx2]').textContent = !cap
+					? `Без конденсатора весь импульсный ток идёт по дорожке: провал ≈ (L1 + L2)·dI/dt = ${fm((L1 + LMM * dist + 1e-9) * 1e9, 0)} нГн · ${fm(IPK / TR / 1e9, 3)} А/нс. Цифровая микросхема при таком провале может сброситься.`
+					: dist > 10
+						? `Конденсатор есть, но далеко: подводка ${dist} мм ≈ ${dist} нГн — и провал снова заметен. Ставь 100 нФ в 1–3 мм от вывода.`
+						: 'Конденсатор рядом — микросхема пьёт из него, а дорожка спокойно доливает. Видно лёгкое «звенение» LC — его гасят ESR и керамика побольше (bulk) на узле.';
+			});
+		}
+	}
+	customElements.define('water-decoupling', WaterDecoupling);
+</script>

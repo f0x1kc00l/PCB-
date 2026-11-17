@@ -1,0 +1,193 @@
+---
+title: Создание проекта и документа схемы
+description: Новый проект платы в Workspace, лист схемы, шаблон ANSI B и сетка 100 mil — первый шаг учебного проекта «Мультивибратор».
+sidebar:
+  label: 7.1 Создание проекта и документа схемы
+  order: 1
+duration: 30
+status: ready
+goals:
+  - создать проект печатной платы (.PrjPcb) в подключённом Workspace
+  - добавить лист схемы, сохранить его и проект локально и в Workspace
+  - настроить шаблон листа и сетку в панели Properties
+  - понимать значки состояния документов в панели Projects
+prerequisites:
+  - m00-intro/03-install-altium
+  - m06-altium-intro/02-files
+  - m06-altium-intro/05-altium-365
+altium:
+  - title: Создание проекта и документа схемы (руководство, RU)
+    url: https://www.altium.com/ru/documentation/altium-designer/tutorial/creating-project-schematic-document
+  - title: Creating the Project and Schematic Document (EN, подробнее)
+    url: https://www.altium.com/documentation/altium-designer/tutorial/creating-project-schematic-document
+  - title: Вводная страница руководства — вход, лицензия, подключение к Workspace
+    url: https://www.altium.com/ru/documentation/altium-designer/tutorial
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Kbd from '../../../components/lesson/Kbd.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+import TutorialFlow from '../../../components/diagrams/m07-multivibrator/TutorialFlow.astro';
+
+С этого урока начинается практика. За девять уроков модуля мы пройдём весь путь официального руководства Altium: от пустого проекта до выпуска производственных файлов автоколебательного мультивибратора на двух транзисторах. Как он работает и почему у него такие номиналы, разобрано в уроках [3.8](../../m03-circuits/08-multivibrator-how/) и [3.9](../../m03-circuits/09-multivibrator-calc/). Здесь мы учимся воплощать схему в САПР.
+
+<TutorialFlow current={1} />
+
+## Перед началом: вход и Workspace
+
+Руководство Altium рассчитано на работу с **подключённым Workspace** — облачным (Altium 365) или корпоративным (Enterprise Server). Проект и компоненты хранятся там, а у тебя на диске лежит рабочая копия. Без подключения часть шагов руководства (особенно урок 7.2 и выпуск в 7.9) не повторить буква в букву.
+
+1. Войди в аккаунт кнопкой **Current User** в правом верхнем углу окна (иконка пользователя).
+2. Проверь лицензию: **Current User** → пункт лицензий → вкладка **License Management**. В редакции Altium Designer Develop отдельной проверки лицензии в руководстве нет. Закрой вкладку: правый клик по её ярлыку → **Close License Management**.
+3. Выбери Workspace кнопкой **Active Workspace** справа вверху. После подключения на ней появится имя Workspace.
+
+<Callout type="altium">
+  Названия редакций и пункты меню входа менялись от версии к версии (Altium Designer, Develop, Agile). Если у тебя
+  выглядит иначе, сверяйся со вводной страницей руководства по ссылке внизу урока. Как устроен Workspace и что можно
+  делать без него — урок [6.5](../../m06-altium-intro/05-altium-365/). Работа без Workspace на локальных библиотеках
+  — модуль 8. **[ПРОВЕРИТЬ]**: доступность Workspace для студенческой лицензии в твоём регионе.
+</Callout>
+
+**Почему так.** Workspace — не прихоть: он хранит историю версий проекта, а компоненты в нём сразу связаны с данными производителей. Для учебного проекта это ещё и бесплатный контроль версий: случайно испортил схему — откатился.
+
+## Шаг 1. Создаём проект
+
+1. Выбери <MenuPath path="File » New » Project" />. Откроется диалог **Create Project**.
+2. Заполни поля:
+
+| Поле | Значение | Зачем |
+|---|---|---|
+| **Location** | твой подключённый Workspace | проект будет храниться и версионироваться там |
+| **Project Type** | раздел **PCB**, шаблон **&lt;Empty&gt;** | пустой проект печатной платы |
+| **Project Name** | `Multivibrator` | имя файла проекта и папки |
+| **Description** | `Simple multivibrator design for the tutorial` | описание видно в Workspace |
+| **Version Control** | включено (в Altium 365) | история изменений. В Enterprise Server опции нет, контроль версий там включён всегда |
+| **Constraint Management** | включено | правила будем задавать в Constraint Manager (урок 7.4) |
+
+3. Нажми **Advanced** и проверь две вещи: **Folder** — папка проекта в Workspace (по умолчанию **Projects**), **Local Storage** — папка на диске, куда ляжет рабочая копия.
+4. Нажми **Create**. Создание займёт несколько секунд: проект появляется и на диске, и в Workspace.
+
+<Screenshot src="screenshots/m07-multivibrator/l01-create-project.png" alt="диалог Create Project с заполненными полями и раскрытым Advanced" />
+
+После создания в панели **Projects** появится `Multivibrator.PrjPcb`. Зелёная галочка рядом означает, что локальная копия совпадает с Workspace.
+
+<Callout type="tip">
+  Если панели Projects не видно, нажми кнопку **Panels** в правом нижнем углу окна и отметь нужную панель. Через эту же
+  кнопку открываются Properties, Messages, Components и остальные панели.
+</Callout>
+
+## Шаг 2. Добавляем лист схемы
+
+1. Правый клик по проекту в панели **Projects** → **Add New to Project » Schematic**. Откроется пустой лист `Sheet1.SchDoc`, он же появится в разделе **Source Documents**. Меню и панель кнопок вверху сменятся на меню редактора схем.
+2. Правый клик по листу → **Save As**. Имя — `Multivibrator`, расширение `.SchDoc` подставится само. Файл сохраняется в ту же папку, что и проект.
+3. Правый клик по проекту → **Save**. Состояние проекта сменится на **Modified**: изменения сохранены на диск, но ещё не в Workspace.
+4. Нажми кнопку **Save to Server** рядом с проектом, введи комментарий (например, `A new blank schematic sheet added`) и нажми **OK**. Состояние сменится на **No modification**.
+
+<Callout type="altium">
+  В Enterprise Server при добавлении листа сначала появится диалог **Select configuration item** — там сразу выбирают
+  шаблон листа, например **ANSI B Landscape**. В Altium 365 шаблон выбирают позже, в шаге 3.
+</Callout>
+
+### Значки состояния в панели Projects
+
+| Состояние | Что значит |
+|---|---|
+| **Open** | документ открыт |
+| **Open and locally modified** | изменён, но не сохранён на диск |
+| **Modified** | сохранён на диск, но не в Workspace |
+| **No modification** | локальная копия совпадает с Workspace |
+
+**Почему так.** Два уровня сохранения — диск и Workspace — это как «сохранить файл» и «сделать коммит» в git. Сохраняй на диск часто, а в Workspace — после законченного шага, с понятным комментарием.
+
+## Навигация по листу
+
+- зум — колесо мыши с <Kbd keys="Ctrl" />;
+- панорама — зажать правую кнопку мыши и тащить;
+- весь лист в окне — <MenuPath path="View » Fit All Objects" /> или <Kbd keys="Ctrl+PgDn" />.
+
+## Шаг 3. Настраиваем лист
+
+1. Открой панель **Properties** (кнопка **Panels** → **Properties**). Когда ничего не выделено, панель показывает свойства листа.
+2. На вкладке **General**, в разделе **Page Options**, выбери в **Formatting and Size** вариант **Template**, а в списке **Template** — **ANSI B Landscape** из твоего Workspace.
+3. В появившемся диалоге **Update Template** выбери **Just this document** и **Add new parameters that exist in the template only**, нажми **OK** и ещё раз **OK** в информационном окне.
+4. В разделе **General** той же вкладки установи **Visible Grid** = `100mil` и **Snap Grid** = `100mil`.
+5. <MenuPath path="View » Fit Document" /> — лист целиком в окне.
+6. Сохрани лист: правый клик в Projects → **Save**.
+
+<Screenshot src="screenshots/m07-multivibrator/l01-sheet-properties.png" alt="панель Properties листа: Page Options = Template ANSI B Landscape, Visible Grid и Snap Grid 100mil" />
+
+**Почему так.** Сетка 100 mil (2,54 мм) — стандарт для схем: выводы библиотечных символов стоят на ней, и проводники точно попадают в выводы. С мелкой сеткой легко получить провод, который выглядит подключённым, но не касается вывода (урок 7.3).
+
+<Callout type="tip" title="А как же ЕСКД?">
+  ANSI B — американский формат листа (11×17 дюймов). Для документации по ЕСКД нужен лист с основной надписью по
+  ГОСТ 2.104. Шаблоны листов делают в Altium отдельно, к этому вернёмся в уроке
+  [10.7](../../m10-manufacturing/07-draftsman-eskd/).
+</Callout>
+
+<Mistakes
+  items={[
+    {
+      problem: 'Кнопка Create неактивна или проект не создаётся в Workspace',
+      why: 'Не выполнен вход или не выбран Workspace в Active Workspace.',
+      fix: 'Проверь **Current User** (вход) и **Active Workspace** (подключение), затем повтори создание проекта.',
+    },
+    {
+      problem: 'Лист схемы оказался вне проекта (Free Documents)',
+      why: 'Схему создали через File » New, когда проект не был выделен, или открыли файл отдельно.',
+      fix: 'Перетащи лист в панели Projects на проект или создавай листы правым кликом по проекту → **Add New to Project**.',
+    },
+    {
+      problem: 'В Workspace нет последних изменений',
+      why: 'Сохранено только на диск (состояние **Modified**).',
+      fix: 'Нажми **Save to Server** рядом с проектом и оставь комментарий.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Что означает состояние Modified у документа в панели Projects?',
+      options: [
+        'Документ открыт, но не изменялся',
+        'Изменения сохранены на диск, но не отправлены в Workspace',
+        'Документ совпадает с версией в Workspace',
+      ],
+      answer: 1,
+      explain: 'Modified — сохранено локально. Чтобы попало в Workspace, нужен Save to Server.',
+    },
+    {
+      q: 'Какой тип проекта выбирают в диалоге Create Project для учебного мультивибратора?',
+      options: ['PCB → <Empty>', 'Integrated Library', 'Script Project'],
+      answer: 0,
+      explain: 'Нужен пустой проект печатной платы: раздел PCB, шаблон <Empty>.',
+    },
+    {
+      q: 'Почему для схемы ставят сетку 100 mil?',
+      options: [
+        'Так требует производитель плат',
+        'Выводы символов стоят на этой сетке, и проводники надёжно попадают в них',
+        'Это минимальная сетка в Altium',
+      ],
+      answer: 1,
+      explain: 'Сетка схемы — не про физические размеры. Она нужна, чтобы проводники точно соединялись с выводами.',
+    },
+    {
+      q: 'Где включают контроль версий проекта в Altium 365?',
+      options: ['В диалоге Create Project, опция Version Control', 'В Preferences', 'В панели Messages'],
+      answer: 0,
+      explain: 'Опция Version Control есть в диалоге Create Project. В Enterprise Server её нет, там контроль версий включён всегда.',
+    },
+  ]}
+/>
+
+<Assignment time={30}>
+  1. Создай проект `Multivibrator` и лист схемы по шагам урока. Сохрани оба на диск и в Workspace.
+  2. Найди папку **Local Storage** на диске и посмотри, какие файлы там появились. Сопоставь их с типами файлов из урока 6.2.
+  3. Сделай скриншоты диалога Create Project и панели Properties листа и положи их в `public/screenshots/m07-multivibrator/`
+     с именами из рамок этого урока — так ты заполнишь плейсхолдеры своими картинками.
+</Assignment>

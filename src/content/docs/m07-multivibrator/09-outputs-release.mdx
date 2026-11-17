@@ -1,0 +1,192 @@
+---
+title: Выходные данные и выпуск
+description: Output Job для изготовления (Gerber, NC Drill, DRC) и для сборки (BOM, Draftsman PDF, Pick&Place), выпуск проекта через Project Releaser в Workspace.
+sidebar:
+  label: 7.9 Выходные данные и выпуск
+  order: 9
+duration: 45
+status: ready
+goals:
+  - создавать файлы Output Job для изготовления и сборки
+  - настраивать Gerber и NC Drill в миллиметрах
+  - понимать контейнеры вывода (папки и PDF)
+  - выпускать проект через Project Releaser и понимать, зачем нужен выпуск
+prerequisites:
+  - m07-multivibrator/08-draftsman
+altium:
+  - title: Подготовка выходных данных и выпуск проекта (руководство, RU)
+    url: https://www.altium.com/ru/documentation/altium-designer/tutorial/output-documentation-project-release
+  - title: Preparing Outputs and Releasing the Project (EN)
+    url: https://www.altium.com/documentation/altium-designer/tutorial/output-documentation-project-release
+sources:
+  - title: Ucamco — спецификация формата Gerber (RS-274X / X2)
+    url: https://www.ucamco.com/en/gerber
+  - title: Формат сверловки Excellon (NC Drill) — описание в справке производителя плат
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+import TutorialFlow from '../../../components/diagrams/m07-multivibrator/TutorialFlow.astro';
+
+Финальный шаг. Завод не открывает .PcbDoc: ему нужны **производственные файлы** — Gerber (рисунок каждого слоя), сверловка, а для сборки ещё спецификация и координаты компонентов. В Altium их описывают в файлах **Output Job (.OutJob)**, а затем **выпускают** проект: генерируют всё одним нажатием и сохраняют в Workspace как неизменяемый набор данных.
+
+<TutorialFlow current={9} />
+
+## Шаг 1. Output Job для изготовления
+
+1. Правый клик по проекту → **Add New to Project » Output Job File**.
+2. Правый клик по нему → **Save As** → `Fabrication`. Затем сохрани проект.
+
+### Gerber
+
+1. **Add New Fabrication Output** → **Gerber Files » [PCB Document]**.
+2. В диалоге **Gerber Setup**: **Units** = **Millimeters**, **Decimal** = **0.001 mm**.
+3. Вкладка **Layer to plot**: кнопкой выбери **Select Used** — в вывод попадут только используемые слои.
+4. **Apply**.
+
+### Сверловка
+
+1. **Add New Fabrication Output** → **NC Drill Files » [PCB Document]**.
+2. В диалоге **NC Drill Setup**: **Units** = **Millimeters**, **Format** = **4:3**, **Coordinate Position** = **Reference to relative origin**.
+3. **OK**.
+
+<Screenshot src="screenshots/m07-multivibrator/l09-gerber-setup.png" alt="Gerber Setup: Units Millimeters, Decimal 0.001 mm, Layer to plot = Select Used" />
+
+**Почему так.** Gerber и сверловка должны быть в **одних единицах и от одной точки отсчёта**, иначе отверстия «уедут» относительно площадок. Формат 4:3 — 4 знака до запятой и 3 после, то есть точность 0,001 мм — совпадает с точностью Gerber. Подробно о форматах — уроки [10.2](../../m10-manufacturing/02-gerber-odb/) и [10.3](../../m10-manufacturing/03-nc-drill/).
+
+### Контейнер и проверка
+
+1. Выбери контейнер **Folder Structure** и включи переключатели **Enabled** у Gerber и NC Drill — они будут выводиться в папки.
+2. **Change** → в настройках **Folder Structure** первым параметром выбери **Release Managed** → **OK**. Папки будет создавать процесс выпуска.
+3. **Add Validation Output** → **Design Rules Check » [PCB Document]** и тоже подключи к **Folder Structure**.
+4. Сохрани OutJob и закрой вкладку (**Close Fabrication.OutJob**).
+
+**Почему так.** DRC внутри Output Job — страховка: выпуск не пройдёт, если на плате есть нарушения. Даже если ты забыл запустить проверку вручную, завод не получит файлы с ошибками.
+
+## Шаг 2. Output Job для сборки
+
+1. Новый Output Job → **Save As** → `Assembly`, сохрани проект.
+2. **Спецификация**: **Add New Report Output** → **Bill of Materials » [ActiveBOM Document]**. В **Report Manager** (**Export Options**): **File Format** = **Generic XLS (*.xls, *.xlsx, *.xlsm)**, **Template** = **BOM Template Single Supplier** → **OK**.
+3. **Чертёж**: **Add New Documentation Output** → **Draftsman » All Draftsman Documents**.
+4. Подключи BOM и Draftsman к контейнеру **PDF**. **Change** → выбери **Assembly.PDF**, режим **Separate file for each output using output name** → **Done**. В предпросмотре будут два файла: **Bill of Materials.pdf** и **Draftsman.pdf**.
+5. **Координаты**: **Add New Documentation Output** → **Generates pick and place files » [PCB Document]**. В **Pick and Place Setup** → **Output Setting › Units** = **Metric** → **OK**. Подключи к **Folder Structure**.
+6. Сохрани и закрой (**Close Assembly.OutJob**).
+
+<Screenshot src="screenshots/m07-multivibrator/l09-assembly-outjob.png" alt="Assembly.OutJob: BOM и Draftsman в контейнере PDF, Pick and Place в Folder Structure" />
+
+**Почему так.** Изготовление и сборка — часто разные компании или разные цеха. Раздельные Output Job дают каждому только его данные: заводу плат — Gerber и сверловку, сборщику — спецификацию, чертёж и координаты для автомата установки (pick&place, урок [10.5](../../m10-manufacturing/05-pick-place/)).
+
+## Шаг 3. Выпуск через Project Releaser
+
+Правый клик по проекту → **Project Releaser**. Откроется вкладка **Release** с шестью этапами.
+
+1. **Configure Server Release.**
+   - Кнопка **Details** показывает, что сгенерирует каждый набор данных.
+   - **Options** (слева внизу) → **Project Release Options** → вкладка **Release Options**: **Release Target** = **Managed - &lt;имя Workspace&gt;**, набор **Fabrication Data** = `Fabrication`, **Assembly Data** = `Assembly` → **OK**.
+   - Включи **Include Fabrication Data** и **Include Assembly Data for No Variant**.
+   - **Prepare** (справа внизу). В **Item Creation** выбери **Create items**. В **Project Modified** — **Save and Commit changes**. В **Commit to Version Control** введи комментарий и отправь.
+2. **Validate Project** — выполняется сам: запускается DRC из Fabrication.OutJob. При нарушениях выпуск остановится: **Cancel**, исправь, начни заново.
+3. **Generate Data** — генерируются все выходные файлы.
+4. **Review Data** — просмотри результат и нажми **Release** (справа внизу). В **Confirm Release** напиши **Release Note** → **OK**.
+5. **Upload Data** — загрузка в Workspace.
+6. **Execution Report** — итоговый отчёт. **Close**.
+
+<Screenshot src="screenshots/m07-multivibrator/l09-project-releaser.png" alt="Project Releaser: этап Review Data со списком сгенерированных файлов" />
+
+**Почему так.** Выпуск фиксирует **ревизию**: набор файлов, привязанный к конкретной версии проекта, который потом нельзя тихо поменять. Если завод через полгода спросит «а что вы нам прислали?», ответ будет в Workspace. Изменил плату — новый выпуск, новая ревизия.
+
+## Совместная работа (кратко)
+
+- История проекта: правый клик → **History & Version Control » Show Project History**.
+- Просмотр в браузере: правый клик → **Show in Web Browser**.
+- Комментарии: панель **Comments and Tasks**.
+- Доступ коллегам: правый клик → **Share**.
+
+<Callout type="altium">
+  Project Releaser и выпуск в Workspace требуют подключённого Workspace и соответствующей лицензии. Без Workspace выходные
+  файлы всё равно можно получить: в Output Job есть генерация в обычные папки на диске (контейнер **Folder Structure** без
+  режима Release Managed) **[ПРОВЕРИТЬ]** точное название параметра в твоей версии. Скриншоты руководства для OutJob и
+  Project Releaser — из AD24/AD25.
+</Callout>
+
+<Callout type="tip">
+  Перед отправкой на завод **обязательно** открой Gerber-файлы в независимом просмотрщике (урок
+  [10.8](../../m10-manufacturing/08-gerber-viewer/)) и пройди чек-лист (приложение C). Altium сгенерирует ровно то, что
+  ты нарисовал, и если ошибка в плате, она попадёт и в файлы.
+</Callout>
+
+<Mistakes
+  items={[
+    {
+      problem: 'Отверстия на просмотрщике смещены относительно площадок',
+      why: 'У Gerber и NC Drill разные единицы или разная точка отсчёта.',
+      fix: 'Единицы — мм в обоих. Coordinate Position у сверловки — Reference to relative origin, как в уроке.',
+    },
+    {
+      problem: 'Выпуск останавливается на Validate Project',
+      why: 'DRC из Fabrication.OutJob нашёл нарушения.',
+      fix: 'Cancel, исправь нарушения (урок 7.7), проверь DRC вручную и начни выпуск заново.',
+    },
+    {
+      problem: 'В Gerber попали лишние или пустые слои',
+      why: 'Слои выбраны вручную, а не Select Used.',
+      fix: 'Во вкладке Layer to plot выбери **Select Used**.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Что содержат Gerber-файлы?',
+      options: [
+        'Рисунок каждого слоя платы (медь, маска, шелкография, контур)',
+        'Список компонентов с ценами',
+        'Схему электрическую принципиальную',
+      ],
+      answer: 0,
+      explain: 'Gerber — векторное описание слоёв для фотоплоттера. Сверловка — отдельный файл NC Drill.',
+    },
+    {
+      q: 'Что значит формат сверловки 4:3 в миллиметрах?',
+      options: [
+        '4 знака до запятой и 3 после — точность 0,001 мм',
+        'Отверстия от 4 до 3 мм',
+        'Четыре слоя, три отверстия',
+      ],
+      answer: 0,
+      explain: 'Формат задаёт число знаков целой и дробной части координат.',
+    },
+    {
+      q: 'Зачем DRC добавлен в Fabrication.OutJob?',
+      options: [
+        'Чтобы выпуск не прошёл, если на плате есть нарушения правил',
+        'Чтобы ускорить генерацию Gerber',
+        'Это обязательный формат завода',
+      ],
+      answer: 0,
+      explain: 'Этап Validate Project проверяет плату, и с нарушениями выпуск останавливается.',
+    },
+    {
+      q: 'Чем выпуск (release) отличается от простой генерации файлов?',
+      options: [
+        'Ничем',
+        'Выпуск фиксирует неизменяемую ревизию набора данных, привязанную к версии проекта',
+        'Выпуск только отправляет файлы на почту',
+      ],
+      answer: 1,
+      explain: 'Ревизия в Workspace неизменяема — всегда известно, какие файлы ушли на производство.',
+    },
+  ]}
+/>
+
+<Assignment time={45}>
+  1. Создай оба Output Job и выпусти проект через Project Releaser.
+  2. Найди выпуск в Workspace (Show in Web Browser) и скачай производственные файлы.
+  3. Открой Gerber и сверловку в любом бесплатном просмотрщике Gerber и убедись, что отверстия совпадают с площадками,
+     а контур — 30×30 мм. Поздравляю: это первая плата, готовая к заказу!
+</Assignment>

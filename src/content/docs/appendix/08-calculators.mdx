@@ -1,0 +1,59 @@
+---
+title: Калькуляторы
+description: Все интерактивные калькуляторы и справочные виджеты курса на одной странице.
+sidebar:
+  label: H. Калькуляторы и справочники
+  order: 8
+---
+
+import OhmCalc from '../../../components/interactive/OhmCalc.astro';
+import DividerCalc from '../../../components/interactive/DividerCalc.astro';
+import TraceWidthCalc from '../../../components/interactive/TraceWidthCalc.astro';
+import MultivibratorCalc from '../../../components/interactive/MultivibratorCalc.astro';
+import LayerStack from '../../../components/interactive/LayerStack.astro';
+import SymbolTable from '../../../components/interactive/SymbolTable.astro';
+import MicrostripCalc from '../../../components/interactive/MicrostripCalc.astro';
+
+Все поля понимают инженерную запись: `4,7к` = `4k7` = 4700, `100n` = 100 нФ, `10мк` = 10 мкФ, `20m` = 20 мА. Регистр важен: `m`/`м` — милли, `M`/`М` — мега.
+
+## Закон Ома
+
+Используется в уроках 1.2 и 1.3.
+
+<OhmCalc />
+
+## Делитель напряжения
+
+Используется в уроках 1.5 и 3.4.
+
+<DividerCalc />
+
+## Мультивибратор
+
+Используется в уроке 3.9.
+
+<MultivibratorCalc />
+
+## Ширина дорожки
+
+Используется в уроке 5.4.
+
+<TraceWidthCalc />
+
+## Микрополосковая линия
+
+Используется в модуле 12 (ВЧ- и СВЧ-платы) и в уроке 9.2.
+
+<MicrostripCalc />
+
+## Стек слоёв платы
+
+Используется в уроках 4.3 и 9.1.
+
+<LayerStack />
+
+## Условные графические обозначения
+
+Используется в уроке 3.2.
+
+<SymbolTable />

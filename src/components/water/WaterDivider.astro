@@ -1,0 +1,149 @@
+---
+/**
+ * Делитель напряжения на воде: два сужения последовательно, манометр в точке между ними.
+ * Галочка «нагрузка» добавляет третью трубу от средней точки вниз — давление проседает.
+ * Внизу — эквивалентный генератор (теорема Гельмгольца — Тевенена).
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-divider"
+	n={n}
+	title="Делитель напряжения: два сужения подряд"
+	map={[
+		['давление в средней точке', 'Uвых'],
+		['отвод воды из средней точки', 'нагрузка Rн'],
+		['«один бак + одно сужение» вместо всей сети', 'эквивалентный генератор Eэ, Rэ'],
+	]}
+	caption="Давление «стекает» по сужениям, как по ступенькам: на каждом теряется доля, пропорциональная его сопротивлению. Подключи нагрузку — из средней точки начнёт уходить вода, через R1 пойдёт больший расход, на нём потеряется больше давления, и выход просядет."
+>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Насос, верхняя труба, вертикальная труба с двумя сужениями R1 и R2, между ними манометр Uвых. Справа ответвление через сужение нагрузки.">
+		<g stroke-width="12">
+			<polyline data-p="hi" class="pipe" points="60,128 60,40 300,40 300,70" />
+			<line data-p="r1" class="pipe" x1="300" y1="70" x2="300" y2="125" />
+			<polyline data-p="mid" class="pipe" points="300,125 300,175" />
+			<line data-p="r2" class="pipe" x1="300" y1="175" x2="300" y2="230" />
+			<polyline data-p="lo" class="pipe" points="300,230 300,260 60,260 60,152" />
+			<g data-load>
+				<polyline data-p="mid2" class="pipe" points="300,150 450,150 450,178" />
+				<line data-p="rl" class="pipe" x1="450" y1="178" x2="450" y2="228" />
+				<polyline data-p="lo2" class="pipe" points="450,228 450,260 300,260" />
+			</g>
+		</g>
+		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
+		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
+		<text class="ts" x="88" y="144">насос U</text>
+		<text class="t" x="284" y="102" text-anchor="end">R1</text>
+		<text class="t" x="284" y="207" text-anchor="end">R2</text>
+		<text class="t" data-ltxt x="466" y="207">Rн</text>
+		<!-- манометр средней точки -->
+		<line x1="306" y1="150" x2="350" y2="150" class="ln" stroke-dasharray="3 3" />
+		<circle cx="370" cy="118" r="22" class="wall" />
+		<line data-needle x1="370" y1="118" x2="370" y2="100" class="ln" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<line x1="370" y1="140" x2="370" y2="150" class="ln" />
+		<text class="ts" x="370" y="88" text-anchor="middle">Uвых</text>
+		<g data-d></g>
+		<!-- эквивалентный генератор -->
+		<g transform="translate(540 50)">
+			<text class="ts" x="50" y="0" text-anchor="middle">эквивалент</text>
+			<rect x="10" y="14" width="80" height="80" class="wall" />
+			<rect data-eqw x="11" y="54" width="78" height="39" fill="var(--water-hi)" opacity="0.5" />
+			<text class="t tm" data-eqe x="50" y="112" text-anchor="middle">Eэ</text>
+			<text class="t tm" data-eqr x="50" y="130" text-anchor="middle">Rэ</text>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Сужение R1</span><input type="range" data-r1 min="1" max="20" step="1" value="10" /><output data-r1v></output></label>
+		<label class="water__row"><span>Сужение R2</span><input type="range" data-r2 min="1" max="20" step="1" value="10" /><output data-r2v></output></label>
+		<label class="water__row"><span>Нагрузка Rн</span><input type="range" data-rl min="1" max="40" step="1" value="5" /><output data-rlv></output></label>
+	</div>
+	<div class="water__btns">
+		<label class="water__check"><input type="checkbox" data-on /> подключить нагрузку</label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, $ } from '../../lib/water';
+
+	class WaterDivider extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			const U = 12;
+			let R1 = 10,
+				R2 = 10,
+				RL = 5,
+				load = false,
+				ang = 0;
+			const g = $(r, '[data-d]');
+			const main = new Drops(g, new Path([[60, 140], [60, 40], [300, 40], [300, 150]]), 15);
+			const down = new Drops(g, new Path([[300, 150], [300, 260]]), 15);
+			const back = new Drops(g, new Path([[300, 260], [60, 260], [60, 140]]), 15);
+			const lb = new Drops(g, new Path([[300, 150], [450, 150], [450, 260], [300, 260]]), 15);
+			let I = 0,
+				I2 = 0,
+				IL = 0;
+			const P = (k: string) => $(r, `[data-p="${k}"]`);
+			const upd = () => {
+				const R2e = load ? (R2 * RL) / (R2 + RL) : R2;
+				I = U / (R1 + R2e);
+				const Uo = I * R2e;
+				I2 = Uo / R2;
+				IL = load ? Uo / RL : 0;
+				const Eth = (U * R2) / (R1 + R2);
+				const Rth = (R1 * R2) / (R1 + R2);
+				$(r, '[data-r1v]').textContent = R1 + ' Ом';
+				$(r, '[data-r2v]').textContent = R2 + ' Ом';
+				$(r, '[data-rlv]').textContent = RL + ' Ом';
+				paint([P('hi')], 1);
+				paint([P('mid'), P('mid2')], Uo / U);
+				paint([P('lo'), P('lo2')], 0);
+				paint([P('r1')], (1 + Uo / U) / 2);
+				paint([P('r2'), P('rl')], Uo / U / 2);
+				for (const [k, R] of [['r1', R1], ['r2', R2], ['rl', RL]] as const)
+					P(k).setAttribute('stroke-width', Math.max(2, 10 / Math.sqrt(R / 2)).toFixed(1));
+				($(r, '[data-load]') as SVGGElement).style.display = load ? '' : 'none';
+				lb.hide(!load);
+				($(r, '[data-ltxt]') as SVGTextElement).style.display = load ? '' : 'none';
+				const a = -120 + (240 * Uo) / U;
+				$(r, '[data-needle]').setAttribute('transform', `rotate(${a.toFixed(1)} 370 118)`);
+				const eh = (78 * Eth) / U;
+				$(r, '[data-eqw]').setAttribute('y', String(93 - eh));
+				$(r, '[data-eqw]').setAttribute('height', String(eh));
+				$(r, '[data-eqe]').textContent = `Eэ = ${fm(Eth, 2)} В`;
+				$(r, '[data-eqr]').textContent = `Rэ = ${fm(Rth, 2)} Ом`;
+				$(r, '[data-fx]').textContent = load
+					? `Uвых = Eэ · Rн/(Rэ + Rн) = ${fm(Eth, 2)} · ${RL}/(${fm(Rth, 2)} + ${RL}) = ${fm(Uo, 2)} В`
+					: `Uвых = U · R2/(R1 + R2) = 12 · ${R2}/${R1 + R2} = ${fm(Uo, 2)} В`;
+				$(r, '[data-fx2]').textContent = load
+					? `Просадка ${fm(100 * (1 - Uo / Eth), 1)} %. Правило Хоровица: нагрузка должна быть хотя бы в 10 раз «тяжелее» Rэ — тогда просадка меньше 10 %.`
+					: 'Без нагрузки делитель выдаёт напряжение холостого хода — это и есть Eэ эквивалентного генератора.';
+			};
+			upd();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-r1]')) R1 = +t.value;
+				if (t.matches('[data-r2]')) R2 = +t.value;
+				if (t.matches('[data-rl]')) RL = +t.value;
+				if (t.matches('[data-on]')) load = t.checked;
+				upd();
+			});
+			const k = 25;
+			animate(r, (dt) => {
+				main.step(k * I * dt);
+				back.step(k * I * dt);
+				down.step(k * I2 * dt);
+				if (load) lb.step(k * IL * dt);
+				ang += 60 * I * dt;
+				$(r, '[data-imp]').setAttribute('transform', `rotate(${ang.toFixed(1)} 60 140)`);
+			});
+		}
+	}
+	customElements.define('water-divider', WaterDivider);
+</script>

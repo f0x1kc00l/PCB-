@@ -1,0 +1,176 @@
+---
+/**
+ * Калькулятор микрополосковой линии: Z0 по ширине или ширина по Z0,
+ * плюс εэфф, длина волны в линии, четвертьволновый отрезок и задержка.
+ * Формулы — src/lib/microstrip.ts (Хаммерстад и Йенсен, 1980).
+ *
+ *   <MicrostripCalc />                         — FR-4, h = 1,5 мм, 868 МГц
+ *   <MicrostripCalc er="9.8" h="0.635" f="3000" mode="width" z0="50" />
+ */
+interface Props {
+	mode?: 'z0' | 'width';
+	er?: string;
+	h?: string;
+	w?: string;
+	z0?: string;
+	f?: string;
+}
+const { mode = 'width', er = '4.3', h = '1.5', w = '2.9', z0 = '50', f = '868' } = Astro.props;
+const uid = `ms-${Math.random().toString(36).slice(2, 8)}`;
+const materials = [
+	{ v: '4.3', label: 'FR-4 (εr ≈ 4,3)' },
+	{ v: '3.66', label: 'Rogers RO4350B (εr ≈ 3,66, расчётное)' },
+	{ v: '9.8', label: 'Поликор / Al₂O₃ (εr ≈ 9,8)' },
+	{ v: '2.2', label: 'PTFE / фторопласт (εr ≈ 2,2)' },
+];
+---
+
+<microstrip-calc class="pcb-widget pcb-calc not-content" data-mode={mode}>
+	<p class="pcb-widget__title">Микрополосковая линия</p>
+
+	<div class="pcb-segmented" role="radiogroup" aria-label="Что найти">
+		<label><input type="radio" name={`${uid}-mode`} value="width" checked={mode === 'width'} /><span>Ширину по Z0</span></label>
+		<label><input type="radio" name={`${uid}-mode`} value="z0" checked={mode === 'z0'} /><span>Z0 по ширине</span></label>
+	</div>
+
+	<div class="layout">
+		<svg class="pcb-schematic" viewBox="0 0 220 120" role="img" aria-label="Поперечное сечение: дорожка шириной W на диэлектрике толщиной h над сплошной землёй">
+			<rect x="10" y="40" width="200" height="50" fill="var(--pcb-fr4)" opacity="0.55" />
+			<rect x="10" y="90" width="200" height="8" fill="var(--pcb-copper)" />
+			<rect x="85" y="33" width="50" height="7" fill="var(--pcb-copper)" data-strip />
+			<g stroke="currentColor" stroke-width="1" fill="none">
+				<path d="M85 22 H135 M85 17 V27 M135 17 V27" data-wdim />
+				<path d="M200 40 V90 M195 40 H205 M195 90 H205" />
+			</g>
+			<g font-size="11" fill="currentColor" font-family="var(--pcb-mono)">
+				<text x="110" y="14" text-anchor="middle" data-wlabel>W</text>
+				<text x="186" y="69" text-anchor="end">h</text>
+				<text x="16" y="70">εr</text>
+				<text x="16" y="114">земля</text>
+			</g>
+		</svg>
+
+		<div class="fields">
+			<label>
+				Материал
+				<select name="preset">
+					{materials.map((m) => <option value={m.v} selected={m.v === er}>{m.label}</option>)}
+					<option value="custom" selected={!materials.some((m) => m.v === er)}>свой εr…</option>
+				</select>
+			</label>
+			<label>εr <input name="er" value={er} inputmode="decimal" autocomplete="off" /></label>
+			<label>
+				Толщина диэлектрика h, мм
+				<input name="h" value={h} inputmode="decimal" autocomplete="off" />
+				<span class="hint">до ближайшего слоя земли</span>
+			</label>
+			<label data-for="width">Нужное Z0, Ом <input name="z0" value={z0} inputmode="decimal" autocomplete="off" /></label>
+			<label data-for="z0">Ширина W, мм <input name="w" value={w} inputmode="decimal" autocomplete="off" /></label>
+			<label>Частота, МГц <input name="f" value={f} inputmode="decimal" autocomplete="off" /></label>
+		</div>
+	</div>
+
+	<div class="results">
+		<div class="result result--main"><span data-main-label>Ширина W</span><output data-out="main">—</output></div>
+		<div class="result"><span>εэфф</span><output data-out="eeff">—</output></div>
+		<div class="result"><span>λ в линии (λг)</span><output data-out="lg">—</output></div>
+		<div class="result"><span>Четверть волны λг/4</span><output data-out="q">—</output></div>
+		<div class="result"><span>Задержка</span><output data-out="d">—</output></div>
+		<div class="result"><span>W/h</span><output data-out="u">—</output></div>
+	</div>
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		Формулы Хаммерстада–Йенсена (1980), точность около 1 %. Не учтены толщина меди (снижает Z0 на 1–3 %), паяльная
+		маска (снижает Z0 ещё на 1–2 Ом) и рост εr с частотой. У FR-4 εr плавает от партии к партии (обычно 4,0–4,7):
+		для серийной платы заказывай контроль импеданса у производителя и бери его расчёт.
+	</p>
+</microstrip-calc>
+
+<script>
+	import { lineInfo, widthFor } from '../../lib/microstrip';
+	import { parseValue, formatNumber } from '../../lib/units';
+
+	class MicrostripCalc extends HTMLElement {
+		connectedCallback() {
+			const $ = (n: string) => this.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${n}"]`)!;
+			const out = (n: string) => this.querySelector(`[data-out="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const strip = this.querySelector<SVGRectElement>('[data-strip]')!;
+			const wdim = this.querySelector<SVGPathElement>('[data-wdim]')!;
+			const wlabel = this.querySelector<SVGTextElement>('[data-wlabel]')!;
+
+			const getMode = () => this.querySelector<HTMLInputElement>('input[type="radio"]:checked')?.value ?? 'width';
+
+			this.addEventListener('change', (e) => {
+				const t = e.target as HTMLElement;
+				if (t.matches('[name="preset"]') && $('preset').value !== 'custom') {
+					$('er').value = $('preset').value.replace('.', ',');
+				}
+			});
+
+			const update = () => {
+				const mode = getMode();
+				this.querySelectorAll<HTMLElement>('[data-for]').forEach((el) => (el.hidden = el.dataset.for !== mode));
+				const er = parseValue($('er').value);
+				const h = parseValue($('h').value);
+				const f = parseValue($('f').value);
+				const ok = er >= 1 && h > 0 && f > 0;
+				let w = parseValue($('w').value);
+				if (mode === 'width') {
+					const z0 = parseValue($('z0').value);
+					w = ok && z0 > 5 && z0 < 250 ? widthFor(z0, h, er) : NaN;
+				}
+				if (!ok || !(w > 0)) {
+					['main', 'eeff', 'lg', 'q', 'd', 'u'].forEach((n) => (out(n).textContent = '—'));
+					return;
+				}
+				const info = lineInfo(w, h, er, f);
+				this.querySelector('[data-main-label]')!.textContent = mode === 'width' ? 'Ширина W' : 'Волновое сопротивление Z0';
+				out('main').textContent = mode === 'width' ? `${formatNumber(w)} мм` : `${formatNumber(info.z0)} Ом`;
+				out('eeff').textContent = formatNumber(info.eeff);
+				out('lg').textContent = `${formatNumber(info.lambdaG)} мм`;
+				out('q').textContent = `${formatNumber(info.quarter)} мм`;
+				out('d').textContent = `${formatNumber(info.delay)} пс/мм`;
+				const u = w / h;
+				out('u').textContent = formatNumber(u);
+
+				// Рисунок: ширина полоски пропорциональна W/h (h на рисунке = 50 px), в пределах блока.
+				const wpx = Math.min(Math.max(u * 50, 4), 190);
+				const x = 110 - wpx / 2;
+				strip.setAttribute('x', x.toFixed(1));
+				strip.setAttribute('width', wpx.toFixed(1));
+				wdim.setAttribute('d', `M${x} 22 H${x + wpx} M${x} 17 V27 M${x + wpx} 17 V27`);
+				wlabel.textContent = `W = ${formatNumber(w)} мм`;
+
+				const msgs: string[] = [];
+				if (u < 0.05 || u > 50) msgs.push('W/h вне типичного диапазона: точность формул падает, проверь в программе расчёта импеданса.');
+				if (w < 0.1) msgs.push('Ширина меньше 0,1 мм — на пределе возможностей большинства производителей.');
+				if (info.quarter > 0 && info.quarter < 1) msgs.push('Четверть волны короче 1 мм: на такой частоте элементы на отрезках линий становятся непрактично малыми.');
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+			};
+
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('microstrip-calc', MicrostripCalc);
+</script>
+
+<style>
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(10rem, 15rem) 1fr;
+		gap: 1rem;
+		align-items: start;
+		margin-top: 0.9rem;
+	}
+	@media (max-width: 40rem) {
+		.layout {
+			grid-template-columns: 1fr;
+		}
+	}
+	[data-for][hidden] {
+		display: none;
+	}
+</style>

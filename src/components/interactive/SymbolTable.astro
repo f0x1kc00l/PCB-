@@ -1,0 +1,167 @@
+---
+/**
+ * Таблица соответствия УГО: ГОСТ ↔ IEC 60617 ↔ ANSI/IEEE 315.
+ * Данные и источники — src/data/symbols.ts. Новый символ = новая запись в массиве.
+ *
+ *   <SymbolTable />                      — все символы
+ *   <SymbolTable only={['resistor','cap']} /> — только выбранные
+ */
+import { symbols } from '../../data/symbols';
+
+interface Props {
+	only?: string[];
+}
+const { only } = Astro.props;
+const rows = only ? symbols.filter((s) => only.includes(s.id)) : symbols;
+
+/** Обёртка фрагмента символа в SVG с общими атрибутами линий. */
+const svg = (inner: string, title: string) =>
+	`<svg viewBox="-2 -2 84 44" width="84" height="44" role="img" aria-label="${title}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+---
+
+<symbol-table class="pcb-widget not-content">
+	<p class="pcb-widget__title">Условные графические обозначения: ГОСТ ↔ IEC ↔ ANSI</p>
+	<label class="search">
+		<span class="visually-hidden">Поиск по таблице</span>
+		<input type="search" placeholder="Поиск: резистор, diode, VT, Q…" autocomplete="off" />
+	</label>
+
+	<div class="scroller">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Элемент</th>
+					<th scope="col">ГОСТ</th>
+					<th scope="col">IEC 60617</th>
+					<th scope="col">ANSI / IEEE 315</th>
+					<th scope="col">Поз. обозначение<br /><small>ГОСТ 2.710 / за рубежом</small></th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((s) => (
+						<tr data-search={`${s.name} ${s.en} ${s.refGost} ${s.refIntl}`.toLowerCase()}>
+							<th scope="row">
+								<span class="name">{s.name}</span>
+								<span class="en">{s.en}</span>
+								<span class="std">{s.gostStd}</span>
+								{s.note && <span class="note">{s.note}</span>}
+							</th>
+							<td class="sym" set:html={svg(s.gost, `${s.name}, ГОСТ`)} />
+							<td class="sym" set:html={svg(s.iec, `${s.name}, IEC`)} />
+							<td class="sym" set:html={svg(s.ansi, `${s.name}, ANSI`)} />
+							<td class="ref">
+								<span class="ref-gost">{s.refGost}</span>
+								<span class="ref-intl">{s.refIntl}</span>
+							</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+	<p class="footnote">
+		Символы упрощены для сравнения формы; размеры и пропорции для чертежей — по указанным ГОСТ. Стандартные
+		библиотеки Altium рисуют символы ближе к IEC/ANSI, поэтому для схем по ЕСКД обычно делают свою библиотеку
+		(модуль 8).
+	</p>
+</symbol-table>
+
+<script>
+	class SymbolTable extends HTMLElement {
+		connectedCallback() {
+			const input = this.querySelector<HTMLInputElement>('input[type="search"]')!;
+			const rows = [...this.querySelectorAll<HTMLTableRowElement>('tbody tr')];
+			input.addEventListener('input', () => {
+				const q = input.value.trim().toLowerCase();
+				rows.forEach((r) => (r.hidden = q !== '' && !r.dataset.search!.includes(q)));
+			});
+		}
+	}
+	customElements.define('symbol-table', SymbolTable);
+</script>
+
+<style>
+	.search input {
+		width: 100%;
+		max-width: 22rem;
+		padding: 0.45rem 0.6rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.35rem;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+	}
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+	}
+	.scroller {
+		margin-top: 0.75rem;
+		overflow-x: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: var(--sl-text-sm);
+	}
+	th,
+	td {
+		padding: 0.5rem 0.6rem;
+		border-bottom: 1px solid var(--sl-color-hairline);
+		text-align: start;
+		vertical-align: middle;
+	}
+	thead th {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	tbody th {
+		min-width: 10rem;
+		font-weight: 400;
+	}
+	.name {
+		display: block;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.en,
+	.std {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.std::before {
+		content: ' · ';
+	}
+	.note {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+	}
+	.sym {
+		color: var(--sl-color-white);
+		min-width: 88px;
+	}
+	.ref span {
+		display: block;
+		font-family: var(--pcb-mono);
+	}
+	.ref-gost {
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	.ref-intl {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+	}
+	thead small {
+		font-weight: 400;
+	}
+	tr[hidden] {
+		display: none;
+	}
+</style>

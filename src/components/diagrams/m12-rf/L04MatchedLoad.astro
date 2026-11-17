@@ -1,0 +1,38 @@
+---
+/**
+ * Рис. 12.4в: согласованная нагрузка 50 Ом. Слева — резистор на землю через переходные отверстия
+ * (так делают сейчас), справа — приём из книги Малорацкого (рис. 1.40): резистор, нагруженный
+ * разомкнутым четвертьволновым шлейфом, который на рабочей частоте работает как короткое замыкание.
+ */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="12.4в" caption="Согласованная нагрузка 50 Ом. Сегодня проще всего поставить чип-резистор 0402 и сразу уйти на землю двумя-тремя переходными отверстиями. В керамических ГИС 1970-х отверстие в подложке было дорогим, поэтому землю «делали» разомкнутым шлейфом длиной λг/4: на рабочей частоте его вход — почти короткое замыкание. Платой за это была узкая полоса.">
+	<svg viewBox="0 0 660 200" role="img" aria-label="Слева дорожка подходит к резистору 50 Ом, за ним площадка с тремя переходными отверстиями на землю. Справа дорожка, резистор и разомкнутый шлейф длиной лямбда на четыре.">
+		<text class="t" x="10" y="18" font-weight="700">Сейчас: резистор + via</text>
+		<rect x="20" y="92" width="130" height="16" fill="var(--pcb-copper)" />
+		<rect x="150" y="88" width="16" height="24" fill="var(--pcb-copper)" />
+		<rect x="166" y="90" width="26" height="20" fill="#2a2a2a" />
+		<text class="t t-s" x="179" y="132" text-anchor="middle">50 Ом</text>
+		<rect x="192" y="80" width="52" height="40" fill="var(--pcb-copper)" />
+		{[205, 231].map((x) => (
+			<g>
+				<circle cx={x} cy="93" r="6" fill="var(--sl-color-bg)" stroke="currentColor" />
+				<circle cx={x} cy="108" r="6" fill="var(--sl-color-bg)" stroke="currentColor" />
+			</g>
+		))}
+		<text class="t t-s t-mut" x="218" y="146" text-anchor="middle">via на GND</text>
+
+		<text class="t" x="330" y="18" font-weight="700">В книге: резистор + шлейф λг/4</text>
+		<rect x="340" y="92" width="100" height="16" fill="var(--pcb-copper)" />
+		<rect x="440" y="88" width="16" height="24" fill="var(--pcb-copper)" />
+		<rect x="456" y="90" width="26" height="20" fill="#2a2a2a" />
+		<text class="t t-s" x="469" y="132" text-anchor="middle">50 Ом</text>
+		<rect x="482" y="88" width="16" height="24" fill="var(--pcb-copper)" />
+		<rect x="498" y="94" width="140" height="12" fill="var(--pcb-copper)" />
+		<path class="ln-acc" d="M498 70 H638 M498 64 V76 M638 64 V76" />
+		<text class="t t-acc" x="568" y="58" text-anchor="middle">λг/4, конец разомкнут</text>
+		<text class="t t-s t-mut" x="568" y="130" text-anchor="middle">на f0 вход шлейфа ≈ 0 Ом</text>
+		<text class="t t-s t-mut" x="568" y="146" text-anchor="middle">(«виртуальная земля»)</text>
+	</svg>
+</Figure>

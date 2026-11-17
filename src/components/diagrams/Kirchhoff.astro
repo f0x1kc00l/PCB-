@@ -1,0 +1,55 @@
+---
+/**
+ * Рис. к уроку 1.4: слева — закон Кирхгофа для токов в узле,
+ * справа — пример смешанного соединения с посчитанными токами и напряжениями.
+ */
+import Figure from './Figure.astro';
+---
+
+<Figure n="1.5" caption="Слева: сколько тока втекает в узел, столько и вытекает (5 = 3 + 2 мА). Справа: R2 и R3 по 2 кОм параллельно дают 1 кОм, всего 2 кОм, ток 12 В / 2 кОм = 6 мА. Он делится поровну между R2 и R3, а 12 В — поровну между R1 и параллельной парой.">
+	<svg viewBox="0 -26 640 256" role="img" aria-label="Узел с входящим током 5 мА и выходящими 3 и 2 мА. Схема: батарея 12 В, резистор R1 1 кОм последовательно с двумя параллельными резисторами по 2 кОм. Ток 6 мА, по 3 мА в ветвях, по 6 вольт на R1 и на параллельной паре.">
+		<!-- ===== Узел ===== -->
+		<text class="t" x="10" y="-8" font-weight="700">Узел</text>
+		<circle cx="110" cy="115" r="6" class="fill-acc" />
+		<path class="ln" d="M20 115 H104 M114 110 L180 55 M114 120 L180 175" />
+		<path class="ln-acc" d="M50 105 H80 M73 99 L80 105 L73 111" />
+		<path class="ln-acc" d="M140 72 L160 56 M151 55 L160 56 L159 65" />
+		<path class="ln-acc" d="M140 158 L160 174 M159 165 L160 174 L151 175" />
+		<text class="t t-mono" x="28" y="96">I₁ = 5 мА</text>
+		<text class="t t-mono" x="150" y="44">I₂ = 3 мА</text>
+		<text class="t t-mono" x="150" y="200">I₃ = 2 мА</text>
+		<text class="t t-acc" x="20" y="222">I₁ = I₂ + I₃</text>
+
+		<!-- ===== Схема ===== -->
+		<text class="t" x="250" y="-8" font-weight="700">Смешанное соединение</text>
+		<!-- батарея -->
+		<path class="ln" d="M270 40 V100 M270 116 V185" />
+		<path class="ln" d="M252 100 H288" />
+		<path d="M260 116 H280" stroke="currentColor" stroke-width="5" />
+		<text class="t" x="246" y="96">+</text>
+		<text class="t t-mono" x="226" y="140">12 В</text>
+		<!-- R1 горизонтально -->
+		<path class="ln" d="M270 40 H340 M380 40 H560" />
+		<rect class="ln" x="340" y="33" width="40" height="14" />
+		<text class="t" x="360" y="26" text-anchor="middle">R1 1 кОм</text>
+		<text class="t t-acc t-s" x="360" y="66" text-anchor="middle">6 В</text>
+		<!-- узел и параллельные R2, R3 -->
+		<circle cx="460" cy="40" r="4" class="fill-cur" />
+		<circle cx="460" cy="185" r="4" class="fill-cur" />
+		<path class="ln" d="M460 40 V85 M460 125 V185 M560 40 V85 M560 125 V185 M270 185 H560" />
+		<rect class="ln" x="453" y="85" width="14" height="40" />
+		<rect class="ln" x="553" y="85" width="14" height="40" />
+		<text class="t" x="445" y="104" text-anchor="end">R2</text>
+		<text class="t t-s t-mut" x="445" y="119" text-anchor="end">2 кОм</text>
+		<text class="t" x="577" y="104">R3</text>
+		<text class="t t-s t-mut" x="577" y="119">2 кОм</text>
+		<text class="t t-acc t-s" x="510" y="150" text-anchor="middle">6 В</text>
+		<!-- токи -->
+		<path class="ln-acc" d="M400 52 H430 M424 47 L430 52 L424 57" />
+		<text class="t t-mono t-s" x="400" y="72">6 мА</text>
+		<path class="ln-acc" d="M472 55 V75 M467 69 L472 75 L477 69" />
+		<text class="t t-mono t-s" x="480" y="70">3 мА</text>
+		<path class="ln-acc" d="M572 55 V75 M567 69 L572 75 L577 69" />
+		<text class="t t-mono t-s" x="580" y="70">3 мА</text>
+	</svg>
+</Figure>

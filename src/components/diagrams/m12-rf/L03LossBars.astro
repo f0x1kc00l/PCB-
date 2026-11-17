@@ -1,0 +1,43 @@
+---
+/**
+ * Рис. 12.4 к уроку 12.3: оценка потерь в линии 50 Ом длиной 10 см на 2,45 ГГц.
+ * Числа посчитаны по приближённым формулам Pozar (Microwave Engineering, §3.8) для микрополоска:
+ *   αd = k0·εr·(εэфф−1)·tgδ / (2·√εэфф·(εr−1)),  αc ≈ Rs / (Z0·W),  Rs = √(π·f·μ0/σ), медь σ = 5,8·10⁷ См/м.
+ * Шероховатость меди, маска и излучение не учтены. Данные материалов:
+ *   FR-4 (Shengyi S1000-2M): εr 4,6, tgδ 0,018 @ 1 ГГц (берём как оценку и для 2,45 ГГц);
+ *   RO4350B: εr (расчётное) 3,66, tgδ 0,0037 @ 10 ГГц.
+ */
+import Figure from '../Figure.astro';
+
+const rows = [
+	{ label: 'FR-4, h = 1,6 мм (W ≈ 2,96 мм)', d: 0.68, c: 0.08 },
+	{ label: 'FR-4, h = 0,2 мм (W ≈ 0,37 мм)', d: 0.68, c: 0.61 },
+	{ label: 'RO4350B, h = 0,508 мм (W ≈ 1,11 мм)', d: 0.13, c: 0.2 },
+];
+const scale = 230; // px на 1 дБ
+const x0 = 250;
+---
+
+<Figure n="12.3а" caption="Оценка потерь в линии 50 Ом длиной 10 см на частоте 2,45 ГГц. В FR-4 основная беда — диэлектрик (tg δ ≈ 0,018). На тонком диэлектрике дорожка узкая, и к ним добавляются потери в меди. У Rogers диэлектрические потери в 5 раз меньше. Шероховатость меди добавит к «меди» ещё 40–80 %.">
+	<svg viewBox="0 0 640 210" role="img" aria-label="Горизонтальные столбцы потерь: FR-4 толстый около 0,76 дБ, FR-4 тонкий около 1,3 дБ, RO4350B около 0,33 дБ на 10 см.">
+		{
+			rows.map((r, i) => {
+				const y = 30 + i * 52;
+				return (
+					<g>
+						<text class="t t-s" x={x0 - 10} y={y + 17} text-anchor="end">{r.label}</text>
+						<rect x={x0} y={y} width={r.d * scale} height="26" fill="var(--sl-color-accent)" />
+						<rect x={x0 + r.d * scale} y={y} width={r.c * scale} height="26" fill="var(--pcb-altium)" />
+						<text class="t t-s t-mono" x={x0 + (r.d + r.c) * scale + 6} y={y + 17}>
+							≈ {(r.d + r.c).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} дБ
+						</text>
+					</g>
+				);
+			})
+		}
+		<rect x={x0} y="185" width="14" height="12" fill="var(--sl-color-accent)" />
+		<text class="t t-s" x={x0 + 20} y="195">диэлектрик</text>
+		<rect x={x0 + 110} y="185" width="14" height="12" fill="var(--pcb-altium)" />
+		<text class="t t-s" x={x0 + 130} y="195">медь (без шероховатости)</text>
+	</svg>
+</Figure>

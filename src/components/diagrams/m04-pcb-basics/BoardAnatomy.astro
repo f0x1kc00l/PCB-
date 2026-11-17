@@ -1,0 +1,83 @@
+---
+/**
+ * Рис. 4.1 (урок 4.1): разрез двухслойной печатной платы.
+ * Толщины слоёв сильно преувеличены, чтобы были видны маска, медь и покрытие.
+ */
+import Figure from '../Figure.astro';
+
+const BG = 'var(--sl-color-bg)';
+const CU = 'var(--pcb-copper)';
+const MASK = 'var(--pcb-mask)';
+const SOLDER = '#b8c0c8';
+const FINISH = '#d9b44a';
+---
+
+<Figure n="4.1" caption="Разрез двухслойной платы (не в масштабе). Медь лежит по обе стороны стеклотекстолитового ядра, сверху её закрывает паяльная маска с окнами под пайку, поверх маски — шелкография. Металлизированные отверстия соединяют слои и держат выводы компонентов.">
+	<svg viewBox="0 0 680 300" role="img" aria-label="Разрез платы: ядро FR-4, медь сверху и снизу, паяльная маска с окнами, шелкография, площадка с финишным покрытием, переходное отверстие под маской и вывод компонента, пропаянный в металлизированном отверстии.">
+		<!-- ядро FR-4 -->
+		<rect x="40" y="114" width="600" height="100" fill="var(--pcb-fr4)" />
+		<text x="160" y="170" font-size="13" fill="#1a1a1a" font-family="system-ui, sans-serif">стеклотекстолит FR-4 (ядро)</text>
+
+		<!-- медь верхнего слоя: дорожка, SMD-площадка, площадки отверстий -->
+		<rect x="100" y="104" width="80" height="10" fill={CU} />
+		<rect x="240" y="104" width="60" height="10" fill={CU} />
+		<rect x="370" y="104" width="60" height="10" fill={CU} />
+		<rect x="500" y="104" width="70" height="10" fill={CU} />
+		<!-- медь нижнего слоя: полигон и площадки -->
+		<rect x="60" y="214" width="270" height="10" fill={CU} />
+		<rect x="370" y="214" width="60" height="10" fill={CU} />
+		<rect x="500" y="214" width="70" height="10" fill={CU} />
+
+		<!-- переходное отверстие: высверленный канал и медные стенки -->
+		<rect x="392" y="104" width="16" height="120" fill={BG} />
+		<rect x="388" y="104" width="4" height="120" fill={CU} />
+		<rect x="408" y="104" width="4" height="120" fill={CU} />
+
+		<!-- отверстие под вывод: канал, стенки, припой, вывод -->
+		<rect x="522" y="104" width="26" height="120" fill={SOLDER} />
+		<rect x="518" y="104" width="4" height="120" fill={CU} />
+		<rect x="548" y="104" width="4" height="120" fill={CU} />
+		<polygon points="500,101 531,74 531,101" fill={SOLDER} />
+		<polygon points="570,101 539,74 539,101" fill={SOLDER} />
+		<polygon points="503,224 531,240 531,224" fill={SOLDER} />
+		<polygon points="567,224 539,240 539,224" fill={SOLDER} />
+		<rect x="531" y="58" width="8" height="190" fill="#8a929b" />
+		<rect x="505" y="30" width="60" height="28" rx="4" fill="#3a3f45" />
+		<text x="535" y="49" font-size="11" fill="#ffffff" text-anchor="middle" font-family="system-ui, sans-serif">корпус</text>
+
+		<!-- финишное покрытие на открытых площадках -->
+		<rect x="240" y="101" width="60" height="3" fill={FINISH} />
+
+		<!-- паяльная маска сверху (окна над SMD-площадкой и выводом) и снизу -->
+		<rect x="40" y="94" width="196" height="10" fill={MASK} />
+		<rect x="304" y="94" width="192" height="10" fill={MASK} />
+		<rect x="574" y="94" width="66" height="10" fill={MASK} />
+		<rect x="40" y="224" width="456" height="8" fill={MASK} />
+		<rect x="574" y="224" width="66" height="8" fill={MASK} />
+
+		<!-- шелкография -->
+		<rect x="440" y="88" width="44" height="6" fill="var(--pcb-silk)" stroke="#999" stroke-width="0.5" />
+
+		<!-- подписи -->
+		<g class="t t-s">
+			<path class="ln-thin" d="M70 94 V48" />
+			<text x="40" y="42">паяльная маска</text>
+			<path class="ln-thin" d="M140 104 V70" />
+			<text x="140" y="64" text-anchor="middle">дорожка</text>
+			<path class="ln-thin" d="M270 100 V50" />
+			<text x="270" y="30" text-anchor="middle">площадка с финишным</text>
+			<text x="270" y="44" text-anchor="middle">покрытием</text>
+			<path class="ln-thin" d="M400 94 V80" />
+			<text x="400" y="62" text-anchor="middle">переходное отверстие</text>
+			<text x="400" y="76" text-anchor="middle">(закрыто маской)</text>
+			<path class="ln-thin" d="M462 88 V30" />
+			<text x="458" y="24" text-anchor="end">шелкография</text>
+			<text x="580" y="78">вывод</text>
+			<text x="580" y="92">и припой</text>
+			<path class="ln-thin" d="M200 224 V252" />
+			<text x="200" y="266" text-anchor="middle">медь нижнего слоя (полигон)</text>
+			<path class="ln-thin" d="M410 200 L440 256" />
+			<text x="444" y="268">металлизация стенок</text>
+		</g>
+	</svg>
+</Figure>

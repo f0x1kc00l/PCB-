@@ -1,0 +1,166 @@
+---
+/**
+ * Конденсатор = бак, разделённый резиновой мембраной. Вода через мембрану не проходит,
+ * но мембрана растягивается — и с одной стороны вода «входит», с другой «выходит».
+ * Заряд через сужение R: экспонента с постоянной времени τ = RC (Хоровиц §1.13).
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-capacitor"
+	n={n}
+	title="Конденсатор: бак с резиновой мембраной"
+	map={[
+		['мембрана', 'диэлектрик'],
+		['мягкость мембраны', 'ёмкость C'],
+		['прогиб мембраны', 'заряд q = C·U'],
+		['давление растянутой мембраны', 'напряжение Uc'],
+	]}
+	caption="Пока мембрана не растянута, вода идёт легко — ток максимален. Чем сильнее прогиб, тем сильнее мембрана давит в ответ, и расход затухает. Сквозь мембрану не прошло ни капли, хотя ток в цепи был: так конденсатор «пропускает» перемены и не пропускает постоянный ток."
+>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Слева насос и трёхходовой кран, сужение R, бак с мембраной. Справа осциллограмма напряжения на конденсаторе и тока.">
+		<g stroke-width="12">
+			<polyline data-p="hi" class="pipe" points="60,128 60,50 150,50" />
+			<line data-p="r" class="pipe" x1="150" y1="50" x2="220" y2="50" />
+			<polyline data-p="a" class="pipe" points="220,50 300,50 300,92" />
+			<polyline data-p="b" class="pipe" points="300,208 300,250 60,250 60,152" />
+			<polyline data-p="short" class="pipe" points="110,50 110,250" />
+		</g>
+		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
+		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
+		<text class="ts" x="88" y="144">насос U</text>
+		<text class="t" x="185" y="36" text-anchor="middle">R</text>
+		<!-- кран-переключатель -->
+		<circle cx="110" cy="50" r="9" class="wall" />
+		<text class="ts" data-modet x="110" y="80" text-anchor="middle">заряд</text>
+		<!-- бак: корпус -->
+		<rect x="255" y="92" width="90" height="116" rx="10" class="wall" />
+		<path data-wa d="" fill="var(--water-hi)" opacity="0.35" />
+		<path data-wb d="" fill="var(--water-lo)" opacity="0.6" />
+		<path data-mem d="" fill="none" stroke="var(--sl-color-accent)" stroke-width="3" />
+		<text class="ts" x="350" y="100">C</text>
+		<g data-d></g>
+		<!-- осциллограф -->
+		<g transform="translate(400 50)">
+			<rect width="260" height="200" class="grid" />
+			<path d="M0 50H260M0 100H260M0 150H260M65 0V200M130 0V200M195 0V200" class="grid" opacity="0.5" />
+			<polyline data-tu class="tr-u" />
+			<polyline data-ti class="tr-i" />
+			<text class="ts" x="4" y="-6">Uc (синяя)</text>
+			<text class="ts" x="256" y="-6" text-anchor="end" fill="var(--sl-color-accent)">I (оранжевая)</text>
+			<text class="ts" x="130" y="218" text-anchor="middle" data-tlab>время →</text>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Сужение R</span><input type="range" data-r min="1" max="10" step="0.5" value="4.7" /><output data-rv></output></label>
+		<label class="water__row"><span>Мягкость мембраны C</span><input type="range" data-c min="47" max="470" step="1" value="220" /><output data-cv></output></label>
+	</div>
+	<div class="water__btns">
+		<button type="button" data-sb aria-pressed="false">Разрядить (закоротить через R)</button>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, si, Scope, $ } from '../../lib/water';
+
+	class WaterCapacitor extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			const U = 5;
+			let R = 4.7e3,
+				C = 220e-6,
+				Uc = 0,
+				charge = true,
+				ang = 0,
+				tmode = 0;
+			const g = $(r, '[data-d]');
+			const inA = new Drops(g, new Path([[60, 140], [60, 50], [300, 50], [300, 100]]), 15);
+			const outB = new Drops(g, new Path([[300, 200], [300, 250], [60, 250], [60, 140]]), 15);
+			const loopA = new Drops(g, new Path([[110, 250], [110, 50], [300, 50], [300, 100]]), 15);
+			const loopB = new Drops(g, new Path([[300, 200], [300, 250], [110, 250]]), 15);
+			const sc = new Scope([$(r, '[data-tu]'), $(r, '[data-ti]')], { x: 0, y: 0, w: 260, h: 200 }, 260);
+			const P = (k: string) => $(r, `[data-p="${k}"]`);
+			const drawTank = () => {
+				const b = (Uc / U) * 38; // прогиб мембраны вниз
+				const ym = 150 + b * 0.35;
+				$(r, '[data-mem]').setAttribute('d', `M257 150 Q300 ${(150 + 2 * b).toFixed(1)} 343 150`);
+				$(r, '[data-wa]').setAttribute('d', `M257 94 H343 V150 Q300 ${(150 + 2 * b).toFixed(1)} 257 150 Z`);
+				$(r, '[data-wb]').setAttribute('d', `M257 150 Q300 ${(150 + 2 * b).toFixed(1)} 343 150 V206 H257 Z`);
+				void ym;
+			};
+			const upd = () => {
+				$(r, '[data-rv]').textContent = si(R, 'Ом');
+				$(r, '[data-cv]').textContent = si(C, 'Ф');
+				const tau = R * C;
+				$(r, '[data-tlab]').textContent = `время → (клетка = ${fm(tau, 2)} с = τ)`;
+				P('r').setAttribute('stroke-width', Math.max(3, 14 / Math.sqrt(R / 1000)).toFixed(1));
+				$(r, '[data-sb]').textContent = charge ? 'Разрядить (закоротить через R)' : 'Зарядить снова';
+				$(r, '[data-modet]').textContent = charge ? 'заряд' : 'разряд';
+				(P('short') as SVGElement).style.display = charge ? 'none' : '';
+				inA.hide(!charge);
+				outB.hide(!charge);
+				loopA.hide(charge);
+				loopB.hide(charge);
+				tmode = 0;
+			};
+			upd();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-r]')) R = +t.value * 1e3;
+				if (t.matches('[data-c]')) C = +t.value * 1e-6;
+				upd();
+			});
+			$(r, '[data-sb]').addEventListener('click', () => {
+				charge = !charge;
+				upd();
+			});
+			const k = 2500;
+			let acc = 0;
+			animate(r, (dt) => {
+				const tau = R * C;
+				const Us = charge ? U : 0;
+				// точное решение на шаге: Uc → Us по экспоненте
+				Uc = Us + (Uc - Us) * Math.exp(-dt / tau);
+				const I = (Us - Uc) / R;
+				tmode += dt;
+				const ds = k * I * dt;
+				if (charge) {
+					inA.step(ds);
+					outB.step(ds);
+				} else {
+					loopA.step(-ds);
+					loopB.step(-ds);
+				}
+				ang += 9000 * I * dt;
+				$(r, '[data-imp]').setAttribute('transform', `rotate(${ang.toFixed(1)} 60 140)`);
+				const pa = charge ? 1 : Uc / U;
+				paint([P('hi')], charge ? 1 : 0);
+				paint([P('a')], Uc / U);
+				paint([P('r')], charge ? (1 + Uc / U) / 2 : Uc / U / 2);
+				paint([P('b'), P('short')], 0);
+				void pa;
+				drawTank();
+				// осциллограф: 4 клетки = 4τ на ширину; пишем точку каждые τ/65
+				acc += dt;
+				const stepT = tau / 65;
+				while (acc >= stepT) {
+					acc -= stepT;
+					sc.push([Uc / U, (I * R) / U]);
+				}
+				sc.draw([true, false]);
+				$(r, '[data-fx]').textContent = `τ = R·C = ${si(R, 'Ом')} · ${si(C, 'Ф')} = ${fm(tau, 2)} с · Uc = ${fm(Uc, 2)} В · I = ${si(I, 'А')}`;
+				$(r, '[data-fx2]').textContent = charge
+					? `Uc(t) = U·(1 − e^(−t/τ)). За τ — 63 %, за 3τ — 95 %, за 5τ — 99 %. Сейчас ${fm((100 * Uc) / U, 0)} %.`
+					: `Uc(t) = U₀·e^(−t/τ): мембрана выталкивает воду обратно, ток течёт в другую сторону (оранжевая линия ушла вниз).`;
+			});
+		}
+	}
+	customElements.define('water-capacitor', WaterCapacitor);
+</script>

@@ -1,0 +1,48 @@
+# Сборка Android-приложения (APK) на GitHub. Запускается при пуше в main и вручную
+# (вкладка Actions › Build Android APK › Run workflow).
+# Готовый APK: открой завершённый запуск › раздел Artifacts › pcb-course-apk.
+#
+# Собирается отладочный (debug) APK: он подписан отладочным ключом и ставится на телефон
+# напрямую (разреши установку из неизвестных источников). Для Google Play нужен
+# подписанный релизный AAB — см. README, раздел «Android-приложение».
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest # на раннере уже есть Android SDK
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Capacitor 8 / Android Gradle Plugin 8.13 требуют JDK 21.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - run: npm ci
+
+      # Сборка сайта в режиме приложения и копирование в android/app/src/main/assets/public
+      - run: npm run build:android
+
+      - name: Сборка APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pcb-course-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

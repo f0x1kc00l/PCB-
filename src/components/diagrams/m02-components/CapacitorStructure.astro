@@ -1,0 +1,44 @@
+---
+/** Рис. 2.2 (урок 2.2): устройство конденсатора — две обкладки и диэлектрик; многослойный керамический (MLCC) в разрезе. */
+import Figure from '../Figure.astro';
+
+const layers = Array.from({ length: 7 }, (_, i) => i);
+---
+
+<Figure n="2.2" caption="Слева: конденсатор — две проводящие обкладки, разделённые диэлектриком; заряд Q = C·U. Справа: многослойный керамический конденсатор (MLCC) в разрезе. Десятки и сотни тонких обкладок соединены через одну с левым и правым выводом, поэтому крошечный корпус даёт большую ёмкость.">
+	<svg viewBox="0 0 640 250" role="img" aria-label="Слева две параллельные пластины с плюсами и минусами и диэлектриком между ними. Справа разрез многослойного керамического конденсатора с чередующимися обкладками.">
+		<!-- ===== Плоский конденсатор ===== -->
+		<text class="t" x="20" y="22" font-weight="700">Обкладки + диэлектрик</text>
+		<rect x="80" y="60" width="14" height="140" class="fill-acc" />
+		<rect x="186" y="60" width="14" height="140" class="fill-acc" />
+		<rect x="98" y="60" width="84" height="140" fill="var(--pcb-altium)" opacity="0.18" />
+		<text class="t t-s t-mut" x="140" y="134" text-anchor="middle">диэлектрик</text>
+		{[75, 105, 135, 165].map((y) => <text class="t" x="66" y={y + 10} text-anchor="middle" font-weight="700">+</text>)}
+		{[75, 105, 135, 165].map((y) => <text class="t" x="214" y={y + 10} text-anchor="middle" font-weight="700">−</text>)}
+		<path class="ln" d="M87 60 V40 H40 M193 60 V40 H240" />
+		<text class="t t-mono" x="140" y="232" text-anchor="middle">Q = C · U</text>
+		<path class="ln-thin" d="M98 214 H182 M98 208 V220 M182 208 V220" />
+		<text class="t t-s" x="140" y="210" text-anchor="middle">d</text>
+
+		<!-- ===== MLCC в разрезе ===== -->
+		<text class="t" x="330" y="22" font-weight="700">MLCC в разрезе</text>
+		<rect x="380" y="60" width="200" height="140" rx="4" fill="#b9a678" opacity="0.55" />
+		<rect x="350" y="56" width="34" height="148" rx="3" fill="#9aa3ad" />
+		<rect x="576" y="56" width="34" height="148" rx="3" fill="#9aa3ad" />
+		{
+			layers.map((i) => (
+				<rect
+					x={i % 2 === 0 ? 384 : 406}
+					y={74 + i * 17}
+					width="170"
+					height="4"
+					class="fill-acc"
+				/>
+			))
+		}
+		<text class="t t-s" x="367" y="225" text-anchor="middle">вывод</text>
+		<text class="t t-s" x="593" y="225" text-anchor="middle">вывод</text>
+		<text class="t t-s t-mut" x="480" y="225" text-anchor="middle">керамика (диэлектрик)</text>
+		<text class="t t-acc t-s" x="480" y="50" text-anchor="middle">обкладки через одну на разные выводы</text>
+	</svg>
+</Figure>

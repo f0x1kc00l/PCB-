@@ -1,0 +1,44 @@
+---
+/** Рис. 2.7 (урок 2.7): N-канальный MOSFET как ключ в нижнем плече. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="2.7" caption="Ключ на N-канальном MOSFET в нижнем плече. Затвор управляется напряжением, тока в статике почти не берёт. Резистор 100 Ом ограничивает импульс тока перезаряда ёмкости затвора, 100 кОм к земле держат транзистор закрытым, пока вывод МК не настроен. Диод гасит выброс от индуктивной нагрузки.">
+	<svg viewBox="0 0 640 270" role="img" aria-label="Схема: +12 вольт, нагрузка (мотор) с диодом параллельно, сток MOSFET VT1, исток на земле. Вывод микроконтроллера через резистор 100 Ом на затвор, резистор 100 кОм от затвора к земле.">
+		<text class="t t-acc" x="360" y="24" text-anchor="middle">+12 В</text>
+		<path class="ln" d="M360 32 V50 M360 110 V140 M360 50 H430 V64 M430 96 V110 H360" />
+		<!-- нагрузка: мотор -->
+		<circle class="ln" cx="360" cy="80" r="22" />
+		<text class="t" x="360" y="85" text-anchor="middle" font-weight="700">M</text>
+		<!-- диод катодом вверх -->
+		<polygon points="418,96 442,96 430,72" class="ln" />
+		<path class="ln" d="M418 72 H442" />
+		<text class="t t-s" x="448" y="90">VD1</text>
+		<!-- MOSFET (упрощённый символ N-канала, обогащение) -->
+		<path class="ln" d="M360 140 V154 H344 M344 196 H360 V226" />
+		<path d="M340 148 V160 M340 169 V181 M340 190 V202" stroke="currentColor" stroke-width="3" />
+		<path class="ln" d="M344 175 H360 M360 175 V196" />
+		<polygon points="346,175 354,170 354,180" class="fill-cur" />
+		<path class="ln" d="M330 150 V200" />
+		<path class="ln" d="M240 175 H330" />
+		<text class="t" x="372" y="170">VT1</text>
+		<text class="t t-s t-mut" x="372" y="186">N-MOSFET</text>
+		<text class="t t-s" x="372" y="148">сток D</text>
+		<text class="t t-s" x="372" y="222">исток S</text>
+		<text class="t t-s" x="326" y="166" text-anchor="end">затвор G</text>
+		<!-- резисторы затвора -->
+		<rect class="ln" x="180" y="167" width="44" height="16" />
+		<path class="ln" d="M120 175 H180 M224 175 H240" />
+		<text class="t t-s" x="202" y="160" text-anchor="middle">100 Ом</text>
+		<path class="ln" d="M270 175 V196 M270 236 V250" />
+		<rect class="ln" x="262" y="196" width="16" height="40" />
+		<text class="t t-s" x="256" y="222" text-anchor="end">100 кОм</text>
+		<circle cx="270" cy="175" r="3" class="fill-cur" />
+		<circle class="ln" cx="114" cy="175" r="5" />
+		<text class="t t-s" x="112" y="200" text-anchor="middle">вывод МК</text>
+		<text class="t t-s t-mut" x="112" y="216" text-anchor="middle">0 / 3,3 В</text>
+		<!-- земли -->
+		<path class="ln" d="M346 226 H374 M351 232 H369 M356 238 H364" />
+		<path class="ln" d="M256 250 H284 M261 256 H279 M266 262 H274" />
+	</svg>
+</Figure>

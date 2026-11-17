@@ -1,0 +1,47 @@
+---
+/** Рис. 9.4: дифференциальная пара — сечение (w, s, h, противоположные токи) и вид сверху. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="9.4" caption="Дифференциальная пара: две одинаковые дорожки шириной w с зазором s над опорным слоем. Токи в них равны и противоположны (⊙ — к нам, ⊗ — от нас), поэтому поля почти компенсируют друг друга снаружи. Приёмник смотрит на разность напряжений D+ и D−, и помеха, одинаково наведённая на обе дорожки, вычитается.">
+	<svg viewBox="0 0 660 250" role="img" aria-label="Слева сечение: две дорожки над слоем земли с размерами w, s, h и противоположными токами. Справа вид сверху: две параллельные дорожки D+ и D− от разъёма к микросхеме.">
+		<text class="t" x="10" y="18" font-weight="700">Сечение</text>
+		<rect x="20" y="110" width="290" height="70" fill="var(--pcb-fr4)" opacity="0.55" />
+		<rect x="20" y="180" width="290" height="10" fill="var(--pcb-copper)" />
+		<rect x="105" y="100" width="45" height="10" fill="var(--pcb-copper)" />
+		<rect x="180" y="100" width="45" height="10" fill="var(--pcb-copper)" />
+		<!-- поле между дорожками -->
+		<path d="M150 103 Q165 80 180 103" fill="none" stroke="var(--pcb-altium)" stroke-width="1.5" />
+		<path d="M140 100 Q165 60 190 100" fill="none" stroke="var(--pcb-altium)" stroke-width="1.2" opacity="0.7" />
+		<!-- токи -->
+		<circle cx="127" cy="80" r="9" class="ln" />
+		<circle cx="127" cy="80" r="2.5" class="fill-cur" />
+		<circle cx="202" cy="80" r="9" class="ln" />
+		<path class="ln" d="M196 74 L208 86 M208 74 L196 86" />
+		<text class="t t-acc" x="127" y="60" text-anchor="middle">D+</text>
+		<text class="t t-acc" x="202" y="60" text-anchor="middle">D−</text>
+		<!-- размеры -->
+		<path class="ln" d="M105 128 H150 M105 122 V134 M150 122 V134" />
+		<text class="t t-s" x="127" y="148" text-anchor="middle">w</text>
+		<path class="ln" d="M150 128 H180 M150 122 V134 M180 122 V134" />
+		<text class="t t-s" x="165" y="148" text-anchor="middle">s</text>
+		<path class="ln" d="M270 110 V180 M264 110 H276 M264 180 H276" />
+		<text class="t t-s" x="282" y="150">h</text>
+		<text class="t t-s" x="165" y="210" text-anchor="middle">опорный слой GND</text>
+
+		<!-- ===== Вид сверху ===== -->
+		<text class="t" x="350" y="18" font-weight="700">Вид сверху</text>
+		<rect x="360" y="70" width="40" height="70" rx="3" class="ln" />
+		<text class="t t-s" x="380" y="160" text-anchor="middle">USB</text>
+		<rect x="570" y="60" width="70" height="90" rx="3" class="ln" />
+		<text class="t t-s" x="605" y="110" text-anchor="middle">МК</text>
+		<path d="M400 95 H460 L470 85 H570" class="ln-acc" />
+		<path d="M400 115 H460 L470 105 H570" class="ln-acc" />
+		<text class="t t-acc t-s" x="500" y="78">D+</text>
+		<text class="t t-acc t-s" x="500" y="126">D−</text>
+		<path class="ln" d="M520 85 V105 M514 85 H526 M514 105 H526" />
+		<text class="t t-s" x="520" y="150" text-anchor="middle">s = const</text>
+		<text class="t t-s t-mut" x="470" y="190" text-anchor="middle">обе дорожки рядом, одной длины,</text>
+		<text class="t t-s t-mut" x="470" y="206" text-anchor="middle">с постоянным зазором по всей длине</text>
+	</svg>
+</Figure>

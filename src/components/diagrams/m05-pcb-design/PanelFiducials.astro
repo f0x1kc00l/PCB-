@@ -1,0 +1,45 @@
+---
+/** Рис. 5.10: групповая заготовка (панель) с технологическими полями, реперными знаками и V-надрезом. */
+import Figure from '../Figure.astro';
+const boards = [
+	[60, 50],
+	[250, 50],
+	[60, 140],
+	[250, 140],
+];
+---
+
+<Figure n="5.10" caption="Панель из четырёх плат для автоматического монтажа. По краям технологические поля (rails) с реперными знаками (fiducials) и базовыми отверстиями, между платами линии V-надреза. Справа реперный знак крупно: медный круг, вокруг него окно в маске, чтобы камера автомата видела контраст.">
+	<svg viewBox="0 0 660 270" role="img" aria-label="Панель с четырьмя платами, технологическими полями сверху и снизу, тремя реперными знаками и базовыми отверстиями, пунктирными линиями надреза. Справа крупно реперный знак.">
+		<!-- панель -->
+		<rect x="20" y="10" width="440" height="230" rx="4" fill="var(--pcb-mask)" opacity="0.25" />
+		<rect x="20" y="10" width="440" height="230" rx="4" class="ln" />
+		<path class="ln-thin" d="M20 40 H460 M20 210 H460" />
+		<text class="t t-s t-mut" x="240" y="30" text-anchor="middle">технологическое поле</text>
+		<text class="t t-s t-mut" x="240" y="230" text-anchor="middle">технологическое поле</text>
+		{boards.map(([x, y]) => (
+			<g>
+				<rect x={x} y={y} width="170" height="80" rx="3" class="ln" />
+				<text class="t t-s" x={x + 85} y={y + 45} text-anchor="middle">плата</text>
+			</g>
+		))}
+		<!-- V-надрез -->
+		<path class="ln-dash" d="M240 40 V210 M20 135 H460" style="stroke: var(--sl-color-accent); opacity: 1" />
+		<text class="t t-acc t-s" x="246" y="200">V-надрез</text>
+		<!-- реперы и базовые отверстия -->
+		{[[40, 25], [440, 25], [440, 225]].map(([x, y]) => (
+			<g>
+				<circle cx={x} cy={y} r="7" fill="var(--sl-color-bg)" />
+				<circle cx={x} cy={y} r="3.5" fill="var(--pcb-copper)" />
+			</g>
+		))}
+		{[[70, 25], [410, 225]].map(([x, y]) => <circle cx={x} cy={y} r="5" class="ln" />)}
+		<!-- крупно репер -->
+		<circle cx="560" cy="110" r="60" fill="var(--sl-color-bg)" class="ln-dash" />
+		<circle cx="560" cy="110" r="22" fill="var(--pcb-copper)" />
+		<path class="ln" d="M538 190 H582 M538 184 V196 M582 184 V196" />
+		<text class="t t-s" x="560" y="210" text-anchor="middle">медь ≈ 1 мм</text>
+		<text class="t t-s" x="560" y="26" text-anchor="middle">окно в маске</text>
+		<text class="t t-s" x="560" y="42" text-anchor="middle">≈ 2–3 мм</text>
+	</svg>
+</Figure>

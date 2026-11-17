@@ -1,0 +1,46 @@
+---
+/**
+ * Рис. 4.2 (урок 4.2): тепловое расширение FR-4 по оси Z.
+ * До Tg ~50 ppm/°C, выше Tg ~250 ppm/°C — условные типовые значения из даташитов ламинатов.
+ * Масштаб: x = 60 + (T − 25)·1,7; y = 240 − расширение,% · 50.
+ */
+import Figure from '../Figure.astro';
+
+const x = (t: number) => 60 + (t - 25) * 1.7;
+const y = (pct: number) => 240 - pct * 50;
+const A1 = 50e-6;
+const A2 = 250e-6;
+/** Расширение в процентах при температуре t для материала с данным Tg. */
+const exp = (t: number, tg: number) =>
+	100 * (t <= tg ? (t - 25) * A1 : (tg - 25) * A1 + (t - tg) * A2);
+const path = (tg: number) =>
+	`M${x(25)} ${y(0)} L${x(tg)} ${y(exp(tg, tg))} L${x(260)} ${y(exp(260, tg))}`;
+const ticksT = [50, 100, 150, 200, 250];
+const ticksP = [1, 2, 3, 4];
+---
+
+<Figure n="4.2" caption="Пока температура ниже Tg, плата по толщине расширяется медленно; выше Tg смола размягчается и расширение по оси Z резко ускоряется. При бессвинцовой пайке плата проходит через 240–250 °C, и именно в этой зоне растягиваются и трескаются стенки переходных отверстий. Чем выше Tg, тем меньше суммарное расширение. Значения условные, типовые для FR-4.">
+	<svg viewBox="0 0 540 290" role="img" aria-label="График теплового расширения по оси Z от температуры: излом на Tg 140 и 170 градусов, после излома крутой рост. Зона пайки от 217 до 260 градусов заштрихована.">
+		<!-- зона бессвинцовой пайки -->
+		<rect x={x(217)} y={y(4.2)} width={x(260) - x(217)} height={y(0) - y(4.2)} fill="var(--sl-color-accent)" opacity="0.12" />
+		<text class="t t-s t-acc" x={x(238)} y={y(4.0)} text-anchor="middle">пайка</text>
+		<text class="t t-s t-acc" x={x(238)} y={y(4.0) + 14} text-anchor="middle">без свинца</text>
+		<!-- сетка и оси -->
+		{ticksT.map((t) => <line class="ln-thin" x1={x(t)} y1={y(0)} x2={x(t)} y2={y(4.2)} />)}
+		{ticksP.map((p) => <line class="ln-thin" x1={x(25)} y1={y(p)} x2={x(260)} y2={y(p)} />)}
+		<path class="ln" d={`M${x(25)} ${y(0)} H${x(268)} M${x(25)} ${y(0)} V${y(4.4)}`} />
+		{ticksT.map((t) => <text class="t t-s t-mut" x={x(t)} y={y(0) + 16} text-anchor="middle">{t}</text>)}
+		{ticksP.map((p) => <text class="t t-s t-mut" x={x(25) - 8} y={y(p) + 4} text-anchor="end">{p} %</text>)}
+		<text class="t t-s" x={x(268)} y={y(0) + 32} text-anchor="end">T, °C</text>
+		<text class="t t-s" x={x(25) + 6} y={y(4.4) + 4}>расширение по Z</text>
+		<!-- кривые -->
+		<path d={path(140)} fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<path d={path(170)} fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" stroke-dasharray="7 4" />
+		<path class="ln-dash" d={`M${x(140)} ${y(0)} V${y(exp(140, 140))}`} />
+		<path class="ln-dash" d={`M${x(170)} ${y(0)} V${y(exp(170, 170))}`} />
+		<text class="t t-s t-acc" x={x(140)} y={y(0) - 6} text-anchor="end">Tg 140</text>
+		<text class="t t-s" x={x(170) + 4} y={y(0) - 6} fill="var(--pcb-altium)">Tg 170</text>
+		<text class="t t-s t-acc" x={x(205)} y={y(exp(205, 140)) - 8} text-anchor="end">обычный FR-4</text>
+		<text class="t t-s" x={x(222)} y={y(exp(222, 170)) + 18} fill="var(--pcb-altium)">high-Tg</text>
+	</svg>
+</Figure>

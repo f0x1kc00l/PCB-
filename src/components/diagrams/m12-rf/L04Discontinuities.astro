@@ -1,0 +1,82 @@
+---
+/**
+ * Рис. 12.4б: неоднородности микрополосковой линии и их эквивалентные схемы
+ * (по §1.4 Малорацкого: изгиб, Т-соединение, скачок ширины, зазор, разомкнутый конец).
+ */
+import Figure from '../Figure.astro';
+
+const W = 220;
+const H = 170;
+const cells = [
+	{ x: 0, y: 0, title: 'Разомкнутый конец', eq: '≈ ёмкость → линия «длиннее» на Δl' },
+	{ x: 1, y: 0, title: 'Прямой изгиб 90°', eq: 'лишняя C в углу' },
+	{ x: 2, y: 0, title: 'Изгиб со срезом угла', eq: 'C скомпенсирована' },
+	{ x: 0, y: 1, title: 'Скачок ширины', eq: 'параллельная C' },
+	{ x: 1, y: 1, title: 'Зазор', eq: 'П-схема из трёх C' },
+	{ x: 2, y: 1, title: 'Т-соединение', eq: 'сдвиг плоскостей + C' },
+];
+---
+
+<Figure n="12.4б" caption="Любое резкое изменение формы дорожки — неоднородность. На низких частотах она незаметна, на ВЧ добавляет паразитную ёмкость или индуктивность и сдвигает электрическую длину. Срез угла у изгиба (по Малорацкому — «скос») убирает лишнюю ёмкость угла.">
+	<svg viewBox={`0 0 ${3 * W} ${2 * H}`} role="img" aria-label="Шесть эскизов неоднородностей: разомкнутый конец с удлинением дельта эль, прямой изгиб, изгиб со срезом, скачок ширины, зазор и Т-соединение.">
+		{cells.map((c) => (
+			<g transform={`translate(${c.x * W} ${c.y * H})`}>
+				<rect x="4" y="4" width={W - 8} height={H - 8} rx="6" class="ln-thin" />
+				<text class="t t-s" x={W / 2} y="22" text-anchor="middle" font-weight="700">{c.title}</text>
+				<text class="t t-s t-acc" x={W / 2} y={H - 14} text-anchor="middle">{c.eq}</text>
+			</g>
+		))}
+
+		<!-- 1. Разомкнутый конец -->
+		<rect x="20" y="70" width="120" height="16" fill="var(--pcb-copper)" />
+		<rect x="140" y="70" width="18" height="16" fill="none" stroke="var(--sl-color-accent)" stroke-dasharray="3 2" stroke-width="1.5" />
+		<path class="ln" d="M140 104 H158 M140 99 V109 M158 99 V109" />
+		<text class="t t-s t-acc" x="149" y="124" text-anchor="middle">Δl</text>
+
+		<!-- 2. Прямой изгиб -->
+		<g transform="translate(220 0)">
+			<path d="M20 60 H130 V140 H114 V76 H20 Z" fill="var(--pcb-copper)" />
+			<path d="M114 60 L130 76" stroke="var(--sl-color-accent)" stroke-width="1.5" stroke-dasharray="3 2" />
+			<text class="t t-s t-acc" x="138" y="60">лишняя</text>
+			<text class="t t-s t-acc" x="138" y="74">медь</text>
+		</g>
+
+		<!-- 3. Изгиб со срезом -->
+		<g transform="translate(440 0)">
+			<path d="M20 60 H118 L130 72 V140 H114 V76 H20 Z" fill="var(--pcb-copper)" />
+			<path d="M118 60 L130 60 L130 72" class="ln-dash" />
+			<text class="t t-s t-mut" x="140" y="62">срез</text>
+		</g>
+
+		<!-- 4. Скачок ширины -->
+		<g transform="translate(0 170)">
+			<rect x="20" y="62" width="90" height="28" fill="var(--pcb-copper)" />
+			<rect x="110" y="70" width="90" height="12" fill="var(--pcb-copper)" />
+			<text class="t t-s t-mut" x="65" y="112" text-anchor="middle">низкое Z0</text>
+			<text class="t t-s t-mut" x="155" y="104" text-anchor="middle">высокое Z0</text>
+		</g>
+
+		<!-- 5. Зазор -->
+		<g transform="translate(220 170)">
+			<rect x="20" y="70" width="85" height="14" fill="var(--pcb-copper)" />
+			<rect x="115" y="70" width="85" height="14" fill="var(--pcb-copper)" />
+			<!-- эквивалент: C1 последовательно, C2 на землю с каждой стороны -->
+			<g class="ln">
+				<path d="M60 112 H104 M116 112 H160" />
+				<path d="M104 104 V120 M116 104 V120" />
+				<path d="M72 112 V122 M148 112 V122" />
+				<path d="M66 122 H78 M66 127 H78 M142 122 H154 M142 127 H154" />
+				<path d="M72 127 V134 M148 127 V134" />
+				<path d="M66 134 H78 M69 138 H75 M142 134 H154 M145 138 H151" />
+			</g>
+		</g>
+
+		<!-- 6. Т-соединение -->
+		<g transform="translate(440 170)">
+			<rect x="20" y="58" width="180" height="14" fill="var(--pcb-copper)" />
+			<rect x="102" y="72" width="16" height="58" fill="var(--pcb-copper)" />
+			<path d="M20 50 V80 M200 50 V80" class="ln-dash" />
+			<text class="t t-s t-mut" x="110" y="46" text-anchor="middle">плоскости отсчёта сдвигаются</text>
+		</g>
+	</svg>
+</Figure>

@@ -1,0 +1,52 @@
+---
+/**
+ * Рис. 11.11: посадочное место TQFP-32 (вид сверху) — нумерация выводов против часовой стрелки,
+ * метка первого вывода, контур шелкографии и курьтъярд. Схематично, не в масштабе производителя.
+ */
+import Figure from '../Figure.astro';
+
+const c = 170; // центр
+const body = 140; // корпус 7 мм ≈ 140 px (20 px/мм)
+const pitch = 16; // 0,8 мм
+const pads: { x: number; y: number; w: number; h: number; n: number }[] = [];
+for (let i = 0; i < 8; i++) {
+	const off = (i - 3.5) * pitch;
+	pads.push({ x: c - 100, y: c + off - 4, w: 26, h: 8, n: i + 1 }); // левая сторона, сверху вниз: 1–8
+	pads.push({ x: c + off - 4, y: c + 74, w: 8, h: 26, n: 9 + i }); // низ, слева направо: 9–16
+	pads.push({ x: c + 74, y: c - off - 4, w: 26, h: 8, n: 17 + i }); // правая, снизу вверх: 17–24
+	pads.push({ x: c - off - 4, y: c - 100, w: 8, h: 26, n: 25 + i }); // верх, справа налево: 25–32
+}
+const label = (n: number) => [1, 8, 9, 16, 17, 24, 25, 32].includes(n);
+---
+
+<Figure n="11.11" caption="Посадочное место TQFP-32: выводы нумеруются против часовой стрелки, начиная с левого верхнего угла (метка — точка на шелкографии и скос корпуса). Корпус 7×7 мм, шаг 0,8 мм. Оранжевый пунктир — courtyard, зона, в которую не должны заходить соседние детали. Шелкография не заходит на площадки.">
+	<svg viewBox="0 0 560 340" role="img" aria-label="Схема посадочного места TQFP-32 с 32 площадками по четырём сторонам, меткой первого вывода, контуром корпуса и зоной courtyard.">
+		<rect x={c - 112} y={c - 112} width="224" height="224" fill="none" stroke="var(--sl-color-accent)" stroke-dasharray="6 4" stroke-width="1.5" />
+		<rect x={c - body / 2} y={c - body / 2} width={body} height={body} fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7" />
+		<path d={`M${c - body / 2} ${c - body / 2 + 16} L${c - body / 2 + 16} ${c - body / 2}`} stroke="currentColor" stroke-width="1.5" opacity="0.7" />
+		<circle cx={c - 112 - 2} cy={c - 112 - 2} r="5" class="fill-cur" />
+		{pads.map((p) => (
+			<g>
+				<rect x={p.x} y={p.y} width={p.w} height={p.h} rx="1.5" fill="var(--pcb-copper)" />
+			</g>
+		))}
+		{pads.filter((p) => label(p.n)).map((p) => {
+			const isV = p.h > p.w;
+			const tx = isV ? p.x + 4 : p.x < c ? p.x - 4 : p.x + p.w + 4;
+			const ty = isV ? (p.y > c ? p.y + p.h + 14 : p.y - 6) : p.y + 7;
+			const an = isV ? 'middle' : p.x < c ? 'end' : 'start';
+			return <text class="t t-s t-mono" x={tx} y={ty} text-anchor={an}>{p.n}</text>;
+		})}
+		<text class="t t-s" x={c} y={c - 4} text-anchor="middle">7×7 мм</text>
+		<text class="t t-s t-mut" x={c} y={c + 14} text-anchor="middle">шаг 0,8</text>
+		<g class="t t-s">
+			<text x="330" y="70" class="t t-s">● метка вывода 1 (шелкография)</text>
+			<text x="330" y="100" class="t t-s">◢ скос корпуса со стороны вывода 1</text>
+			<text x="330" y="130" class="t t-s" fill="var(--pcb-copper)">■ площадки: медь + маска + паста</text>
+			<text x="330" y="160" class="t t-s" fill="var(--sl-color-accent)">┅ courtyard — зона детали</text>
+			<text x="330" y="200" class="t t-s">нумерация: против часовой стрелки</text>
+			<text x="330" y="220" class="t t-s">1→8 слева, 9→16 снизу,</text>
+			<text x="330" y="240" class="t t-s">17→24 справа, 25→32 сверху</text>
+		</g>
+	</svg>
+</Figure>

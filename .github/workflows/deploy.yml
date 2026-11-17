@@ -1,0 +1,68 @@
+# Сборка и публикация сайта на GitHub Pages при каждом пуше в main.
+# Включи: Settings › Pages › Build and deployment › Source: GitHub Actions.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # ручной запуск из вкладки Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # полная история нужна для даты «последнее обновление» страниц
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Адрес сайта
+        # Свой домен: задай переменную репозитория CUSTOM_DOMAIN (Settings › Secrets and variables ›
+        # Actions › Variables), например pcb.example.com — сайт соберётся в корень домена.
+        # Без неё: репозиторий <user>.github.io публикуется в корень, остальные — в /<repo>.
+        env:
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            echo "SITE_URL=https://${CUSTOM_DOMAIN}" >> "$GITHUB_ENV"
+            echo "BASE_PATH=/" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "SITE_URL=https://${OWNER}.github.io" >> "$GITHUB_ENV"
+          if [ "$REPO" = "${OWNER}.github.io" ]; then
+            echo "BASE_PATH=/" >> "$GITHUB_ENV"
+          else
+            echo "BASE_PATH=/${REPO}" >> "$GITHUB_ENV"
+          fi
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

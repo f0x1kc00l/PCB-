@@ -1,0 +1,199 @@
+---
+/**
+ * Калькулятор резистивного делителя напряжения.
+ *
+ *   Uвых = Uвх · R2 / (R1 + R2)
+ *
+ * Дополнительно:
+ *  - нагрузка Rн параллельно R2 — показывает, как делитель «проседает» (Хоровиц, §1.03–1.05);
+ *  - ток через делитель и мощность на резисторах;
+ *  - подбор R2 из ряда E24 под желаемое Uвых при заданном R1.
+ */
+interface Props {
+	vin?: string;
+	r1?: string;
+	r2?: string;
+}
+const { vin = '12', r1 = '10к', r2 = '4,7к' } = Astro.props;
+---
+
+<divider-calc class="pcb-widget pcb-calc not-content">
+	<p class="pcb-widget__title">Калькулятор делителя напряжения</p>
+
+	<div class="layout">
+		<svg class="pcb-schematic" viewBox="0 0 230 230" role="img" aria-label="Схема делителя: Uвх, R1, R2, нагрузка Rн">
+			<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+				<!-- вход сверху -->
+				<line x1="60" y1="20" x2="60" y2="45" />
+				<circle cx="60" cy="16" r="4" />
+				<!-- R1 (прямоугольник по ГОСТ 2.728) -->
+				<rect x="50" y="45" width="20" height="45" />
+				<line x1="60" y1="90" x2="60" y2="125" />
+				<!-- узел выхода -->
+				<circle cx="60" cy="115" r="3" fill="currentColor" />
+				<line x1="60" y1="115" x2="196" y2="115" />
+				<circle cx="200" cy="115" r="4" />
+				<!-- R2 -->
+				<rect x="50" y="125" width="20" height="45" />
+				<line x1="60" y1="170" x2="60" y2="200" />
+				<!-- нагрузка (пунктир — необязательна) -->
+				<g data-load-svg>
+					<line x1="160" y1="115" x2="160" y2="125" />
+					<rect x="150" y="125" width="20" height="45" stroke-dasharray="4 3" />
+					<line x1="160" y1="170" x2="160" y2="200" />
+					<line x1="60" y1="200" x2="160" y2="200" />
+					<circle cx="160" cy="115" r="3" fill="currentColor" />
+				</g>
+				<!-- земля -->
+				<line x1="45" y1="200" x2="75" y2="200" />
+				<line x1="51" y1="207" x2="69" y2="207" />
+				<line x1="56" y1="214" x2="64" y2="214" />
+			</g>
+			<g font-size="12" fill="currentColor" font-family="var(--pcb-mono)">
+				<text x="70" y="20" data-t="vin">Uвх</text>
+				<text x="76" y="64">R1</text>
+				<text x="76" y="80" data-t="r1" class="val">—</text>
+				<text x="76" y="144">R2</text>
+				<text x="76" y="160" data-t="r2" class="val">—</text>
+				<text x="176" y="152" data-load-svg>Rн</text>
+				<text x="225" y="104" text-anchor="end" data-t="vout" class="val strong">—</text>
+			</g>
+		</svg>
+
+		<div>
+			<div class="fields">
+				<label>Uвх, В <input name="vin" value={vin} inputmode="decimal" autocomplete="off" /></label>
+				<label>R1, Ом <input name="r1" value={r1} inputmode="decimal" autocomplete="off" /></label>
+				<label>R2, Ом <input name="r2" value={r2} inputmode="decimal" autocomplete="off" /></label>
+				<label>
+					Нагрузка Rн, Ом
+					<input name="rl" value="" placeholder="нет" inputmode="decimal" autocomplete="off" />
+					<span class="hint">пусто = без нагрузки</span>
+				</label>
+			</div>
+
+			<div class="results">
+				<div class="result result--main"><span>Uвых</span><output data-out="vout">—</output></div>
+				<div class="result"><span>Ток делителя</span><output data-out="i">—</output></div>
+				<div class="result"><span>Мощность на R1 / R2</span><output data-out="p">—</output></div>
+				<div class="result"><span>Выходное сопротивление R1‖R2</span><output data-out="rout">—</output></div>
+			</div>
+			<ul class="warnings" data-warn></ul>
+		</div>
+	</div>
+
+	<details class="pick">
+		<summary>Подобрать R2 под нужное Uвых (ряд E24)</summary>
+		<div class="fields" style="margin-top: 0.6rem">
+			<label>Нужно Uвых, В <input name="target" value="3,3" inputmode="decimal" autocomplete="off" /></label>
+		</div>
+		<p class="footnote" data-pick></p>
+	</details>
+	<p class="footnote">
+		Uвых = Uвх · R2 / (R1 + R2). С нагрузкой вместо R2 берётся R2‖Rн. Подробнее: Хоровиц, гл. 1, §1.03–1.05.
+	</p>
+</divider-calc>
+
+<script>
+	import { parseValue, formatValue, nearestE24 } from '../../lib/units';
+
+	const par = (a: number, b: number) => (a * b) / (a + b);
+
+	class DividerCalc extends HTMLElement {
+		connectedCallback() {
+			const $ = (n: string) => this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!;
+			const out = (n: string) => this.querySelector(`[data-out="${n}"]`)!;
+			const svgText = (n: string) => this.querySelector(`[data-t="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const pick = this.querySelector('[data-pick]')!;
+
+			const update = () => {
+				const vin = parseValue($('vin').value);
+				const r1 = parseValue($('r1').value);
+				const r2 = parseValue($('r2').value);
+				const rlRaw = $('rl').value.trim();
+				const rl = rlRaw === '' ? Infinity : parseValue(rlRaw);
+				for (const [n, v] of [['vin', vin], ['r1', r1], ['r2', r2]] as const) {
+					$(n).setAttribute('aria-invalid', String(!(Number.isFinite(v) && v >= 0)));
+				}
+				$('rl').setAttribute('aria-invalid', String(Number.isNaN(rl)));
+
+				const r2eff = Number.isFinite(rl) ? par(r2, rl) : r2;
+				const vout = (vin * r2eff) / (r1 + r2eff);
+				const voutNoLoad = (vin * r2) / (r1 + r2);
+				const i = vin / (r1 + r2eff);
+
+				out('vout').textContent = formatValue(vout, 'В');
+				out('i').textContent = formatValue(i, 'А');
+				out('p').textContent = `${formatValue(i * i * r1, 'Вт', 2)} / ${formatValue((vout * vout) / r2, 'Вт', 2)}`;
+				out('rout').textContent = formatValue(par(r1, r2), 'Ом');
+
+				svgText('r1').textContent = formatValue(r1, 'Ом');
+				svgText('r2').textContent = formatValue(r2, 'Ом');
+				svgText('vout').textContent = `Uвых ${formatValue(vout, 'В')}`;
+				this.querySelectorAll<SVGElement>('[data-load-svg]').forEach((el) => {
+					el.style.opacity = Number.isFinite(rl) ? '1' : '0.25';
+				});
+
+				// Предупреждения: нагрузка сильно просаживает выход, резисторы греются.
+				const msgs: string[] = [];
+				if (Number.isFinite(rl) && voutNoLoad > 0 && (voutNoLoad - vout) / voutNoLoad > 0.05) {
+					msgs.push(
+						`Нагрузка просаживает выход на ${(((voutNoLoad - vout) / voutNoLoad) * 100).toFixed(0)} %. Правило: Rн должно быть хотя бы в 10 раз больше R1‖R2.`,
+					);
+				}
+				if (i * i * r1 > 0.125 || (vout * vout) / r2 > 0.125) {
+					msgs.push('Мощность на резисторе больше 0,125 Вт — это предел для типичного резистора 0805. Возьми корпус крупнее или резисторы больше.');
+				}
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+
+				// Подбор R2 из ряда E24: R2 = R1 · Uвых / (Uвх − Uвых).
+				const target = parseValue($('target').value);
+				if (target > 0 && target < vin && r1 > 0) {
+					const ideal = (r1 * target) / (vin - target);
+					const e24 = nearestE24(ideal);
+					const real = (vin * e24) / (r1 + e24);
+					pick.textContent = `Идеально R2 = ${formatValue(ideal, 'Ом')}. Ближайший номинал E24: ${formatValue(e24, 'Ом')} → Uвых = ${formatValue(real, 'В')} (ошибка ${(((real - target) / target) * 100).toFixed(1)} %).`;
+				} else {
+					pick.textContent = 'Нужное Uвых должно быть больше нуля и меньше Uвх.';
+				}
+			};
+
+			this.addEventListener('input', update);
+			update();
+		}
+	}
+	customElements.define('divider-calc', DividerCalc);
+</script>
+
+<style>
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(9rem, 14rem) 1fr;
+		gap: 1rem;
+		align-items: start;
+	}
+	@media (max-width: 40rem) {
+		.layout {
+			grid-template-columns: 1fr;
+		}
+		.layout svg {
+			max-width: 12rem;
+			margin-inline: auto;
+		}
+	}
+	.val {
+		fill: var(--sl-color-accent-high);
+	}
+	.strong {
+		font-weight: 700;
+	}
+	.pick {
+		margin-top: 1rem;
+	}
+	.pick summary {
+		cursor: pointer;
+		font-size: var(--sl-text-sm);
+		font-weight: 600;
+	}
+</style>

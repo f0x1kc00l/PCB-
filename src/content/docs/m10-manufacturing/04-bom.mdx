@@ -1,0 +1,153 @@
+---
+title: BOM и ActiveBOM
+description: Перечень элементов — из чего состоит хороший BOM, как его готовить в ActiveBOM и выгружать через Report Manager; альтернативные компоненты и поставщики.
+sidebar:
+  label: 10.4 BOM и ActiveBOM
+  order: 4
+duration: 35
+status: ready
+goals:
+  - понимать, какие колонки должны быть в BOM, чтобы плату можно было собрать без вопросов
+  - создавать ActiveBOM в проекте и проверять в нём компоненты и поставщиков
+  - выгружать BOM в Excel или CSV через Report Manager
+prerequisites:
+  - m10-manufacturing/01-fab-package
+  - m08-libraries/06-parameters-suppliers
+altium:
+  - title: Creating the BOM Document (ActiveBOM)
+    url: https://www.altium.com/documentation/altium-designer/activebom/creating-document
+  - title: Preparing a BOM in the Report Manager
+    url: https://www.altium.com/documentation/altium-designer/preparing-bom-report-manager
+sources:
+  - title: "ГОСТ 2.701-2008 и ГОСТ 2.702-2011 — перечень элементов как часть схемы в ЕСКД"
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+
+## Зачем нужен BOM
+
+**BOM (Bill of Materials, перечень элементов)** — таблица всего, что нужно купить и поставить на плату. Gerber говорит, какой будет плата, а BOM — что на ней будет стоять. Ошибка в BOM бьёт по деньгам: закупили не тот корпус — компоненты не встанут, перепутали номинал — плата заработает «как-то не так».
+
+Аналогия: BOM — это список покупок для рецепта. «Мука — 500 г» недостаточно, нужно «мука пшеничная высшего сорта, марка такая-то». Иначе в магазине купят не то.
+
+## Какие колонки нужны
+
+| Колонка | Зачем | Пример |
+|---|---|---|
+| **Designator** — позиционные обозначения | где на плате | R1, R4 |
+| **Quantity** — количество | сколько купить | 2 |
+| **Comment / Value** — номинал | что это | 470 Ом |
+| **Description** — описание | человекочитаемо | Резистор 0805 1 % 0,125 Вт |
+| **Footprint** — корпус | какой корпус | 0805 |
+| **Manufacturer** — производитель | однозначность | Yageo |
+| **Manufacturer Part Number (MPN)** | точный артикул | RC0805FR-07470RL |
+| **Поставщик и его артикул** | где купить | по необходимости |
+
+Главная колонка — **MPN**. С ним BOM однозначен: «резистор 10 кОм 0805» бывает тысячи видов, а MPN один.
+
+<Callout type="tip">
+  Компоненты, которые ставить **не нужно** (вариант без них), помечай явно: отдельной колонкой или параметром
+  «не устанавливать» (в англоязычной практике DNP / DNF — do not populate / do not fit). Монтажник не должен гадать,
+  почему на площадке ничего нет.
+</Callout>
+
+## ActiveBOM
+
+В Altium «живой» BOM проекта — документ **ActiveBOM** (файл `.BomDoc`). Он берёт компоненты из схемы и показывает:
+
+- список позиций в нескольких видах (**Flat view**, **Base view**, **Consolidated view**);
+- для каждой позиции — производителей и поставщиков с ценами и наличием (данные приходят из облачных сервисов Altium, нужен интернет и вход в аккаунт);
+- столбец статуса **BOM Status** — риск по компоненту (снят с производства, нет на складе…);
+- проверки **BOM Checks** — например, позиции без MPN; режим реакции на каждое нарушение настраивается.
+
+В проекте может быть только **один** BomDoc.
+
+Как добавить: правый клик по проекту в панели **Projects** → <MenuPath path="Add New to Project » ActiveBOM" verify /> (или через меню **File » New**). Документ попадает в проект, его нужно сохранить.
+
+<Screenshot src="screenshots/m10-manufacturing/l04-activebom.png" alt="документ ActiveBOM: список позиций и поставщики внизу" />
+
+<Callout type="altium">
+  Номер позиции (**Line #**) в ActiveBOM задаётся кнопкой **Set Line #** и работает только в Base view. Когда BOM
+  генерируется из ActiveBOM, этот номер доступен как колонка и в выгрузке. Удобно, чтобы позиции BOM совпадали с
+  выносками на сборочном чертеже (урок 10.7).
+</Callout>
+
+## Выгрузка BOM: Report Manager
+
+Сам BomDoc заводу не отправляют. Выгружают таблицу через **Report Manager**: <MenuPath path="Reports » Bill of Materials" /> (команда есть в редакторах схемы, платы и в ActiveBOM). Если в проекте есть ActiveBOM, данные берутся из него автоматически.
+
+<Screenshot src="screenshots/m10-manufacturing/l04-report-manager.png" alt="диалог Bill of Materials (Report Manager): таблица и настройки экспорта" />
+
+В диалоге:
+
+1. На вкладке **Columns** (панель Properties справа) включи нужные колонки: Designator, Quantity, Comment, Description, Footprint, Manufacturer 1, Manufacturer Part Number 1.
+2. На вкладке **General** выбери **File Format**: MS-Excel, CSV, PDF и другие. Для Excel-формата можно выбрать **Template** — шаблон оформления.
+3. Опции **Add to Project** (добавить файл в проект) и **Open Exported** (сразу открыть).
+4. Кнопка **Export**.
+
+В Output Job тот же BOM добавляется как **Report Outputs → Bill of Materials** (урок [10.6](../06-output-job/)).
+
+## BOM и ЕСКД
+
+В отечественной документации аналог BOM — **перечень элементов** (ПЭ3) к схеме и **спецификация** к сборочному чертежу. Это документы со строго заданной формой и основной надписью. Altium из коробки делает BOM «западного» вида. Перечень по ЕСКД обычно оформляют по шаблону в Excel или сторонними средствами. Для заказа на зарубежном сервисе ЕСКД не нужен, для отечественного предприятия — почти всегда. [ПРОВЕРИТЬ: наличие готовых шаблонов ЕСКД для Report Manager]
+
+## Практика
+
+1. Добавь в проект мультивибратора ActiveBOM.
+2. Найди позиции без MPN (они подсветятся проверками) и подбери для резисторов, конденсаторов, транзисторов и светодиодов реальные артикулы.
+3. Выгрузи BOM в Excel и CSV с колонками из таблицы выше.
+4. Посчитай по данным ActiveBOM стоимость компонентов на одну плату и на 10 плат.
+
+<Mistakes
+  items={[
+    {
+      problem: 'В BOM «Резистор 10к» без корпуса и артикула',
+      why: 'У компонентов не заполнены параметры, BOM собран из одного поля Comment.',
+      fix: 'Заполняй у каждого компонента Footprint, Manufacturer и MPN (урок 8.6) и проверяй в ActiveBOM, что пустых нет.',
+    },
+    {
+      problem: 'Количество в BOM не совпадает с платой',
+      why: 'На схеме остались компоненты, удалённые с платы, или есть дубликаты позиционных обозначений.',
+      fix: 'Синхронизируй схему и плату (Design » Update PCB Document), проверь аннотацию и отсутствие ошибок компиляции.',
+    },
+    {
+      problem: 'Монтажник поставил компонент, которого не должно быть',
+      why: 'Не отмечены позиции «не устанавливать».',
+      fix: 'Используй варианты (Variants) или явный параметр DNP и выгружай BOM с его учётом.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Какая колонка делает позицию BOM однозначной?',
+      options: ['Comment', 'Manufacturer Part Number (MPN)', 'Description'],
+      answer: 1,
+      explain: 'MPN — точный артикул производителя. Номинал и описание подходят тысячам разных деталей.',
+    },
+    {
+      q: 'Сколько документов ActiveBOM может быть в одном проекте Altium?',
+      options: ['Один', 'Два — для верха и низа', 'Сколько угодно'],
+      answer: 0,
+      explain: 'В проекте может быть только один BomDoc. Разные конфигурации делаются через BOM Sets и варианты.',
+    },
+    {
+      q: 'Какой командой выгружают BOM в Excel или CSV?',
+      options: ['File » Fabrication Outputs » Gerber Files', 'Reports » Bill of Materials (Report Manager)', 'File » Save As'],
+      answer: 1,
+      explain: 'Таблица выгружается через Report Manager; при наличии ActiveBOM данные берутся из него.',
+    },
+  ]}
+/>
+
+<Assignment time={30}>
+  Подготовь полный BOM мультивибратора: все позиции с MPN, у каждой — минимум один поставщик с наличием. Выгрузи в
+  Excel. Затем представь, что один из транзисторов снят с производства: найди замену в том же корпусе и с близкими
+  параметрами (урок 2.11 — как сравнивать даташиты) и добавь её как альтернативу в ActiveBOM.
+</Assignment>

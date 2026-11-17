@@ -1,0 +1,111 @@
+---
+title: Водяные аналогии
+description: Все анимации «вода ↔ электричество» на одной странице — таблица соответствий, где аналогия работает и где врёт, что говорят исследования.
+sidebar:
+  label: I. Водяные аналогии
+  order: 9
+status: ready
+book:
+  - { ch: 1, sec: "1.01", page: 8, note: "напряжение, ток, правила Кирхгофа" }
+  - { ch: 1, sec: "1.12", page: 27, note: "конденсаторы, I = C·dU/dt" }
+  - { ch: 1, sec: "1.16", page: 35, note: "индуктивности, U = L·dI/dt" }
+  - { ch: 1, sec: "1.25", page: 50, note: "диоды" }
+  - { ch: 2, sec: "2.01", page: 69, note: "транзистор как усилитель тока" }
+  - { ch: 3, sec: "3.01", page: 122, note: "полевые транзисторы" }
+sources:
+  - title: "Gentner D., Gentner D. R. Flowing waters or teeming crowds: Mental models of electricity // Mental Models / ed. D. Gentner, A. L. Stevens. — Hillsdale: Erlbaum, 1983. — P. 99–129"
+    url: "https://groups.psych.northwestern.edu/gentner/papers/GentnerGentner83.pdf"
+  - title: "Cohen R., Eylon B., Ganiel U. Potential difference and current in simple electric circuits: A study of students' concepts // American Journal of Physics. — 1983. — Vol. 51, № 5. — P. 407–412"
+    url: "https://doi.org/10.1119/1.13226"
+  - title: "Engelhardt P. V., Beichner R. J. Students' understanding of direct current resistive electrical circuits // American Journal of Physics. — 2004. — Vol. 72, № 1. — P. 98–115"
+    url: "https://doi.org/10.1119/1.1614813"
+  - title: "Schwedes H. The importance of water circuits in teaching electric circuits // Aspects of Understanding Electricity / ed. R. Duit, W. Jung, C. v. Rhöneck. — Kiel: IPN, 1985"
+  - title: "Burde J.-P., Wilhelm T. Teaching electric circuits with a focus on potential differences // Research and Innovation in Physics Education. — Springer, 2020"
+    url: "https://doi.org/10.1007/978-3-030-51182-1_10"
+  - title: "Сугян Г. Лекции по ТОЭ: «Идеальные пассивные элементы в цепях переменного синусоидального тока», «Расчёт цепей переменного синусоидального тока», «Мощность в цепях переменного синусоидального тока», «Метод эквивалентного генератора»"
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import WaterCircuit from '../../../components/water/WaterCircuit.astro';
+import WaterPN from '../../../components/water/WaterPN.astro';
+import WaterOhm from '../../../components/water/WaterOhm.astro';
+import WaterKirchhoff from '../../../components/water/WaterKirchhoff.astro';
+import WaterDivider from '../../../components/water/WaterDivider.astro';
+import WaterAC from '../../../components/water/WaterAC.astro';
+import WaterCapacitor from '../../../components/water/WaterCapacitor.astro';
+import WaterInductor from '../../../components/water/WaterInductor.astro';
+import WaterDiode from '../../../components/water/WaterDiode.astro';
+import WaterTransistor from '../../../components/water/WaterTransistor.astro';
+import WaterDecoupling from '../../../components/water/WaterDecoupling.astro';
+
+Здесь собраны все анимации курса, где электричество показано водой в трубах. Каждая стоит и в своём уроке — тут они для повторения и сравнения.
+
+Есть и **[карманная справка](../../spravka/)** — отдельная лёгкая страница: каждый термин простыми словами, водяная аналогия, формулы, ссылка на страницу Хоровица и поиск. Удобно открыть с телефона в любой момент.
+
+## Таблица соответствий
+
+| Вода | Электричество | Формула |
+|---|---|---|
+| Объём воды | Заряд q, Кл | — |
+| Расход, л/с | Ток I, А | I = dq/dt |
+| Давление (разность давлений) | Потенциал (напряжение U), В | — |
+| Насос | Источник ЭДС | — |
+| Сужение трубы | Резистор R | U = I·R |
+| Бак с резиновой мембраной | Конденсатор C | q = C·U, I = C·dU/dt |
+| Тяжёлое колесо-маховик в трубе | Катушка L | U = L·dI/dt |
+| Плотина между двумя озёрами | p-n-переход | барьер ≈ 0,7 В |
+| Пузырёк воздуха в воде | Дырка | — |
+| Обратный клапан с пружиной | Диод | I = Is·(e^(U/nUт) − 1) |
+| Кран с гидроприводом | Транзистор | Iк = β·Iб (BJT) |
+| Кран открыт / закрыт | Ключ замкнут / разомкнут | — |
+| Широкая обходная труба | Короткое замыкание | I = U / (r + Rкз) |
+| Гидроудар | Индуктивный выброс | U = −L·dI/dt |
+| Бак-аккумулятор у потребителя | Развязывающий конденсатор | — |
+
+## Как пользоваться аналогией и не обмануться
+
+Исследования по физическому образованию сходятся в одном: аналогия помогает, только если понимаешь, **где она кончается**.
+
+- **Давление не видно.** Шведес (1985) и позже Бурде и Вильгельм отмечают: в замкнутой трубе вода под высоким давлением ничем не отличается от воды под низким. Ученик смотрит на поток и забывает про давление. Поэтому во всех анимациях давление нарисовано **цветом трубы** и манометрами.
+- **Ток — не причина, а следствие.** Коэн, Эйлон и Ганиэль (1983) обнаружили, что студенты считают ток главной величиной, а напряжение — его следствием. Правильно наоборот: разность давлений (напряжение) — причина, расход (ток) — следствие.
+- **Ток не расходуется.** Энгельхардт и Бейхнер (2004) построили тест DIRECT по цепям постоянного тока. Одна из типичных ошибок у школьников и у студентов: будто ток «тратится» в нагрузке. В воде видно сразу — капли не исчезают в сужении.
+- **Разные модели — для разных задач.** У Гентнер и Гентнер (1983) испытуемые с «водяной» моделью лучше решали задачи про батарейки, а с моделью «толпа бегущих людей» — про резисторы. Аналогия — инструмент. Взял, применил, отложил.
+
+<Callout type="warning" title="Где вода врёт">
+
+  - Вода течёт медленно, а сигнал в проводе распространяется почти со скоростью света. Сами электроны при этом ползут со скоростью миллиметры в секунду.
+  - У воды есть вес и гравитация, у заряда в цепи — нет.
+  - Открытая труба — фонтан, разомкнутая цепь — просто ноль тока.
+  - Магнитного поля у воды нет: трансформатор, излучение, перекрёстные помехи водой не объяснить. Для ВЧ (модуль 12) аналогию бросаем.
+
+</Callout>
+
+## Постоянный ток
+
+<WaterCircuit n="I.0" />
+
+<WaterOhm n="I.1" />
+
+<WaterKirchhoff n="I.2" />
+
+<WaterDivider n="I.3" />
+
+## Реактивные элементы
+
+<WaterCapacitor n="I.4" />
+
+<WaterInductor n="I.5" />
+
+<WaterAC n="I.6" el="RLC" />
+
+## Полупроводники
+
+<WaterPN n="I.6а" />
+
+<WaterDiode n="I.7" zener />
+
+<WaterTransistor n="I.8" mode="bjt" />
+
+## На плате
+
+<WaterDecoupling n="I.9" />

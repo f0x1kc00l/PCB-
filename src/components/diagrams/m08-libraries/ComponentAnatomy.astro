@@ -1,0 +1,57 @@
+---
+/** Рис. 8.1: из чего состоит компонент — символ, посадочное место (с 3D внутри) и параметры. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="8.1" caption="Компонент — это не картинка, а набор связанных моделей. Символ рисуется на схеме, посадочное место — на плате, 3D-модель в Altium хранится внутри посадочного места, а параметры (MPN, производитель, номинал) уходят в перечень элементов и в закупку.">
+	<svg viewBox="0 0 660 300" role="img" aria-label="В центре — компонент LM1117-3.3. От него линии к символу схемы, к посадочному месту на плате и к параметрам. 3D-модель связана с посадочным местом пунктиром.">
+		<!-- центр -->
+		<rect x="252" y="125" width="150" height="60" rx="8" fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+		<text class="t" x="327" y="149" text-anchor="middle" font-weight="700">Компонент</text>
+		<text class="t t-mono t-acc" x="327" y="170" text-anchor="middle">LM1117-3.3</text>
+
+		<!-- рамки плиток -->
+		<rect class="ln-thin" x="20" y="20" width="190" height="100" rx="6" />
+		<rect class="ln-thin" x="450" y="20" width="190" height="100" rx="6" />
+		<rect class="ln-thin" x="20" y="190" width="190" height="100" rx="6" />
+		<rect class="ln-thin" x="450" y="190" width="190" height="100" rx="6" />
+
+		<!-- символ -->
+		<rect class="ln" x="80" y="35" width="70" height="45" />
+		<path class="ln" d="M50 50 H80 M150 50 H180 M115 80 V95" />
+		<text class="t t-s" x="84" y="54">IN</text>
+		<text class="t t-s" x="146" y="54" text-anchor="end">OUT</text>
+		<text class="t t-s" x="115" y="76" text-anchor="middle">GND</text>
+		<text class="t t-s" x="115" y="112" text-anchor="middle" font-weight="700">Символ · SchLib</text>
+
+		<!-- посадочное место -->
+		<rect x="505" y="32" width="80" height="22" rx="2" fill="var(--pcb-copper)" />
+		<rect x="505" y="68" width="14" height="26" rx="2" fill="var(--pcb-copper)" />
+		<rect x="538" y="68" width="14" height="26" rx="2" fill="var(--pcb-copper)" />
+		<rect x="571" y="68" width="14" height="26" rx="2" fill="var(--pcb-copper)" />
+		<text class="t t-s" x="545" y="112" text-anchor="middle" font-weight="700">Посадочное место · PcbLib</text>
+
+		<!-- 3D -->
+		<polygon points="505,225 525,210 605,210 585,225" fill="#3a3a3a" />
+		<polygon points="585,225 605,210 605,245 585,260" fill="#222" />
+		<rect x="505" y="225" width="80" height="35" fill="#2c2c2c" />
+		<rect x="515" y="260" width="8" height="8" fill="#bdbdbd" />
+		<rect x="541" y="260" width="8" height="8" fill="#bdbdbd" />
+		<rect x="567" y="260" width="8" height="8" fill="#bdbdbd" />
+		<text class="t t-s" x="545" y="284" text-anchor="middle" font-weight="700">3D-модель · STEP</text>
+
+		<!-- параметры -->
+		<g class="t t-s t-mono">
+			<text x="32" y="206">Value: 3.3V</text>
+			<text x="32" y="222">MPN: LM1117IMPX-3.3</text>
+			<text x="32" y="238">Manufacturer: TI</text>
+			<text x="32" y="254">Description: LDO</text>
+		</g>
+		<text class="t t-s" x="115" y="284" text-anchor="middle" font-weight="700">Параметры</text>
+
+		<!-- связи -->
+		<path class="ln-acc" d="M252 140 L210 75 M402 140 L450 75 M252 170 L210 235" />
+		<path class="ln-dash" d="M545 120 V190" />
+		<text class="t t-s t-mut" x="537" y="160" text-anchor="end">3D — внутри футпринта</text>
+	</svg>
+</Figure>

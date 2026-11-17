@@ -1,0 +1,39 @@
+---
+/** Рис. 2.5 (урок 2.5): светодиод с токоограничивающим резистором и расчёт. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="2.5" caption="Резистор последовательно со светодиодом задаёт ток: всё напряжение, которое светодиод не «взял», падает на резисторе. Пример: 5 В питания, красный светодиод ~2 В, нужный ток 10 мА → R = 3 В / 10 мА = 300 Ом → ближайший номинал 300 Ом (E24).">
+	<svg viewBox="0 -6 640 236" role="img" aria-label="Схема: +5 вольт, резистор 300 Ом, светодиод, земля. Справа подписаны напряжения: на резисторе 3 вольта, на светодиоде 2 вольта, ток 10 миллиампер. Внизу светодиод в корпусе: длинная ножка — анод, срез корпуса — катод.">
+		<!-- схема -->
+		<text class="t t-acc" x="90" y="28" text-anchor="middle">+5 В</text>
+		<path class="ln" d="M90 36 V56 M90 106 V124 M90 166 V200" />
+		<rect class="ln" x="80" y="56" width="20" height="50" />
+		<text class="t" x="110" y="78">R1</text>
+		<text class="t t-mono t-s" x="110" y="94">300 Ом</text>
+		<!-- светодиод вертикально, анод сверху -->
+		<polygon points="74,124 106,124 90,152" class="ln" />
+		<path class="ln" d="M90 124 V152 M74 152 H106" />
+		<path class="ln" d="M110 130 L122 118 M118 118 H122 V122 M114 142 L126 130 M122 130 H126 V134" />
+		<text class="t" x="132" y="146">HL1</text>
+		<path class="ln" d="M76 200 H104 M81 206 H99 M86 212 H94" />
+		<!-- напряжения -->
+		<path class="ln-acc" d="M190 56 V106 M184 62 L190 56 L196 62 M184 100 L190 106 L196 100" />
+		<text class="t t-acc t-mono" x="200" y="86">U_R = 5 − 2 = 3 В</text>
+		<path class="ln-acc" d="M190 124 V152 M184 130 L190 124 L196 130 M184 146 L190 152 L196 146" />
+		<text class="t t-acc t-mono" x="200" y="143">U_LED ≈ 2 В</text>
+		<path class="ln-acc" d="M60 60 V96 M54 90 L60 96 L66 90" />
+		<text class="t t-acc t-mono" x="54" y="80" text-anchor="end">10 мА</text>
+
+		<!-- корпус светодиода 5 мм -->
+		<text class="t" x="480" y="12" text-anchor="middle" font-weight="700">Светодиод 5 мм</text>
+		<path d="M440 60 A40 40 0 0 1 520 60 V130 H440 Z" fill="var(--pcb-tip)" opacity="0.35" stroke="currentColor" stroke-width="1.5" />
+		<path class="ln" d="M440 130 H448 M512 130 H520" />
+		<path d="M516 60 V130" stroke="currentColor" stroke-width="3" />
+		<path class="ln" d="M460 130 V210 M500 130 V190" />
+		<text class="t t-s" x="456" y="226" text-anchor="end">анод (+), длинная ножка</text>
+		<text class="t t-s" x="508" y="194">катод (−)</text>
+		<text class="t t-s" x="508" y="210">короткая ножка,</text>
+		<text class="t t-s" x="508" y="226">срез корпуса</text>
+	</svg>
+</Figure>

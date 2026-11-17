@@ -1,0 +1,42 @@
+---
+/** Рис. 9.5: формы меандров для выравнивания длины — Accordion, Trombone, Sawtooth. */
+import Figure from '../Figure.astro';
+
+// Accordion: прямоугольные «зубцы» на прямом участке дорожки.
+const acc = (() => {
+	let d = 'M20 140 H60';
+	for (let i = 0; i < 4; i++) {
+		const x = 60 + i * 30;
+		d += ` V80 H${x + 15} V140 H${x + 30}`;
+	}
+	return d + ' H200';
+})();
+// Sawtooth: треугольные зубцы.
+const saw = (() => {
+	let d = 'M460 140 H490';
+	for (let i = 0; i < 5; i++) {
+		const x = 490 + i * 24;
+		d += ` L${x + 12} 105 L${x + 24} 140`;
+	}
+	return d + ' H640';
+})();
+---
+
+<Figure n="9.5" caption="Чтобы удлинить дорожку до нужной длины, в неё вставляют меандр. Accordion (гармошка) — классический вариант. Trombone (тромбон) — одна большая петля, удобна для дифференциальных пар. Sawtooth (пила) — пологие зубцы. Параметры: амплитуда (высота зубца) и шаг (Space) между витками; шаг должен быть не меньше нескольких зазоров, иначе соседние витки начинают наводить друг на друга.">
+	<svg viewBox="0 0 660 200" role="img" aria-label="Три формы меандров: прямоугольная гармошка, одна петля-тромбон и треугольная пила.">
+		<text class="t" x="20" y="24" font-weight="700">Accordion</text>
+		<path d={acc} class="ln-acc" />
+		<path class="ln" d="M210 80 V140 M204 80 H216 M204 140 H216" />
+		<text class="t t-s" x="220" y="114">амплитуда</text>
+		<path class="ln" d="M60 165 H90 M60 159 V171 M90 159 V171" />
+		<text class="t t-s" x="96" y="170">шаг</text>
+
+		<text class="t" x="275" y="24" font-weight="700">Trombone</text>
+		<path d="M260 140 H310 V90 H370 V140 H420" class="ln-acc" />
+		<path d="M260 155 H295 V75 H385 V155 H420" class="ln-acc" opacity="0.6" />
+		<text class="t t-s t-mut" x="340" y="180" text-anchor="middle">удобен для пары</text>
+
+		<text class="t" x="490" y="24" font-weight="700">Sawtooth</text>
+		<path d={saw} class="ln-acc" />
+	</svg>
+</Figure>

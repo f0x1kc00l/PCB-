@@ -1,0 +1,27 @@
+---
+/** Рис. 5.9: излучение петли тока зависит от её площади. */
+import Figure from '../Figure.astro';
+const cu = 'var(--pcb-copper)';
+---
+
+<Figure n="5.9" caption="Любая петля с быстро меняющимся током — маленькая рамочная антенна. Излучение дифференциальной петли растёт пропорционально току, площади петли и квадрату частоты. Частоту и ток задаёт схема, а площадь петли — разводка. Это главный рычаг конструктора платы.">
+	<svg viewBox="0 0 660 210" role="img" aria-label="Слева: сигнал и обратный провод идут далеко друг от друга, большая заштрихованная петля. Справа: обратный путь прямо рядом с сигналом, петля узкая.">
+		<!-- большая петля -->
+		<rect x="30" y="40" width="40" height="40" rx="3" class="ln" />
+		<rect x="250" y="40" width="40" height="40" rx="3" class="ln" />
+		<path d="M70 52 H250 M270 80 V170 H50 V80" fill="none" stroke={cu} stroke-width="5" />
+		<path d="M70 52 H250 V80 H270 V170 H50 V80 H70 Z" fill="var(--pcb-bad)" opacity="0.15" />
+		<text class="t t-s" x="160" y="120" text-anchor="middle" fill="var(--pcb-bad)">площадь петли A — большая</text>
+		<text class="t t-s" x="160" y="30" text-anchor="middle">сигнал</text>
+		<text class="t t-s" x="160" y="188" text-anchor="middle">обратный провод далеко</text>
+		<!-- маленькая петля -->
+		<rect x="370" y="40" width="40" height="40" rx="3" class="ln" />
+		<rect x="590" y="40" width="40" height="40" rx="3" class="ln" />
+		<path d="M410 52 H590 M590 68 H410" fill="none" stroke={cu} stroke-width="5" />
+		<path d="M410 52 H590 V68 H410 Z" fill="var(--pcb-ok)" opacity="0.25" />
+		<text class="t t-s" x="500" y="30" text-anchor="middle">сигнал</text>
+		<text class="t t-s" x="500" y="92" text-anchor="middle">возврат рядом</text>
+		<text class="t t-s" x="500" y="120" text-anchor="middle" fill="var(--pcb-ok)">площадь петли — минимальная</text>
+		<text class="t t-acc" x="500" y="170" text-anchor="middle">E ~ I · A · f²</text>
+	</svg>
+</Figure>

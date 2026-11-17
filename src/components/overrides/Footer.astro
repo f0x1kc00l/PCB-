@@ -1,0 +1,49 @@
+---
+/**
+ * Переопределение подвала страницы Starlight.
+ *
+ * Для уроков добавляет перед стандартной навигацией «назад / далее»:
+ *  1. блок «Ссылки» — собирается из frontmatter (book, altium, sources);
+ *  2. кнопку «Урок пройден» — отметка в localStorage.
+ */
+import EditLink from '@astrojs/starlight/components/EditLink.astro';
+import LastUpdated from '@astrojs/starlight/components/LastUpdated.astro';
+import Pagination from '@astrojs/starlight/components/Pagination.astro';
+import References from '../lesson/References.astro';
+import LessonComplete from '../interactive/LessonComplete.astro';
+import { isLessonId } from '../../lib/site';
+
+const { entry, id } = Astro.locals.starlightRoute;
+const { book, altium, sources } = entry.data;
+const isLesson = isLessonId(id);
+---
+
+<footer>
+	{isLesson && <References book={book} altium={altium} sources={sources} />}
+	{isLesson && <LessonComplete />}
+	<div class="meta">
+		<EditLink />
+		<LastUpdated />
+	</div>
+	<Pagination />
+</footer>
+
+<style>
+	footer {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.75rem 3rem;
+		margin-top: 0.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.meta:empty {
+		display: none;
+	}
+</style>

@@ -1,0 +1,26 @@
+---
+/** Рис. 5.3: варианты поворота дорожки — 90°, 45°, дуга и острый угол. */
+import Figure from '../Figure.astro';
+const cu = 'var(--pcb-copper)';
+---
+
+<Figure n="5.3" caption="Повороты дорожки. Под 45° — стандарт: короче путь, аккуратный вид, нет внешнего «лишнего» угла меди. 90° для низкочастотных цепей работает, но выглядит неряшливо и на нём сложнее держать зазоры. Дуга нужна в высокоскоростных и гибких платах. Острого угла между дорожками избегай: Altium ловит его правилом Acute Angle.">
+	<svg viewBox="0 0 660 200" role="img" aria-label="Четыре примера: поворот на 90 градусов, на 45 градусов, дугой и острый угол при соединении двух дорожек.">
+		<rect x="0" y="0" width="660" height="160" rx="8" fill="var(--pcb-mask)" opacity="0.18" />
+		<g fill="none" stroke={cu} stroke-width="12" stroke-linejoin="miter" stroke-linecap="round">
+			<path d="M30 130 V40 H130" />
+			<path d="M195 130 V75 L230 40 H295" stroke-linejoin="round" />
+			<path d="M360 130 V80 A40 40 0 0 1 400 40 H460" />
+			<path d="M530 130 V40" />
+			<path d="M530 130 L630 70" />
+		</g>
+		<circle cx="530" cy="130" r="10" fill={cu} />
+		<path d="M538 112 Q552 112 548 100" fill="none" stroke="var(--pcb-bad)" stroke-width="2" />
+		<g class="t t-s">
+			<text x="80" y="185" text-anchor="middle">90° — допустимо</text>
+			<text x="245" y="185" text-anchor="middle" font-weight="700">45° — стандарт</text>
+			<text x="410" y="185" text-anchor="middle">дуга — для ВЧ</text>
+			<text x="580" y="185" text-anchor="middle" fill="var(--pcb-bad)">острый угол — нет</text>
+		</g>
+	</svg>
+</Figure>

@@ -1,0 +1,59 @@
+---
+/**
+ * Рис. 11.4: эскиз размещения платы питания 40×30 мм (вид сверху). Масштаб 10 px = 1 мм.
+ * Схематичный, для понимания логики размещения, а не чертёж.
+ */
+import Figure from '../Figure.astro';
+
+const S = 10;
+const ox = 30;
+const oy = 20;
+const mm = (v: number) => v * S;
+// переходные отверстия под теплоотводящим полигоном выхода
+const vias: number[][] = [];
+for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) vias.push([ox + mm(21 + i * 2), oy + mm(6 + j * 2)]);
+---
+
+<Figure n="11.4" caption="Эскиз размещения 40×30 мм. Разъёмы — по краям. Цепочка «вход → VT1 → C1 → DA1 → C3 → выход» идёт слева направо без петель. Под фланцем DA1 (это вывод OUT) — большой медный полигон +3V3 с переходными отверстиями на такой же полигон на нижнем слое: через них уходит тепло. Остальной нижний слой — сплошная земля.">
+	<svg viewBox="0 0 470 372" role="img" aria-label="Эскиз платы 40 на 30 миллиметров: слева разъём J1, затем VT1, конденсаторы C1 и C2, стабилизатор DA1 с полигоном и переходными отверстиями, конденсатор C3, светодиод, справа разъём J2, по углам монтажные отверстия.">
+		<!-- плата -->
+		<rect x={ox} y={oy} width={mm(40)} height={mm(30)} rx="12" fill="var(--pcb-mask)" />
+		<!-- монтажные отверстия M3 -->
+		{[[3.5, 3.5], [36.5, 3.5], [3.5, 26.5], [36.5, 26.5]].map(([x, y]) => (
+			<g><circle cx={ox + mm(x)} cy={oy + mm(y)} r="16" fill="var(--pcb-copper)" /><circle cx={ox + mm(x)} cy={oy + mm(y)} r="8" fill="var(--sl-color-bg)" /></g>
+		))}
+		<!-- полигон OUT под фланцем -->
+		<rect x={ox + mm(19)} y={oy + mm(4.5)} width={mm(10)} height={mm(9)} rx="3" fill="var(--pcb-copper)" opacity="0.55" />
+		{vias.map(([x, y]) => <circle cx={x} cy={y} r="4" fill="var(--sl-color-bg)" stroke="var(--pcb-copper)" stroke-width="2" />)}
+		<!-- дорожки питания -->
+		<path d={`M${ox + mm(5)} ${oy + mm(15)} H${ox + mm(19)}`} stroke="var(--pcb-copper)" stroke-width="8" />
+		<path d={`M${ox + mm(29)} ${oy + mm(9)} H${ox + mm(33)} V${oy + mm(15)} H${ox + mm(37)}`} stroke="var(--pcb-copper)" stroke-width="8" fill="none" />
+		<!-- J1 -->
+		<rect x={ox} y={oy + mm(9)} width={mm(7)} height={mm(12)} fill="#222" stroke="#bbb" />
+		<text class="t t-s" x={ox + mm(3.5)} y={oy + mm(24)} text-anchor="middle" fill="#fff">J1</text>
+		<!-- VT1 SOT-23 -->
+		<rect x={ox + mm(9)} y={oy + mm(13.5)} width={mm(3)} height={mm(3)} fill="#222" stroke="#bbb" />
+		<text class="t t-s" x={ox + mm(10.5)} y={oy + mm(19.5)} text-anchor="middle" fill="#fff">VT1</text>
+		<!-- C1 C2 -->
+		<rect x={ox + mm(14)} y={oy + mm(13.2)} width={mm(3.2)} height={mm(1.6)} fill="#c9a36a" />
+		<rect x={ox + mm(14)} y={oy + mm(16.5)} width={mm(2)} height={mm(1.25)} fill="#c9a36a" />
+		<text class="t t-s" x={ox + mm(15.5)} y={oy + mm(21)} text-anchor="middle" fill="#fff">C1 C2</text>
+		<!-- DA1 SOT-223 -->
+		<rect x={ox + mm(20)} y={oy + mm(10.5)} width={mm(6.5)} height={mm(3.5)} fill="#222" stroke="#bbb" />
+		<text class="t t-s" x={ox + mm(23.25)} y={oy + mm(3.2)} text-anchor="middle" fill="#fff">DA1 + теплоотвод</text>
+		<!-- C3 -->
+		<rect x={ox + mm(30)} y={oy + mm(7.5)} width={mm(3.5)} height={mm(2.8)} fill="#c9a36a" />
+		<text class="t t-s" x={ox + mm(31.75)} y={oy + mm(6.5)} text-anchor="middle" fill="#fff">C3</text>
+		<!-- HL1 -->
+		<rect x={ox + mm(28)} y={oy + mm(20)} width={mm(2)} height={mm(1.25)} fill="#e33" />
+		<text class="t t-s" x={ox + mm(29)} y={oy + mm(24)} text-anchor="middle" fill="#fff">HL1</text>
+		<!-- J2 -->
+		<rect x={ox + mm(37)} y={oy + mm(11)} width={mm(3)} height={mm(8)} fill="#222" stroke="#bbb" />
+		<text class="t t-s" x={ox + mm(38.5)} y={oy + mm(22)} text-anchor="middle" fill="#fff">J2</text>
+		<!-- размеры -->
+		<path class="ln" d={`M${ox} ${oy + mm(30) + 18} H${ox + mm(40)} M${ox} ${oy + mm(30) + 12} V${oy + mm(30) + 24} M${ox + mm(40)} ${oy + mm(30) + 12} V${oy + mm(30) + 24}`} />
+		<text class="t t-s" x={ox + mm(20)} y={oy + mm(30) + 34} text-anchor="middle">40 мм</text>
+		<path class="ln" d={`M${ox + mm(40) + 18} ${oy} V${oy + mm(30)} M${ox + mm(40) + 12} ${oy} H${ox + mm(40) + 24} M${ox + mm(40) + 12} ${oy + mm(30)} H${ox + mm(40) + 24}`} />
+		<text class="t t-s" x={ox + mm(40) + 26} y={oy + mm(15)}>30</text>
+	</svg>
+</Figure>

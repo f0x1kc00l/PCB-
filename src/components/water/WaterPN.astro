@@ -1,0 +1,176 @@
+---
+/**
+ * p-n-переход: слева n-область (свободные электроны), справа p-область (дырки).
+ * Между ними обеднённый слой — «плотина». Прямое смещение её понижает и сужает,
+ * обратное — повышает и расширяет. Ток — по Шокли.
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-pn"
+	n={n}
+	title="p-n-переход: плотина между двумя озёрами"
+	map={[
+		['n-область', 'избыток свободных электронов (●)'],
+		['p-область', 'избыток «дырок» — пустых мест (○)'],
+		['плотина', 'обеднённый слой, потенциальный барьер ≈ 0,7 В'],
+		['поднять воду выше плотины', 'прямое смещение'],
+	]}
+	caption="У границы электроны из n-области заполнили дырки в p-области — там не осталось свободных носителей (обеднённый слой), остались только неподвижные ионы (+ и −). Их поле — плотина высотой ~0,7 В. Подай плюс на p, минус на n — плотина опускается, и носители пошли навстречу друг другу (ток). Подай наоборот — плотина растёт, слой шире, тока нет."
+>
+	<svg viewBox="0 0 680 290" role="img" aria-label="Кристалл: слева n-область с точками-электронами, справа p-область с кружками-дырками, в середине обеднённый слой с ионами. Справа рисунок плотины.">
+		<text class="th" x="140" y="34" text-anchor="middle">n — катод</text>
+		<text class="th" x="340" y="34" text-anchor="middle">p — анод</text>
+		<rect x="40" y="50" width="400" height="160" rx="6" class="wall" />
+		<rect data-zone x="220" y="51" width="40" height="158" fill="var(--sl-color-accent)" opacity="0.15" />
+		<g data-ions></g>
+		<g data-car></g>
+		<text class="ts" data-zl x="240" y="228" text-anchor="middle">обеднённый слой</text>
+		<line x1="40" y1="130" x2="10" y2="130" class="ln" />
+		<line x1="440" y1="130" x2="470" y2="130" class="ln" />
+		<text class="t tm" data-pol x="240" y="262" text-anchor="middle"></text>
+		<!-- плотина -->
+		<g transform="translate(490 50)">
+			<text class="ts" x="80" y="-12" text-anchor="middle">плотина (энергия)</text>
+			<rect x="0" y="0" width="170" height="160" class="grid" />
+			<rect x="1" data-wl y="80" width="70" height="79" fill="var(--water-hi)" opacity="0.55" />
+			<path data-dam d="" fill="var(--water-wall)" opacity="0.8" />
+			<rect x="100" data-wr y="130" width="69" height="29" fill="var(--water-hi)" opacity="0.35" />
+			<g data-fall></g>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Напряжение на переходе U (p относительно n)</span><input type="range" data-u min="-5" max="0.8" step="0.01" value="0" /><output data-uv></output></label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { SVG_NS, animate, fm, si, $ } from '../../lib/water';
+
+	const PHI = 0.7,
+		IS = 2e-9,
+		NVT = 1.8 * 0.02585,
+		XC = 240;
+	class WaterPN extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			let U = 0;
+			const car = $(r, '[data-car]');
+			const ions = $(r, '[data-ions]');
+			const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+			type C = { x: number; y: number; el: SVGCircleElement; e: boolean };
+			const cs: C[] = [];
+			for (let i = 0; i < 70; i++) {
+				const e = i < 35;
+				const c = document.createElementNS(SVG_NS, 'circle');
+				c.setAttribute('r', '4');
+				c.setAttribute('fill', e ? 'var(--water-hi)' : 'none');
+				c.setAttribute('stroke', e ? 'none' : 'var(--sl-color-accent)');
+				c.setAttribute('stroke-width', '1.8');
+				car.appendChild(c);
+				cs.push({ x: e ? rnd(50, 200) : rnd(280, 430), y: rnd(60, 200), el: c, e });
+			}
+			let I = 0,
+				w = 40,
+				fallT = 0;
+			const drawIons = () => {
+				ions.innerHTML = '';
+				const cols = Math.max(1, Math.round(w / 2 / 14));
+				for (let s = 0; s < cols; s++)
+					for (let k = 0; k < 6; k++) {
+						const y = 70 + k * 25;
+						for (const side of [-1, 1]) {
+							const t = document.createElementNS(SVG_NS, 'text');
+							t.setAttribute('x', String(XC + side * (7 + s * 14)));
+							t.setAttribute('y', String(y + 4));
+							t.setAttribute('text-anchor', 'middle');
+							t.setAttribute('class', 'ts');
+							t.textContent = side < 0 ? '+' : '−';
+							ions.appendChild(t);
+						}
+					}
+			};
+			const upd = () => {
+				I = IS * (Math.exp(Math.min(U, 0.85) / NVT) - 1);
+				w = Math.max(6, Math.min(170, 40 * Math.sqrt(Math.max(0.02, PHI - U) / PHI)));
+				$(r, '[data-zone]').setAttribute('x', (XC - w / 2).toFixed(1));
+				$(r, '[data-zone]').setAttribute('width', w.toFixed(1));
+				drawIons();
+				$(r, '[data-uv]').textContent = fm(U, 2) + ' В';
+				// плотина: высота барьера ~ (PHI − U)
+				const h = Math.max(4, Math.min(150, 70 * (PHI - U) / PHI + 4));
+				$(r, '[data-dam]').setAttribute('d', `M60 160 L80 ${(160 - h).toFixed(1)} L92 ${(160 - h).toFixed(1)} L112 160 Z`);
+				$(r, '[data-pol]').textContent =
+					U > 0.05 ? '+ на p, − на n: прямое смещение' : U < -0.05 ? '− на p, + на n: обратное смещение' : 'без внешнего напряжения';
+				$(r, '[data-fx]').textContent = `U = ${fm(U, 2)} В · ширина слоя ×${fm(w / 40, 2)} · I = ${si(I, 'А')}`;
+				$(r, '[data-fx2]').textContent =
+					U >= 0.5
+						? 'Плотина почти исчезла — электроны и дырки встречаются в середине и «гасят» друг друга (рекомбинация), а из проводов приходят новые. Это и есть прямой ток диода.'
+						: U > 0.05
+							? 'Плотина ниже, но вода через неё ещё почти не переливается. Ток пойдёт заметно только с ~0,5–0,6 В.'
+							: U < -0.05
+								? 'Обратное смещение оттягивает носители от границы: слой шире, плотина выше. Ток — только утечка в наноамперах. Ширина слоя меняется с напряжением — на этом работает варикап (диод-конденсатор).'
+								: 'Равновесие: плотина держит носителей по своим сторонам.';
+			};
+			upd();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-u]')) {
+					U = +t.value;
+					upd();
+				}
+			});
+			animate(r, (dt) => {
+				const drift = I > 1e-6 ? Math.min(220, 30 * Math.log10(I / 1e-6)) : 0;
+				const zl = XC - w / 2,
+					zr = XC + w / 2;
+				for (const c of cs) {
+					c.x += rnd(-1, 1) * 40 * dt;
+					c.y += rnd(-1, 1) * 40 * dt;
+					c.y = Math.max(58, Math.min(202, c.y));
+					if (c.e) {
+						c.x += drift * dt;
+						if (drift > 0 && c.x >= XC) c.x = rnd(44, 60);
+						if (drift === 0) c.x = Math.min(c.x, zl - 5);
+						c.x = Math.max(46, c.x);
+					} else {
+						c.x -= drift * dt;
+						if (drift > 0 && c.x <= XC) c.x = rnd(420, 436);
+						if (drift === 0) c.x = Math.max(c.x, zr + 5);
+						c.x = Math.min(434, c.x);
+					}
+					c.el.setAttribute('cx', c.x.toFixed(1));
+					c.el.setAttribute('cy', c.y.toFixed(1));
+				}
+				// перелив через плотину
+				fallT += dt;
+				const fall = $(r, '[data-fall]');
+				if (drift > 0 && fallT > 0.05) {
+					fallT = 0;
+					const d = document.createElementNS(SVG_NS, 'circle');
+					d.setAttribute('r', '2.5');
+					d.setAttribute('class', 'dot');
+					d.dataset.t = '0';
+					fall.appendChild(d);
+				}
+				for (const d of Array.from(fall.children) as SVGCircleElement[]) {
+					const t = +(d.dataset.t || 0) + dt;
+					d.dataset.t = String(t);
+					const x = 70 + 60 * t,
+						y = 85 + 80 * t * t * 3;
+					d.setAttribute('cx', x.toFixed(1));
+					d.setAttribute('cy', Math.min(150, y).toFixed(1));
+					if (t > 0.6) d.remove();
+				}
+			});
+		}
+	}
+	customElements.define('water-pn', WaterPN);
+</script>

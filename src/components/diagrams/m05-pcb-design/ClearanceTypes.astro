@@ -1,0 +1,30 @@
+---
+/** Рис. 5.5: виды зазоров на плате — дорожка-дорожка, гарантийный поясок, медь — край платы. */
+import Figure from '../Figure.astro';
+const cu = 'var(--pcb-copper)';
+---
+
+<Figure n="5.5" caption="Что ограничивают правила зазоров: расстояние между медью разных цепей (clearance), ширину медного кольца вокруг отверстия (гарантийный поясок, annular ring) и отступ меди от края платы. Минимумы задаёт завод, а для высоких напряжений — стандарт (таблица IPC-2221B ниже в уроке).">
+	<svg viewBox="0 0 660 230" role="img" aria-label="Две параллельные дорожки с зазором между ними, переходное отверстие с кольцом меди и отверстием, отступ меди от края платы.">
+		<rect x="0" y="0" width="600" height="200" fill="var(--pcb-mask)" opacity="0.18" />
+		<path class="ln" d="M600 0 V200" />
+		<text class="t t-s" x="606" y="110">край</text>
+		<text class="t t-s" x="606" y="126">платы</text>
+		<!-- две дорожки -->
+		<rect x="30" y="40" width="220" height="16" fill={cu} />
+		<rect x="30" y="86" width="220" height="16" fill={cu} />
+		<path class="ln" d="M140 56 V86 M134 56 H146 M134 86 H146" />
+		<text class="t t-acc t-s" x="152" y="75">зазор</text>
+		<text class="t t-s t-mut" x="30" y="128">разные цепи</text>
+		<!-- переходное отверстие -->
+		<circle cx="380" cy="80" r="30" fill={cu} />
+		<circle cx="380" cy="80" r="14" fill="var(--sl-color-bg)" class="ln" />
+		<path class="ln" d="M394 80 H410 M394 74 V86 M410 74 V86" />
+		<text class="t t-acc t-s" x="380" y="134" text-anchor="middle">поясок (annular ring)</text>
+		<text class="t t-s t-mut" x="380" y="150" text-anchor="middle">(Ø площадки − Ø отверстия) / 2</text>
+		<!-- медь у края -->
+		<rect x="480" y="150" width="90" height="16" fill={cu} />
+		<path class="ln" d="M570 158 H600 M570 152 V164 M600 152 V164" />
+		<text class="t t-acc t-s" x="585" y="186" text-anchor="middle">до края</text>
+	</svg>
+</Figure>

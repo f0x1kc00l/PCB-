@@ -1,0 +1,64 @@
+---
+/**
+ * Рис. 12.5а: стоячая волна на линии с несогласованной нагрузкой.
+ * Огибающая |U(d)| = |1 + Γ·e^(−j2βd)| для Γ нагрузки 20 − j30 Ом на 50-омной линии (|Γ| ≈ 0,557).
+ */
+import Figure from '../Figure.astro';
+
+const gr = -0.2069;
+const gi = -0.5172;
+const mag = Math.hypot(gr, gi);
+const ang = Math.atan2(gi, gr);
+const x0 = 60;
+const x1 = 560;
+const yBase = 190;
+const k = 70; // пикселей на единицу напряжения
+const N = 240;
+// d — расстояние от нагрузки (справа) в длинах волны; рисуем 1 λг
+const pts = Array.from({ length: N + 1 }, (_, i) => {
+	const d = 1 - i / N;
+	const ph = ang - 4 * Math.PI * d;
+	const v = Math.hypot(1 + mag * Math.cos(ph), mag * Math.sin(ph));
+	return [x0 + ((x1 - x0) * i) / N, yBase - k * v] as const;
+});
+const env = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+const yMax = yBase - k * (1 + mag);
+const yMin = yBase - k * (1 - mag);
+const y1 = yBase - k;
+const fmt = (v: number, n = 2) => v.toFixed(n).replace('.', ',');
+const vswr = (1 + mag) / (1 - mag);
+---
+
+<Figure n="12.5а" caption={`Что происходит на линии, если нагрузка не 50 Ом. Падающая и отражённая волны складываются, и вдоль линии появляется «стоячая волна»: где-то напряжение больше, где-то меньше. Здесь нагрузка 20 − j30 Ом: |Γ| ≈ ${fmt(mag)}, КСВ = Umax/Umin ≈ ${fmt(vswr, 1)}. Максимумы и минимумы повторяются через λг/2.`}>
+	<svg viewBox="0 0 660 250" role="img" aria-label="График огибающей напряжения вдоль линии длиной одна длина волны. Пунктир — уровень 1 без отражения. Огибающая колеблется между 1,56 и 0,44, нагрузка справа.">
+		<path d={`M${x0} ${yBase} H${x1}`} class="ln" />
+		<path d={`M${x0} ${y1} H${x1}`} class="ln-dash" />
+		<path d={`M${x0} ${yMax} H${x1}`} class="ln-thin" />
+		<path d={`M${x0} ${yMin} H${x1}`} class="ln-thin" />
+		<path d={env} class="ln-acc" />
+
+		<text class="t t-s" x={x0 - 6} y={yMax + 4} text-anchor="end">{fmt(1 + mag)}</text>
+		<text class="t t-s" x={x0 - 6} y={y1 + 4} text-anchor="end">1</text>
+		<text class="t t-s" x={x0 - 6} y={yMin + 4} text-anchor="end">{fmt(1 - mag)}</text>
+		<text class="t t-s" x={x0 - 6} y={yBase + 4} text-anchor="end">0</text>
+		<text class="t t-s t-mut" x={x1 - 4} y={y1 - 6} text-anchor="end">без отражения</text>
+		<text class="t t-s t-acc" x={x0 + 4} y={yMax - 8}>Umax = 1 + |Γ|</text>
+		<text class="t t-s t-acc" x={x0 + 4} y={yMin + 16}>Umin = 1 − |Γ|</text>
+
+		<!-- нагрузка -->
+		<rect x={x1 + 10} y={yBase - 70} width="22" height="56" class="ln" />
+		<path d={`M${x1} ${yBase - 42} H${x1 + 10}`} class="ln" />
+		<text class="t t-s" x={x1 + 40} y={yBase - 46}>Z<tspan dy="3" font-size="9">н</tspan></text>
+		<text class="t t-s" x={x1 + 40} y={yBase - 30}>≠ 50 Ом</text>
+
+		<!-- ось расстояний -->
+		<path d={`M${x0} ${yBase + 24} H${x1}`} class="ln-thin" />
+		{[0, 0.25, 0.5, 0.75, 1].map((f) => (
+			<g>
+				<path d={`M${x1 - (x1 - x0) * f} ${yBase + 20} V${yBase + 28}`} class="ln-thin" />
+				<text class="t t-s t-mut" x={x1 - (x1 - x0) * f} y={yBase + 42} text-anchor="middle">{f === 0 ? '0' : `${fmt(f, 2).replace(/0$/, '')} λг`}</text>
+			</g>
+		))}
+		<text class="t t-s t-mut" x={(x0 + x1) / 2} y="20" text-anchor="middle">амплитуда напряжения вдоль линии (относительно падающей волны)</text>
+	</svg>
+</Figure>

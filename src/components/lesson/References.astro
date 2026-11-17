@@ -1,0 +1,128 @@
+---
+/**
+ * Блок «Ссылки» в конце урока: глава учебника, документация Altium, стандарты.
+ * Обычно выводится автоматически в подвале из frontmatter урока,
+ * но его можно вставить и вручную: <References book={[{ ch: 1, sec: '1.03', page: 14 }]} />
+ */
+import { BOOKS } from '../../lib/site';
+
+interface BookRef {
+	book?: 'horowitz' | 'maloratsky';
+	ch: number;
+	sec?: string;
+	page?: number;
+	note?: string;
+}
+interface Link {
+	title: string;
+	url?: string;
+}
+interface Props {
+	book?: BookRef[];
+	altium?: Link[];
+	sources?: Link[];
+}
+
+const { book = [], altium = [], sources = [] } = Astro.props;
+const empty = book.length + altium.length + sources.length === 0;
+// Ссылки группируем по учебникам: сначала Хоровиц, потом Малорацкий.
+const bookGroups = (['horowitz', 'maloratsky'] as const)
+	.map((key) => ({ info: BOOKS[key], refs: book.filter((b) => (b.book ?? 'horowitz') === key) }))
+	.filter((g) => g.refs.length > 0);
+---
+
+{
+	!empty && (
+		<section class="references not-content" aria-labelledby="refs-title">
+			<h2 id="refs-title">Ссылки</h2>
+			{bookGroups.map((g) => (
+				<div class="ref-group">
+					<p class="ref-label">📖 {g.info.short}</p>
+					<ul>
+						{g.refs.map((b) => (
+							<li>
+								<strong>Глава {b.ch}</strong> «{g.info.chapters[b.ch]}»{b.sec && <>, §{b.sec}</>}
+								{b.page && <>, с. {b.page}</>}
+								{b.note && <span class="ref-note"> — {b.note}</span>}
+							</li>
+						))}
+					</ul>
+					<p class="ref-source">{g.info.full}</p>
+				</div>
+			))}
+			{altium.length > 0 && (
+				<div class="ref-group">
+					<p class="ref-label">🛠 Документация Altium</p>
+					<ul>
+						{altium.map((l) => (
+							<li>
+								<a href={l.url} target="_blank" rel="noopener">
+									{l.title} ↗
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+			{sources.length > 0 && (
+				<div class="ref-group">
+					<p class="ref-label">📐 Стандарты и другие источники</p>
+					<ul>
+						{sources.map((l) => (
+							<li>
+								{l.url ? (
+									<a href={l.url} target="_blank" rel="noopener">
+										{l.title} ↗
+									</a>
+								) : (
+									l.title
+								)}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+		</section>
+	)
+}
+
+<style>
+	.references {
+		margin-top: 2rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--sl-color-hairline);
+	}
+	h2 {
+		font-size: var(--sl-text-h4);
+		margin: 0 0 0.75rem;
+		color: var(--sl-color-white);
+	}
+	.ref-group + .ref-group {
+		margin-top: 0.9rem;
+	}
+	.ref-label {
+		margin: 0;
+		font-weight: 600;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-white);
+	}
+	ul {
+		margin: 0.3rem 0 0;
+		padding-inline-start: 1.2rem;
+		font-size: var(--sl-text-sm);
+	}
+	li {
+		margin: 0.15rem 0;
+	}
+	.ref-note,
+	.ref-source {
+		color: var(--sl-color-gray-3);
+	}
+	.ref-source {
+		margin: 0.3rem 0 0;
+		font-size: var(--sl-text-xs);
+	}
+	a {
+		color: var(--sl-color-text-accent);
+	}
+</style>

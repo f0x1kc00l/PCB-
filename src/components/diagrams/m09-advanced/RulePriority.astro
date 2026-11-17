@@ -1,0 +1,43 @@
+---
+/** Рис. 9.3: как Altium выбирает правило — по приоритету, первое совпавшее по области действия. */
+import Figure from '../Figure.astro';
+
+const rules = [
+	{ p: 1, name: 'Clearance_USB', scope: "InNetClass('USB')", hit: true },
+	{ p: 2, name: 'Clearance_HV', scope: "InNetClass('HV')", hit: false },
+	{ p: 3, name: 'Clearance', scope: 'All', hit: false },
+];
+---
+
+<Figure n="9.3" caption="Для каждого объекта Altium перебирает правила одного типа в порядке приоритета (1 — самый высокий) и применяет первое, чья область действия (Scope) подходит. Дорожка цепи USB_D_P входит в класс USB, поэтому к ней применяется Clearance_USB, а общее правило Clearance (All) работает для всего остального.">
+	<svg viewBox="0 0 660 220" role="img" aria-label="Слева объект — дорожка цепи USB_D_P. Справа список правил Clearance по приоритету: первое с областью InNetClass USB совпало и применено, остальные не проверяются.">
+		<rect x="20" y="80" width="150" height="56" rx="6" class="ln" />
+		<text class="t" x="95" y="104" text-anchor="middle">дорожка</text>
+		<text class="t t-mono t-s" x="95" y="122" text-anchor="middle">USB_D_P</text>
+		<path class="ln-acc" d="M170 108 H220 M212 102 L220 108 L212 114" />
+		{
+			rules.map((r, i) => (
+				<g>
+					<rect
+						x="230"
+						y={30 + i * 58}
+						width="300"
+						height="46"
+						rx="6"
+						fill={r.hit ? 'var(--sl-color-accent-low)' : 'none'}
+						stroke={r.hit ? 'var(--sl-color-accent)' : 'currentColor'}
+						stroke-width={r.hit ? 2.5 : 1.2}
+						opacity={r.hit ? 1 : 0.6}
+					/>
+					<text class="t t-acc" x="248" y={58 + i * 58}>{r.p}</text>
+					<text class="t" x="270" y={50 + i * 58}>{r.name}</text>
+					<text class="t t-mono t-s t-mut" x="270" y={66 + i * 58}>Scope: {r.scope}</text>
+					<text class="t t-s" x="545" y={58 + i * 58} fill={r.hit ? 'var(--pcb-ok)' : 'currentColor'} opacity={r.hit ? 1 : 0.6}>
+						{r.hit ? '✓ применено' : 'не проверяется'}
+					</text>
+				</g>
+			))
+		}
+		<text class="t t-s t-mut" x="380" y="212" text-anchor="middle">приоритет ↓ (1 — самый высокий)</text>
+	</svg>
+</Figure>

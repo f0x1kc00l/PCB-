@@ -1,0 +1,69 @@
+---
+/**
+ * Рис. 6.1: условная схема окна Altium Designer — где что находится.
+ * Это не копия интерфейса, а упрощённая карта областей окна.
+ */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="6.1" caption="Упрощённая карта окна Altium Designer. Слева и справа — пристыкованные панели, в центре — рабочая область документа с вкладками. Кнопка Panels в правом нижнем углу открывает любую панель, подходящую для текущего редактора.">
+	<svg viewBox="0 0 660 380" role="img" aria-label="Схема окна: сверху главное меню и элементы управления аккаунтом и рабочим пространством, слева панель Projects, в центре вкладки документов и рабочая область, справа панели Properties и Components, снизу строка состояния и кнопка Panels.">
+		<!-- рамка окна -->
+		<rect class="ln" x="10" y="10" width="640" height="360" rx="6" />
+		<!-- главное меню -->
+		<path class="ln-thin" d="M10 44 H650" />
+		<text class="t t-s" x="22" y="32">File  Edit  View  Project  Place  Design  Tools  …</text>
+		<text class="t t-acc t-s" x="20" y="60">① главное меню</text>
+		<!-- правый верх: управление -->
+		<rect class="ln-acc" x="398" y="18" width="244" height="20" rx="4" />
+		<text class="t t-s" x="520" y="32" text-anchor="middle">поиск · настройки · Workspace · аккаунт</text>
+		<text class="t t-acc t-s" x="642" y="60" text-anchor="end">② элементы управления справа вверху</text>
+		<!-- левая панель -->
+		<rect class="ln" x="18" y="72" width="140" height="262" rx="3" />
+		<text class="t" x="88" y="94" text-anchor="middle" font-weight="700">Projects</text>
+		<g class="t t-s t-mut">
+			<text x="30" y="118">▾ Multivibrator.PrjPcb</text>
+			<text x="42" y="138">▾ Source Documents</text>
+			<text x="54" y="156">Sheet1.SchDoc</text>
+			<text x="54" y="174">PCB1.PcbDoc</text>
+			<text x="42" y="194">▸ Settings</text>
+			<text x="42" y="212">▸ Libraries</text>
+		</g>
+		<text class="t t-acc t-s" x="88" y="326" text-anchor="middle">③ панели слева</text>
+		<!-- вкладки документов -->
+		<rect class="ln" x="168" y="72" width="320" height="262" rx="3" />
+		<path class="ln-thin" d="M168 94 H488" />
+		<rect class="fill-acc" x="172" y="76" width="88" height="16" rx="2" opacity="0.35" />
+		<text class="t t-s" x="216" y="88" text-anchor="middle">Sheet1.SchDoc</text>
+		<text class="t t-s t-mut" x="306" y="88" text-anchor="middle">PCB1.PcbDoc</text>
+		<!-- рабочая область с сеткой -->
+		<g class="ln-thin">
+			<path d="M188 120 H468 M188 150 H468 M188 180 H468 M188 210 H468 M188 240 H468 M188 270 H468 M188 300 H468" />
+			<path d="M218 104 V320 M268 104 V320 M318 104 V320 M368 104 V320 M418 104 V320" />
+		</g>
+		<text class="t t-acc t-s" x="328" y="200" text-anchor="middle">④ рабочая область</text>
+		<text class="t t-acc t-s" x="328" y="216" text-anchor="middle">(design space)</text>
+		<text class="t t-acc t-s" x="328" y="110" text-anchor="middle">вкладки открытых документов</text>
+		<!-- правые панели -->
+		<rect class="ln" x="498" y="72" width="144" height="128" rx="3" />
+		<text class="t" x="570" y="94" text-anchor="middle" font-weight="700">Properties</text>
+		<g class="t t-s t-mut">
+			<text x="510" y="118">General · Parameters</text>
+			<text x="510" y="138">Snap Grid …</text>
+			<text x="510" y="158">Sheet size …</text>
+		</g>
+		<rect class="ln" x="498" y="206" width="144" height="128" rx="3" />
+		<text class="t" x="570" y="228" text-anchor="middle" font-weight="700">Components</text>
+		<g class="t t-s t-mut">
+			<text x="510" y="252">поиск: BC547</text>
+			<text x="510" y="272">список компонентов</text>
+		</g>
+		<text class="t t-acc t-s" x="570" y="326" text-anchor="middle">⑤ панели справа</text>
+		<!-- низ -->
+		<path class="ln-thin" d="M10 344 H650" />
+		<text class="t t-s t-mut" x="22" y="362">X:1000mil Y:500mil  Grid:100mil   ⑥ строка состояния</text>
+		<rect class="ln-acc" x="582" y="349" width="60" height="16" rx="3" />
+		<text class="t t-s" x="612" y="361" text-anchor="middle">Panels</text>
+		<text class="t t-acc t-s" x="574" y="361" text-anchor="end">⑦</text>
+	</svg>
+</Figure>

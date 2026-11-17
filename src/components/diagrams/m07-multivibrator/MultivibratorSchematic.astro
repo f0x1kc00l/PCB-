@@ -1,0 +1,96 @@
+---
+/**
+ * Рис. 7.2: принципиальная схема учебного мультивибратора с позиционными обозначениями
+ * и номиналами из официального руководства Altium (BC547, 100 кОм, 1 кОм, 22 нФ, питание 12 В).
+ * Резисторы — прямоугольники (ГОСТ 2.728); позиционные обозначения — как в Altium (Q, R, C, P).
+ */
+import Figure from '../Figure.astro';
+
+/** NPN-транзистор: bx — x базовой черты, cy — центр, dir = 1 база слева, −1 база справа. */
+const npn = (bx: number, cy: number, dir: 1 | -1) => {
+	const cx = bx + 16 * dir;
+	// стрелка эмиттера наружу (от базы), у конца диагонали
+	const ex = bx + 13 * dir;
+	const ey = cy + 16;
+	return {
+		circle: { cx: bx + 9 * dir, cy },
+		bar: `M${bx} ${cy - 13} V${cy + 13}`,
+		col: `M${bx} ${cy - 6} L${cx} ${cy - 18} V${cy - 40}`,
+		emi: `M${bx} ${cy + 6} L${cx} ${cy + 18} V${cy + 40}`,
+		arrow: `${ex} ${ey} ${ex - 7 * dir} ${ey - 0.5} ${ex - 4 * dir} ${ey - 6}`,
+		cTop: { x: cx, y: cy - 40 },
+		eBot: { x: cx, y: cy + 40 },
+	};
+};
+const q1 = npn(190, 230, 1);
+const q2 = npn(450, 230, -1);
+---
+
+<Figure n="7.2" caption="Схема учебного мультивибратора. R1/C1 задают время, пока закрыт Q1, R2/C2 — пока закрыт Q2. Коллекторные резисторы R3 и R4 ограничивают ток. В Altium транзисторы обозначаются Q, по ГОСТ 2.710 было бы VT1, VT2.">
+	<svg viewBox="0 0 640 350" role="img" aria-label="Схема: разъём P1 подаёт 12 вольт и GND. R1 и R2 по 100 кОм от плюса к базам Q1 и Q2. R3 и R4 по 1 кОм от плюса к коллекторам. C1 22 нФ между базой Q1 и коллектором Q2, C2 22 нФ между базой Q2 и коллектором Q1. Эмиттеры на GND.">
+		<!-- шины питания -->
+		<path class="ln" d="M60 40 H580 M80 320 H580" />
+		<text class="t t-acc" x="96" y="32">12V</text>
+		<text class="t t-acc" x="100" y="340">GND</text>
+		<!-- разъём P1 -->
+		<rect class="ln" x="20" y="150" width="26" height="60" />
+		<text class="t" x="18" y="142">P1</text>
+		<text class="t t-s t-mut" x="26" y="170">1</text>
+		<text class="t t-s t-mut" x="26" y="200">2</text>
+		<path class="ln" d="M46 165 H60 V40 M46 195 H80 V320" />
+
+		<!-- R1 (база Q1) -->
+		<path class="ln" d="M130 40 V70 M130 110 V230 H190" />
+		<rect class="ln" x="123" y="70" width="14" height="40" />
+		<text class="t" x="116" y="86" text-anchor="end">R1</text>
+		<text class="t t-s t-mut" x="116" y="101" text-anchor="end">100k</text>
+		<!-- R3 (коллектор Q1) -->
+		<path class="ln" d={`M206 40 V70 M206 110 V${q1.cTop.y}`} />
+		<rect class="ln" x="199" y="70" width="14" height="40" />
+		<text class="t" x="222" y="86">R3</text>
+		<text class="t t-s t-mut" x="222" y="101">1k</text>
+		<!-- R4 (коллектор Q2) -->
+		<path class="ln" d={`M434 40 V70 M434 110 V${q2.cTop.y}`} />
+		<rect class="ln" x="427" y="70" width="14" height="40" />
+		<text class="t" x="418" y="86" text-anchor="end">R4</text>
+		<text class="t t-s t-mut" x="418" y="101" text-anchor="end">1k</text>
+		<!-- R2 (база Q2) -->
+		<path class="ln" d="M510 40 V70 M510 110 V230 H450" />
+		<rect class="ln" x="503" y="70" width="14" height="40" />
+		<text class="t" x="526" y="86">R2</text>
+		<text class="t t-s t-mut" x="526" y="101">100k</text>
+
+		<!-- C1: база Q1 (узел на x=160) ↔ коллектор Q2 -->
+		<path class="ln" d="M160 230 V175 H300 M310 175 H434" />
+		<path d="M300 163 V187 M310 163 V187" stroke="currentColor" stroke-width="2.5" />
+		<text class="t" x="305" y="203" text-anchor="middle">C1 22n</text>
+		<!-- C2: база Q2 (узел на x=480) ↔ коллектор Q1 -->
+		<path class="ln" d="M480 230 V140 H340 M330 140 H206" />
+		<path d="M330 128 V152 M340 128 V152" stroke="currentColor" stroke-width="2.5" />
+		<text class="t" x="335" y="122" text-anchor="middle">C2 22n</text>
+
+		<!-- транзисторы -->
+		{
+			[q1, q2].map((q) => (
+				<g>
+					<circle class="ln" cx={q.circle.cx} cy={q.circle.cy} r="22" />
+					<path d={q.bar} stroke="currentColor" stroke-width="3" />
+					<path class="ln" d={q.col} />
+					<path class="ln" d={q.emi} />
+					<polygon points={q.arrow} class="fill-cur" />
+					<path class="ln" d={`M${q.eBot.x} ${q.eBot.y} V320`} />
+				</g>
+			))
+		}
+		<text class="t" x="232" y="236">Q1</text>
+		<text class="t t-s t-mut" x="232" y="252">BC547</text>
+		<text class="t" x="408" y="236" text-anchor="end">Q2</text>
+		<text class="t t-s t-mut" x="408" y="252" text-anchor="end">BC547</text>
+
+		<!-- точки соединений -->
+		{[[160, 230], [480, 230], [206, 140], [434, 175], [130, 40], [206, 40], [434, 40], [510, 40]].map(([x, y]) => (
+			<circle cx={x} cy={y} r="3.5" class="fill-cur" />
+		))}
+		{[[206, 320], [434, 320]].map(([x, y]) => <circle cx={x} cy={y} r="3.5" class="fill-cur" />)}
+	</svg>
+</Figure>

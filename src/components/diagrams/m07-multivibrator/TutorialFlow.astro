@@ -1,0 +1,83 @@
+---
+/**
+ * Рис. 7.1: девять шагов учебного проекта (уроки 7.1–7.9) и файлы, которые появляются на каждом шаге.
+ * current — номер урока, который подсвечивается (1–9).
+ */
+import Figure from '../Figure.astro';
+
+interface Props {
+	current?: number;
+}
+const { current } = Astro.props;
+
+const steps = [
+	{ n: 1, t: 'Проект и схема', f: '.PrjPcb, .SchDoc' },
+	{ n: 2, t: 'Компоненты', f: 'Workspace' },
+	{ n: 3, t: 'Рисуем схему', f: '.SchDoc, .BomDoc' },
+	{ n: 4, t: 'Ограничения', f: 'Constraint Manager' },
+	{ n: 5, t: 'Документ платы', f: '.PcbDoc' },
+	{ n: 6, t: 'Разводка платы', f: 'размещение, дорожки' },
+	{ n: 7, t: 'Проверка DRC', f: 'отчёт DRC' },
+	{ n: 8, t: 'Чертёж', f: '.PCBDwf' },
+	{ n: 9, t: 'Выпуск', f: '.OutJob, релиз' },
+];
+const W = 190;
+const H = 64;
+const gx = 26;
+const gy = 30;
+const pos = (i: number) => ({ x: 10 + (i % 3) * (W + gx), y: 10 + Math.floor(i / 3) * (H + gy) });
+---
+
+<Figure n="7.1" caption="Девять шагов учебного проекта «Мультивибратор» — по одному уроку модуля 7 на шаг. Под названием шага — что в этот момент появляется в проекте.">
+	<svg viewBox="0 0 650 300" role="img" aria-label="Схема из девяти шагов: проект и схема, компоненты, рисуем схему, ограничения, документ платы, размещение и трассировка, проверка DRC, чертёж, выпуск.">
+		{
+			steps.map((s, i) => {
+				const p = pos(i);
+				const active = current === s.n;
+				return (
+					<g>
+						<rect
+							x={p.x}
+							y={p.y}
+							width={W}
+							height={H}
+							rx="8"
+							fill={active ? 'var(--sl-color-accent-low)' : 'none'}
+							stroke={active ? 'var(--sl-color-accent)' : 'currentColor'}
+							stroke-width={active ? 2.5 : 1.5}
+						/>
+						<text class="t t-acc" x={p.x + 14} y={p.y + 26}>
+							7.{s.n}
+						</text>
+						<text class="t" x={p.x + 50} y={p.y + 26} font-weight="600">
+							{s.t}
+						</text>
+						<text class="t t-s t-mut t-mono" x={p.x + 50} y={p.y + 46}>
+							{s.f}
+						</text>
+					</g>
+				);
+			})
+		}
+		{
+			steps.slice(0, -1).map((_, i) => {
+				const a = pos(i);
+				const b = pos(i + 1);
+				if (i % 3 !== 2) {
+					const y = a.y + H / 2;
+					return <path class="ln-acc" d={`M${a.x + W + 4} ${y} H${b.x - 4} M${b.x - 10} ${y - 5} L${b.x - 4} ${y} L${b.x - 10} ${y + 5}`} />;
+				}
+				// переход на следующую строку
+				const y1 = a.y + H + 4;
+				const ym = a.y + H + gy / 2;
+				const xe = b.x + W / 2;
+				return (
+					<path
+						class="ln-acc"
+						d={`M${a.x + W / 2} ${y1} V${ym} H${xe} V${b.y - 4} M${xe - 5} ${b.y - 10} L${xe} ${b.y - 4} L${xe + 5} ${b.y - 10}`}
+					/>
+				);
+			})
+		}
+	</svg>
+</Figure>

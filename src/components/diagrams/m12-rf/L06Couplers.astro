@@ -1,0 +1,65 @@
+---
+/**
+ * Рис. 12.6б: три классических направленных ответвителя (вид сверху, топология условная):
+ * шлейфный (branch-line), кольцевой 3λ/2 (rat-race) и на связанных линиях.
+ */
+import Figure from '../Figure.astro';
+
+// кольцо: центр, радиус, порты на углах (λ/4 = 60° для кольца 1,5λ)
+const rc = { x: 330, y: 125, r: 62 };
+const portAng = [210, 150, 90, 30]; // P1..P4, по 60° = λ/4; от P4 до P1 — 180° = 3λ/4
+const rp = portAng.map((a) => {
+	const t = (a * Math.PI) / 180;
+	return { x: rc.x + rc.r * Math.cos(t), y: rc.y - rc.r * Math.sin(t), ox: rc.x + (rc.r + 28) * Math.cos(t), oy: rc.y - (rc.r + 28) * Math.sin(t) };
+});
+---
+
+<Figure n="12.6б" caption="Три классических направленных ответвителя. 1 — вход, 2 и 3 (у кольца — 2 и 4) — выходы, оставшийся порт развязан и нагружается на 50 Ом. Шлейфный и кольцевой ответвители делят мощность пополам (3 дБ). Ответвитель на связанных линиях удобен для слабой связи (10–20 дБ); связанный сигнал выходит на том же конце, где вход.">
+	<svg viewBox="0 0 660 260" role="img" aria-label="Слева квадрат из четырёх отрезков лямбда на четыре с портами по углам. В центре кольцо с четырьмя портами. Справа две параллельные полоски длиной лямбда на четыре с четырьмя портами.">
+		<g class="l06c">
+			<!-- шлейфный -->
+			<text class="t" x="110" y="20" text-anchor="middle" font-weight="700">Шлейфный (branch-line)</text>
+			<path fill="none" stroke="var(--pcb-copper)" d="M60 70 H160" stroke-width="10" />
+			<path fill="none" stroke="var(--pcb-copper)" d="M60 170 H160" stroke-width="10" />
+			<path fill="none" stroke="var(--pcb-copper)" d="M60 70 V170 M160 70 V170" stroke-width="6" />
+			<path fill="none" stroke="var(--pcb-copper)" d="M20 70 H60 M160 70 H200 M20 170 H60 M160 170 H200" stroke-width="6" />
+			<text class="t t-s t-acc" x="110" y="58" text-anchor="middle">35,4 Ом, λг/4</text>
+			<text class="t t-s t-acc" x="110" y="194" text-anchor="middle">35,4 Ом, λг/4</text>
+			<text class="t t-s t-acc" x="110" y="116" text-anchor="middle">50 Ом,</text>
+			<text class="t t-s t-acc" x="110" y="130" text-anchor="middle">λг/4</text>
+			<text class="t" x="14" y="62">1</text>
+			<text class="t" x="198" y="62">2</text>
+			<text class="t" x="198" y="190">3</text>
+			<text class="t" x="14" y="190">4</text>
+			<text class="t t-s t-mut" x="110" y="222" text-anchor="middle">2 и 3: по −3 дБ, сдвиг 90°</text>
+			<text class="t t-s t-mut" x="110" y="238" text-anchor="middle">4 — развязан</text>
+
+			<!-- кольцевой -->
+			<text class="t" x="330" y="20" text-anchor="middle" font-weight="700">Кольцо 3λг/2 (rat-race)</text>
+			<circle cx={rc.x} cy={rc.y} r={rc.r} fill="none" stroke="var(--pcb-copper)" stroke-width="5" />
+			{rp.map((p, i) => (
+				<g>
+					<path fill="none" stroke="var(--pcb-copper)" d={`M${p.x} ${p.y} L${p.ox} ${p.oy}`} stroke-width="7" />
+					<text class="t" x={p.ox + (p.ox > rc.x ? 8 : -16)} y={p.oy + 5}>{i + 1}</text>
+				</g>
+			))}
+			<text class="t t-s t-acc" x={rc.x} y={rc.y - 4} text-anchor="middle">70,7 Ом</text>
+			<text class="t t-s t-mut" x={rc.x} y={rc.y + 12} text-anchor="middle">между портами λг/4,</text>
+			<text class="t t-s t-mut" x={rc.x} y={rc.y + 26} text-anchor="middle">от 4 до 1 — 3λг/4</text>
+			<text class="t t-s t-mut" x="330" y="238" text-anchor="middle">вход 1: 2 и 4 в противофазе, 3 развязан</text>
+
+			<!-- на связанных линиях -->
+			<text class="t" x="550" y="20" text-anchor="middle" font-weight="700">На связанных линиях</text>
+			<path fill="none" stroke="var(--pcb-copper)" d="M450 100 H650" stroke-width="7" />
+			<path fill="none" stroke="var(--pcb-copper)" d="M450 140 H650" stroke-width="7" />
+			<path class="ln-acc" d="M490 175 H610 M490 169 V181 M610 169 V181" />
+			<text class="t t-s t-acc" x="550" y="196" text-anchor="middle">λг/4, зазор s задаёт связь</text>
+			<text class="t" x="446" y="90">1</text>
+			<text class="t" x="642" y="90">2</text>
+			<text class="t" x="446" y="164">3</text>
+			<text class="t" x="642" y="164">4</text>
+			<text class="t t-s t-mut" x="550" y="222" text-anchor="middle">1 → 2 проход, 3 — связанный,</text>
+			<text class="t t-s t-mut" x="550" y="238" text-anchor="middle">4 — развязан</text>
+		</g>
+	</svg>
+</Figure>

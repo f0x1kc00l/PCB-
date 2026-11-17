@@ -1,0 +1,200 @@
+---
+/**
+ * Квиз «Проверь себя».
+ *
+ *   <Quiz questions={[
+ *     {
+ *       q: 'Какое напряжение на резисторе 1 кОм при токе 5 мА?',
+ *       options: ['0,2 В', '5 В', '200 В'],
+ *       answer: 1,                       // индекс правильного варианта (с нуля)
+ *       explain: 'U = I·R = 0,005 · 1000 = 5 В.',
+ *     },
+ *   ]} />
+ *
+ * Вопросы показываются все сразу; выбранный ответ подсвечивается, раскрывается пояснение.
+ * Итог «правильно X из N» появляется, когда отвечены все вопросы.
+ */
+interface Question {
+	q: string;
+	options: string[];
+	answer: number;
+	explain?: string;
+}
+interface Props {
+	questions: Question[];
+	title?: string;
+}
+const { questions, title = 'Проверь себя' } = Astro.props;
+
+// Ошибки в разметке квиза ловим при сборке, а не у ученика в браузере.
+questions.forEach((q, i) => {
+	if (q.answer < 0 || q.answer >= q.options.length) {
+		throw new Error(`Quiz: у вопроса №${i + 1} «${q.q}» answer=${q.answer} вне диапазона вариантов.`);
+	}
+});
+const uid = `quiz-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<pcb-quiz class="pcb-widget not-content" data-total={questions.length}>
+	<p class="pcb-widget__title">{title}</p>
+	<ol class="questions">
+		{
+			questions.map((q, qi) => (
+				<li class="question" data-answer={q.answer}>
+					<fieldset>
+						<legend><span class="qnum">{qi + 1}.</span> {q.q}</legend>
+						{q.options.map((opt, oi) => (
+							<label class="option">
+								<input type="radio" name={`${uid}-${qi}`} value={oi} />
+								<span>{opt}</span>
+							</label>
+						))}
+					</fieldset>
+					<p class="feedback" aria-live="polite" hidden>
+						<strong class="verdict" />
+						{q.explain && <span class="explain"> {q.explain}</span>}
+					</p>
+				</li>
+			))
+		}
+	</ol>
+	<div class="summary" hidden>
+		<p class="score" aria-live="polite"></p>
+		<button type="button" class="reset">Пройти заново</button>
+	</div>
+</pcb-quiz>
+
+<script>
+	class PcbQuiz extends HTMLElement {
+		connectedCallback() {
+			const total = Number(this.dataset.total);
+			const summary = this.querySelector<HTMLElement>('.summary')!;
+			const score = this.querySelector<HTMLElement>('.score')!;
+
+			this.querySelectorAll<HTMLElement>('.question').forEach((qEl) => {
+				const correct = Number(qEl.dataset.answer);
+				qEl.addEventListener('change', (e) => {
+					const input = e.target as HTMLInputElement;
+					const chosen = Number(input.value);
+					const ok = chosen === correct;
+					qEl.dataset.state = ok ? 'ok' : 'bad';
+					// Подсвечиваем выбранный вариант и, при ошибке, правильный.
+					qEl.querySelectorAll<HTMLInputElement>('input').forEach((inp, i) => {
+						const label = inp.parentElement!;
+						label.classList.toggle('is-correct', i === correct);
+						label.classList.toggle('is-wrong', i === chosen && !ok);
+					});
+					const fb = qEl.querySelector<HTMLElement>('.feedback')!;
+					fb.hidden = false;
+					fb.querySelector('.verdict')!.textContent = ok ? 'Верно!' : 'Не совсем.';
+					this.updateSummary(total, summary, score);
+				});
+			});
+
+			this.querySelector('.reset')!.addEventListener('click', () => {
+				this.querySelectorAll<HTMLElement>('.question').forEach((qEl) => {
+					delete qEl.dataset.state;
+					qEl.querySelectorAll<HTMLInputElement>('input').forEach((inp) => {
+						inp.checked = false;
+						inp.parentElement!.classList.remove('is-correct', 'is-wrong');
+					});
+					qEl.querySelector<HTMLElement>('.feedback')!.hidden = true;
+				});
+				summary.hidden = true;
+			});
+		}
+
+		updateSummary(total: number, summary: HTMLElement, score: HTMLElement) {
+			const answered = this.querySelectorAll('.question[data-state]').length;
+			const right = this.querySelectorAll('.question[data-state="ok"]').length;
+			if (answered < total) return;
+			summary.hidden = false;
+			const note =
+				right === total ? 'Отлично, можно идти дальше.' : 'Перечитай разделы, где ошибся, и попробуй ещё раз.';
+			score.textContent = `Правильно ${right} из ${total}. ${note}`;
+		}
+	}
+	customElements.define('pcb-quiz', PcbQuiz);
+</script>
+
+<style>
+	.questions {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.qnum {
+		color: var(--sl-color-accent);
+		font-family: var(--pcb-mono);
+	}
+	.question + .question {
+		margin-top: 1rem;
+	}
+	fieldset {
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+	legend {
+		margin-bottom: 0.4rem;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0.25rem 0;
+		padding: 0.4rem 0.6rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.35rem;
+		cursor: pointer;
+	}
+	.option:hover {
+		border-color: var(--sl-color-gray-3);
+	}
+	.option input {
+		accent-color: var(--sl-color-accent);
+	}
+	.option.is-correct {
+		border-color: var(--pcb-ok);
+		background: color-mix(in srgb, var(--pcb-ok) 12%, transparent);
+	}
+	.option.is-wrong {
+		border-color: var(--pcb-bad);
+		background: color-mix(in srgb, var(--pcb-bad) 12%, transparent);
+	}
+	.feedback {
+		margin: 0.4rem 0 0;
+		font-size: var(--sl-text-sm);
+	}
+	[data-state='ok'] .verdict {
+		color: var(--pcb-ok);
+	}
+	[data-state='bad'] .verdict {
+		color: var(--pcb-bad);
+	}
+	.summary {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--sl-color-hairline);
+	}
+	.score {
+		margin: 0;
+		font-weight: 600;
+	}
+	.reset {
+		padding: 0.4rem 0.8rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.35rem;
+		background: transparent;
+		color: var(--sl-color-white);
+		font: inherit;
+		cursor: pointer;
+	}
+</style>

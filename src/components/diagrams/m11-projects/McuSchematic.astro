@@ -1,0 +1,96 @@
+---
+/**
+ * Рис. 11.7: лист «Микроконтроллер» проекта 11.2.
+ * Выводы ATmega328P в корпусе TQFP-32 — по даташиту Microchip, рекомендации по RESET и развязке — AVR042.
+ */
+import Figure from '../Figure.astro';
+import { text, wire, dot, gnd, resV, resH, capV, ledV, diodeV, xtalV, buttonV, box } from './sym';
+
+const G = 420;
+const V = 30;
+const mcu = box(300, 90, 190, 270, 'DD2', 'ATmega328P-AU', [
+	{ side: 'L', at: 30, num: '29', name: 'PC6/RESET' },
+	{ side: 'L', at: 100, num: '7', name: 'PB6/XTAL1' },
+	{ side: 'L', at: 140, num: '8', name: 'PB7/XTAL2' },
+	{ side: 'L', at: 200, num: '20', name: 'AREF' },
+	{ side: 'T', at: 30, num: '4', name: 'VCC' },
+	{ side: 'T', at: 80, num: '6', name: 'VCC' },
+	{ side: 'T', at: 130, num: '18', name: 'AVCC' },
+	{ side: 'B', at: 40, num: '3', name: 'GND' },
+	{ side: 'B', at: 95, num: '5', name: 'GND' },
+	{ side: 'B', at: 150, num: '21', name: 'GND' },
+	{ side: 'R', at: 30, num: '30', name: 'PD0/RXD' },
+	{ side: 'R', at: 60, num: '31', name: 'PD1/TXD' },
+	{ side: 'R', at: 110, num: '15', name: 'PB3/MOSI' },
+	{ side: 'R', at: 140, num: '16', name: 'PB4/MISO' },
+	{ side: 'R', at: 170, num: '17', name: 'PB5/SCK' },
+	{ side: 'R', at: 230, num: '…', name: 'порты' },
+], { x: 395, y: 312, anchor: 'middle' });
+const isp = box(620, 180, 110, 60, 'XP3', 'ISP 2×3', [
+	{ side: 'L', at: 15, num: '1', name: 'MISO' },
+	{ side: 'L', at: 30, num: '3', name: 'SCK' },
+	{ side: 'L', at: 45, num: '5', name: 'RST' },
+	{ side: 'R', at: 15, num: '2', name: 'VCC' },
+	{ side: 'R', at: 30, num: '4', name: 'MOSI' },
+	{ side: 'R', at: 45, num: '6', name: 'GND' },
+]);
+const parts = [
+	mcu.svg, isp.svg,
+	// шина +5V
+	wire([[20, V], [770, V]]),
+	text(24, V - 8, '+5V', 't t-s t-mono t-acc'),
+	dot(330, V), wire([[330, V], [330, 74]]),
+	dot(380, V), wire([[380, V], [380, 74]]),
+	dot(430, V), wire([[430, V], [430, 74]]),
+	// развязка: 100 нФ на каждый вывод питания + общий 10 мкФ
+	dot(560, V), capV(560, V, 100, 'C5', ''), gnd(560, 100),
+	dot(610, V), capV(610, V, 100, 'C6', ''), gnd(610, 100),
+	dot(660, V), capV(660, V, 100, 'C7', ''), gnd(660, 100),
+	dot(710, V), capV(710, V, 100, 'C8', ''), gnd(710, 100),
+	text(560, 16, 'C5–C7: 100 нФ у выв. 4, 6, 18 · C8: 10 мкФ', 't t-s t-mut'),
+	// RESET: подтяжка 10 кОм, диод к VCC, кнопка, конденсатор от DTR
+	dot(120, V), resV(120, V, 120, 'R3', '10 кОм', 'L'),
+	dot(170, V), diodeV(170, V, 120, 'VD1', true, 'R'),
+	wire([[70, 120], [284, 120]]),
+	dot(120, 120), dot(170, 120), dot(250, 120),
+	buttonV(70, 120, 190, 'SB1', 'L'),
+	wire([[70, 190], [70, 200]]), gnd(70, 200),
+	text(100, 138, 'DTR →', 't t-s t-mono t-acc'),
+	wire([[100, 145], [170, 145]]),
+	resH(170, 250, 145, 'C4', '100 нФ'),
+	wire([[250, 145], [250, 120]]),
+	// кварц 16 МГц и нагрузочные конденсаторы
+	wire([[284, 190], [150, 190]]),
+	wire([[284, 230], [190, 230]]),
+	dot(240, 190), dot(240, 230),
+	xtalV(240, 190, 230, 'ZQ1', '16 МГц', 'L'),
+	dot(150, 190), capV(150, 190, 300, 'C9', '22 пФ*', false, 'L'),
+	dot(190, 230), capV(190, 230, 300, 'C10', '22 пФ*', false, 'R'),
+	wire([[150, 300], [190, 300]]), gnd(170, 300),
+	// AREF
+	wire([[284, 290], [260, 290], [260, 330]]),
+	capV(260, 330, 380, 'C11', '100 нФ', false, 'L'),
+	gnd(260, 380),
+	// GND MCU
+	wire([[340, 376], [340, G]]), wire([[395, 376], [395, G]]), wire([[450, 376], [450, G]]),
+	wire([[340, G], [450, G]]), gnd(395, G),
+	// UART
+	text(526, 116, '← UART_TX', 't t-s t-mono t-acc'),
+	text(526, 146, '→ UART_RX', 't t-s t-mono t-acc'),
+	// SPI → ISP: MOSI → 4, MISO → 1, SCK → 3
+	wire([[506, 200], [540, 200], [540, 165], [760, 165], [760, 210], [746, 210]]),
+	wire([[506, 230], [580, 230], [580, 195], [604, 195]]),
+	wire([[506, 260], [595, 260], [595, 210], [604, 210]]),
+	text(545, 160, 'MOSI', 't t-s t-mono t-mut'),
+	// светодиод на PB5 (SCK)
+	dot(530, 260), resV(530, 260, 340, 'R4', '1 кОм', 'R'), ledV(530, 340, 400, 'HL2'), gnd(530, 400),
+	text(620, 290, 'XP3: RST → RESET,', 't t-s t-mut'),
+	text(620, 305, 'VCC → +5V, GND → ⏚', 't t-s t-mut'),
+];
+---
+
+<Figure n="11.7" caption="Лист «Микроконтроллер». У каждого вывода питания (4, 6 и 18 AVCC) свой конденсатор 100 нФ, плюс общий 10 мкФ. RESET подтянут к +5V резистором 10 кОм: не меньше 10 кОм, чтобы работал debugWIRE (AVR042). Диод VD1 срезает выброс выше VCC при автосбросе через C4 от линии DTR. Кварц 16 МГц нагружен двумя конденсаторами, каждый на свой вывод (*номинал считается в уроке 11.2.2). Разъём ISP 2×3 — стандартная распиновка Atmel. Выводы портов вынесены на гребёнки и здесь не показаны.">
+	<svg viewBox="0 0 790 450" role="img" aria-label="Схема ATmega328P: конденсаторы развязки C5–C8, цепь сброса из R3 10 кОм, диода VD1, кнопки SB1 и конденсатора C4 от DTR, кварц ZQ1 16 МГц с конденсаторами C9 и C10, конденсатор C11 на AREF, разъём ISP XP3, светодиод HL2 с резистором R4 на PB5.">
+		<g set:html={parts.join('')} />
+	</svg>
+</Figure>

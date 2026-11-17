@@ -1,0 +1,32 @@
+---
+/** Рис. 8.6: путь параметров компонента — от библиотеки до закупки и сборки. */
+import Figure from '../Figure.astro';
+
+const boxes = [
+	{ x: 10, t1: 'Библиотека', t2: 'MPN, производитель,', t3: 'номинал, описание' },
+	{ x: 170, t1: 'Схема и плата', t2: 'компонент размещён,', t3: 'параметры при нём' },
+	{ x: 330, t1: 'BOM / ActiveBOM', t2: 'перечень элементов,', t3: 'альтернативы' },
+	{ x: 490, t1: 'Закупка и сборка', t2: 'заказ у поставщика,', t3: 'монтаж на заводе' },
+];
+---
+
+<Figure n="8.6" caption="Параметры, которые ты заполнил в библиотеке один раз, дальше едут сами: на схему, в перечень элементов (BOM) и в заказ. Данные поставщиков (цена, наличие, жизненный цикл) подтягиваются в BOM через ссылки на поставщиков.">
+	<svg viewBox="0 0 640 190" role="img" aria-label="Четыре блока слева направо: библиотека, схема и плата, BOM, закупка и сборка. Сверху блок поставщиков со стрелкой в BOM.">
+		{
+			boxes.map((b, i) => (
+				<g>
+					<rect x={b.x} y="90" width="140" height="74" rx="8" fill="none" stroke={i === 0 ? 'var(--sl-color-accent)' : 'currentColor'} stroke-width={i === 0 ? 2.5 : 1.5} />
+					<text class="t" x={b.x + 70} y="114" text-anchor="middle" font-weight="700">{b.t1}</text>
+					<text class="t t-s t-mut" x={b.x + 70} y="134" text-anchor="middle">{b.t2}</text>
+					<text class="t t-s t-mut" x={b.x + 70} y="150" text-anchor="middle">{b.t3}</text>
+					{i < 3 && <path class="ln-acc" d={`M${b.x + 142} 127 H${b.x + 158} M${b.x + 152} 121 L${b.x + 158} 127 L${b.x + 152} 133`} />}
+				</g>
+			))
+		}
+		<rect x="330" y="8" width="140" height="44" rx="8" fill="none" stroke="var(--pcb-altium)" stroke-width="1.5" />
+		<text class="t" x="400" y="28" text-anchor="middle" font-weight="700">Поставщики</text>
+		<text class="t t-s t-mut" x="400" y="44" text-anchor="middle">цена, наличие, статус</text>
+		<path d="M400 52 V86 M394 80 L400 86 L406 80" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
+		<text class="t t-s" x="410" y="74">Supplier Links</text>
+	</svg>
+</Figure>

@@ -1,0 +1,175 @@
+---
+title: "Мини-практика: первый проект"
+description: Открываем готовый пример, ходим по схеме и плате, проверяем проект, пробуем перекрёстное выделение схема ↔ плата и разделённый экран.
+sidebar:
+  label: "6.6 Мини-практика: первый проект"
+  order: 6
+duration: 30
+status: ready
+goals:
+  - открыть готовый проект и найти в нём схему и плату
+  - проверить проект командой Validate и прочитать панель Messages
+  - находить компонент на плате по схеме и наоборот (cross-probe, cross-select)
+  - смотреть схему и плату одновременно в разделённом окне
+prerequisites:
+  - m06-altium-intro/03-navigation-hotkeys
+  - m06-altium-intro/05-altium-365
+altium:
+  - title: "Cross-Probing & Selecting"
+    url: https://www.altium.com/documentation/altium-designer/cross-probing-selecting-schematics-pcb
+  - title: "Opening Projects and Documents"
+    url: https://www.altium.com/documentation/altium-designer/opening-projects-documents
+sources:
+  - title: "Altium 365: Making Projects Available Online — пример Mini PC - SODIMM и путь к папке Examples"
+    url: https://my.altium.com/altium-designer/getting-started/making-projects-available-online
+---
+
+import Callout from '../../../components/lesson/Callout.astro';
+import MenuPath from '../../../components/lesson/MenuPath.astro';
+import Kbd from '../../../components/lesson/Kbd.astro';
+import Screenshot from '../../../components/lesson/Screenshot.astro';
+import Mistakes from '../../../components/lesson/Mistakes.astro';
+import Assignment from '../../../components/lesson/Assignment.astro';
+import Quiz from '../../../components/interactive/Quiz.astro';
+import CrossProbe from '../../../components/diagrams/m06-altium-intro/CrossProbe.astro';
+
+Прежде чем рисовать свою плату, полезно погулять по чужой, уже готовой. Так ты увидишь, как выглядит законченный проект: сколько листов схемы, как разложены компоненты, как идут дорожки. Заодно освоишь главный трюк Altium — **перекрёстное выделение** между схемой и платой.
+
+## Где взять пример
+
+**Вариант 1 — примеры из установки.** Вместе с Altium Designer обычно ставятся примеры проектов. В учебных
+материалах Altium указан путь вида:
+
+`C:\Users\Public\Public Documents\Altium\ADXX\Examples\`
+
+где `ADXX` — папка твоей версии. Например, там лежит проект **Mini PC - SODIMM** с несколькими листами схемы и платой.
+Набор примеров и путь зависят от версии и от того, выбирались ли примеры при установке **[ПРОВЕРИТЬ]** в AD 26.
+
+<Callout type="warning">
+  **Скопируй** папку примера в свою папку курса и открывай копию. Тогда можно смело всё ломать: оригинал на диске
+  C: останется целым.
+</Callout>
+
+**Вариант 2 — Workspace.** Если ты подключён к рабочему пространству с демо-данными (урок [6.5](../05-altium-365/)),
+открой демонстрационный проект из раздела **Workspace** диалога открытия.
+
+**Как открыть:** <MenuPath path="File » Open Project" /> → **Local Projects** → **Browse** → выбери файл `.PrjPcb`.
+Проект появится в панели **Projects**.
+
+## Перекрёстное выделение
+
+Схема и плата в Altium — не два независимых рисунка, а два вида **одной модели проекта**. Поэтому из схемы можно
+мгновенно попасть к тому же компоненту на плате, и наоборот.
+
+<CrossProbe />
+
+Аналогия — карта и вид со спутника в навигаторе: ткнул в дом на карте, и спутниковый снимок показал тот же дом.
+
+В Altium два инструмента:
+
+| Инструмент | Как включить | Что делает |
+|---|---|---|
+| **Cross Probe** (перекрёстный поиск) | <MenuPath path="Tools » Cross Probe" /> или кнопка на панели инструментов **Standard** | щёлкаешь по объекту — он подсвечивается в другом документе |
+| **Cross Select Mode** (перекрёстное выделение) | <MenuPath path="Tools » Cross Select Mode" />, <Kbd keys="Shift+Ctrl+X" /> | режим-переключатель: всё, что выделяешь в одном редакторе, выделяется и в другом |
+
+У **Cross Probe** два режима:
+
+- **Continuous** — остаёшься в исходном документе и по очереди щёлкаешь объекты (или <Kbd keys="Enter" />). Выход — правая кнопка или <Kbd keys="Esc" />.
+- **Jump To** — <Kbd keys="Ctrl" /> + щелчок (или <Kbd keys="Ctrl+Enter" />): Altium переключится на другой документ и покажет объект там.
+
+**Cross Select Mode** включается в обоих редакторах сразу и остаётся включённым, пока не выключишь. Его же можно
+включить флажком **Cross Selection** на странице **System – Navigation** настроек.
+
+<Callout type="altium">
+  Перекрёстное выделение работает через модель проекта, которую Altium собирает автоматически. Если что-то не
+  находится, проверь проект вручную: <MenuPath path="Project » Validate PCB Project" />. В старых версиях эта
+  команда называлась Compile PCB Project. Оба документа должны быть открыты во вкладках.
+</Callout>
+
+## Разделённый экран
+
+Перекрёстное выделение удобнее всего, когда схема и плата видны одновременно. Щёлкни правой кнопкой по вкладке
+документа и выбери **Split Vertical** (рядом) или **Split Horizontal** (друг под другом). Вернуть всё в одно окно —
+**Merge All** в том же меню.
+
+<Screenshot src="screenshots/m06-altium-intro/l06-split-cross-select.png" alt="схема и плата в разделённом окне, выделенный компонент подсвечен в обоих" />
+
+## Практика в Altium
+
+1. Скопируй пример в папку курса и открой его: <MenuPath path="File » Open Project" /> → **Local Projects** → **Browse**.
+2. В панели **Projects** раскрой **Source Documents** и посчитай листы схемы. Открой их по очереди, впиши каждый лист через <Kbd keys="V, D" />.
+3. Проверь проект: <MenuPath path="Project » Validate PCB Project" />. Открой панель **Messages** и посмотри, есть ли предупреждения. Двойной щелчок по сообщению покажет объект. Пройтись по сообщениям по очереди можно клавишами <Kbd keys="Shift+Ctrl+F3" /> / <Kbd keys="Shift+Ctrl+F4" />.
+4. Открой плату `.PcbDoc`, впиши её через <Kbd keys="V, F" />, включи 3D (<Kbd keys="3" />), посмотри и вернись в 2D (<Kbd keys="2" />).
+5. Раздели экран: правый щелчок по вкладке платы → **Split Vertical**.
+6. Включи <Kbd keys="Shift+Ctrl+X" /> (Cross Select Mode). Выдели компонент на схеме — он выделится на плате. Выдели рамкой группу компонентов на плате — посмотри, какие узлы схемы это.
+7. Выключи Cross Select Mode, запусти <MenuPath path="Tools » Cross Probe" />, наведи на резистор на схеме и нажми <Kbd keys="Ctrl" /> + щелчок — Altium перейдёт на плату к этому резистору.
+8. На плате подсвети цепь земли: <Kbd keys="Ctrl" /> + щелчок по дорожке GND. Сними подсветку — <Kbd keys="Shift+C" />.
+9. Закрой проект без сохранения: ты изучал, а не правил.
+
+<Mistakes
+  items={[
+    {
+      problem: 'Cross Probe ничего не подсвечивает в другом документе',
+      why: 'Второй документ не открыт или проект не проверен.',
+      fix: 'Открой схему и плату во вкладках, выполни **Project » Validate PCB Project** и повтори.',
+    },
+    {
+      problem: 'Выделяю на схеме — на плате выделяется что-то лишнее',
+      why: 'Включён Cross Select Mode, и он продолжает работать, пока его не выключишь.',
+      fix: 'Выключи режим тем же Shift+Ctrl+X или в меню Tools — у включённого режима там стоит отметка.',
+    },
+    {
+      problem: 'Испортил файлы примера',
+      why: 'Открывал оригинал из папки установки.',
+      fix: 'Всегда работай с копией. Оригинал можно восстановить переустановкой примеров или скачав их заново.',
+    },
+  ]}
+/>
+
+<Quiz
+  questions={[
+    {
+      q: 'Что делает Cross Select Mode?',
+      options: [
+        'Переключает единицы mm/mil',
+        'Синхронизирует выделение: выделенное в схеме выделяется на плате и наоборот',
+        'Копирует схему в плату',
+      ],
+      answer: 1,
+      explain: 'Это режим-переключатель (Shift+Ctrl+X), который связывает выделение в двух редакторах.',
+    },
+    {
+      q: 'Чем режим Jump To отличается от Continuous при Cross Probe?',
+      options: [
+        'Jump To (Ctrl+щелчок) переключает на другой документ, Continuous оставляет тебя в исходном',
+        'Ничем',
+        'Jump To работает только в 3D',
+      ],
+      answer: 0,
+      explain: 'Continuous — щелчки без смены документа, Jump To — переход к объекту в другом документе.',
+    },
+    {
+      q: 'Какой командой проверить проект, чтобы обновилась модель и появились сообщения?',
+      options: ['File » Save All', 'Project » Validate PCB Project', 'Tools » Preferences'],
+      answer: 1,
+      explain: 'Validate PCB Project проверяет проект и выводит сообщения в панель Messages.',
+    },
+    {
+      q: 'Как посмотреть схему и плату рядом?',
+      options: [
+        'Только на двух мониторах',
+        'Правый щелчок по вкладке документа → Split Vertical',
+        'Через File » Print Preview',
+      ],
+      answer: 1,
+      explain: 'Split Vertical или Split Horizontal делят окно, Merge All собирает обратно.',
+    },
+  ]}
+/>
+
+<Assignment time={30}>
+  В открытом примере найди через перекрёстное выделение: 1) самый «большой» по числу выводов компонент и на каком
+  листе схемы он нарисован; 2) где на плате стоят разъёмы и какие цепи на них приходят; 3) любой развязывающий
+  конденсатор и микросхему, рядом с которой он стоит (почему именно рядом — урок 5.7). Запиши ответы — это первая
+  твоя «экскурсия» по чужому проекту.
+</Assignment>

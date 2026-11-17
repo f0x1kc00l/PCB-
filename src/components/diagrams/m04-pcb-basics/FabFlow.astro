@@ -1,0 +1,78 @@
+---
+/**
+ * Рис. 4.7 (урок 4.6): маршрут изготовления печатной платы.
+ * Шаги, нужные только многослойным платам, обведены пунктиром.
+ */
+import Figure from '../Figure.astro';
+
+const steps = [
+	{ t: 'Подготовка данных', s: 'CAM, панелизация', ml: false },
+	{ t: 'Внутренние слои', s: 'фоторезист, травление', ml: true },
+	{ t: 'Контроль AOI', s: 'внутренних слоёв', ml: true },
+	{ t: 'Прессование', s: 'ядра, препрег, фольга', ml: true },
+	{ t: 'Сверление', s: 'ЧПУ, лазер для μVia', ml: false },
+	{ t: 'Металлизация', s: 'стенки отверстий', ml: false },
+	{ t: 'Рисунок наружных', s: 'фоторезист, гальваника', ml: false },
+	{ t: 'Травление', s: 'лишняя медь уходит', ml: false },
+	{ t: 'Паяльная маска', s: 'нанесение, засветка', ml: false },
+	{ t: 'Финишное покрытие', s: 'HASL, ENIG, OSP…', ml: false },
+	{ t: 'Шелкография', s: 'маркировка', ml: false },
+	{ t: 'Электротест', s: 'обрывы и КЗ', ml: false },
+	{ t: 'Контур', s: 'фрезеровка, V-надрез', ml: false },
+	{ t: 'Выходной контроль', s: 'IPC-A-600, упаковка', ml: false },
+];
+const COLS = 4;
+const BW = 140;
+const BH = 54;
+const GX = 18;
+const GY = 34;
+const pos = steps.map((st, i) => {
+	const row = Math.floor(i / COLS);
+	const colRaw = i % COLS;
+	const col = row % 2 === 0 ? colRaw : COLS - 1 - colRaw; // «змейка»
+	return { ...st, i, x: 10 + col * (BW + GX), y: 10 + row * (BH + GY) };
+});
+const W = 10 + COLS * (BW + GX);
+const H = 10 + Math.ceil(steps.length / COLS) * (BH + GY);
+---
+
+<Figure n="4.7" caption="Упрощённый маршрут изготовления платы по субтрактивной технологии (лишнюю медь стравливают). Шаги в пунктирных рамках нужны только многослойным платам. У двухслойной платы маршрут начинается сразу со сверления.">
+	<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Четырнадцать шагов изготовления платы от подготовки данных до выходного контроля.">
+		{
+			pos.map((p, k) => {
+				const next = pos[k + 1];
+				let arrow = '';
+				if (next) {
+					if (next.y === p.y) {
+						const dir = next.x > p.x ? 1 : -1;
+						const x1 = dir > 0 ? p.x + BW : p.x;
+						const x2 = dir > 0 ? next.x : next.x + BW;
+						arrow = `M${x1} ${p.y + BH / 2} H${x2 - dir * 2} M${x2 - dir * 8} ${p.y + BH / 2 - 5} L${x2 - dir * 2} ${p.y + BH / 2} L${x2 - dir * 8} ${p.y + BH / 2 + 5}`;
+					} else {
+						const cx = p.x + BW / 2;
+						arrow = `M${cx} ${p.y + BH} V${next.y - 2} M${cx - 5} ${next.y - 8} L${cx} ${next.y - 2} L${cx + 5} ${next.y - 8}`;
+					}
+				}
+				return (
+					<g>
+						<rect
+							x={p.x}
+							y={p.y}
+							width={BW}
+							height={BH}
+							rx="6"
+							fill="var(--sl-color-gray-6)"
+							stroke={p.ml ? 'var(--sl-color-gray-3)' : 'var(--sl-color-accent)'}
+							stroke-width="1.5"
+							stroke-dasharray={p.ml ? '5 4' : undefined}
+						/>
+						<text class="t t-s t-acc" x={p.x + 8} y={p.y + 16}>{p.i + 1}</text>
+						<text class="t t-s" x={p.x + BW / 2} y={p.y + 30} text-anchor="middle" font-weight="700">{p.t}</text>
+						<text class="t t-s t-mut" x={p.x + BW / 2} y={p.y + 45} text-anchor="middle">{p.s}</text>
+						{arrow && <path class="ln-acc" d={arrow} />}
+					</g>
+				);
+			})
+		}
+	</svg>
+</Figure>

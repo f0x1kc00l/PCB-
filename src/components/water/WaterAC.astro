@@ -1,0 +1,205 @@
+---
+/**
+ * Переменный ток на воде: насос качает то вперёд, то назад.
+ * Сужение (R), мембрана (C) и колесо-маховик (L) ведут себя по-разному:
+ * ток в R совпадает с давлением, в C опережает на 90°, в L отстаёт на 90°.
+ * Мгновенная мощность p = u·i = UI·cosφ·(1 − cos2ωt) + UI·sinφ·sin2ωt —
+ * разложение из лекции Г. Сугяна «Мощность в цепях переменного синусоидального тока».
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+	el?: 'R' | 'L' | 'C' | 'RL' | 'RC' | 'RLC';
+}
+const { n, el = 'R' } = Astro.props;
+const uid = `wac-${Math.random().toString(36).slice(2, 7)}`;
+const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
+---
+
+<WaterFrame
+	tag="water-ac"
+	n={n}
+	title="Переменный ток: насос качает туда-обратно"
+	map={[
+		['сужение', 'R: ток в фазе с напряжением'],
+		['мембрана', 'C: ток опережает на 90°'],
+		['колесо-маховик', 'L: ток отстаёт на 90°'],
+		['вращающаяся стрелка', 'комплексная амплитуда (вектор)'],
+	]}
+	caption="Капли больше не бегут по кругу — они качаются на месте. В сужении вода тормозится трением в такт давлению (энергия уходит в тепло). Мембрана сначала растягивается, потом сама выталкивает воду — энергия возвращается насосу. Колесо сначала разгоняется, потом само толкает воду. Зелёная линия p = u·i: где она уходит ниже нуля, энергия течёт обратно в источник."
+>
+	<div class="water__btns" style="margin:0 0 .5rem">
+		<span class="water__seg" role="radiogroup" aria-label="Что в цепи">
+			{
+				OPTS.map((o) => (
+					<label>
+						<input type="radio" name={uid} value={o} checked={o === el} /> {o}
+					</label>
+				))
+			}
+		</span>
+	</div>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Слева контур с качающимся насосом и элементами R, L, C; в центре вращающиеся векторы напряжения и тока; справа графики u, i и p за два периода.">
+		<g stroke-width="11">
+			<polyline data-p="top" class="pipe" points="50,128 50,40 220,40 220,60" />
+			<polyline data-p="bot" class="pipe" points="220,260 50,260 50,152" />
+			<line class="pipe" data-p="s1" x1="220" y1="60" x2="220" y2="260" />
+		</g>
+		<circle cx="50" cy="140" r="17" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
+		<g data-imp class="ln"><path d="M38 140H62M50 128V152" /></g>
+		<text class="ts" x="76" y="144">насос ~</text>
+		<!-- R -->
+		<g data-eR>
+			<rect x="208" y="66" width="24" height="44" rx="3" fill="var(--sl-color-bg)" class="wall" />
+			<line x1="220" y1="66" x2="220" y2="110" stroke="var(--water-hi)" stroke-width="3" />
+			<text class="t" x="240" y="92">R</text>
+		</g>
+		<!-- L -->
+		<g data-eL>
+			<circle cx="220" cy="148" r="24" fill="var(--sl-color-bg)" class="wall" />
+			<g data-wheel><circle cx="220" cy="148" r="18" fill="none" stroke="currentColor" stroke-width="4" /><path d="M220 130V166M202 148H238" class="ln" /></g>
+			<text class="t" x="250" y="152">L</text>
+		</g>
+		<!-- C -->
+		<g data-eC>
+			<rect x="196" y="188" width="48" height="56" rx="6" fill="var(--sl-color-bg)" class="wall" />
+			<path data-mem d="" fill="none" stroke="var(--sl-color-accent)" stroke-width="3" />
+			<text class="t" x="250" y="222">C</text>
+		</g>
+		<g data-d></g>
+		<!-- векторная диаграмма -->
+		<g transform="translate(335 140)">
+			<circle r="62" class="grid" />
+			<path d="M-70 0H70M0 -70V70" class="grid" />
+			<line data-vu x1="0" y1="0" x2="60" y2="0" stroke="var(--water-hi)" stroke-width="3" />
+			<line data-vi x1="0" y1="0" x2="40" y2="0" stroke="var(--sl-color-accent)" stroke-width="3" />
+			<circle data-vuh r="4" fill="var(--water-hi)" />
+			<circle data-vih r="4" fill="var(--sl-color-accent)" />
+			<text class="ts" x="0" y="88" text-anchor="middle">векторы U и I</text>
+			<text class="ts tm" data-phi x="0" y="-74" text-anchor="middle"></text>
+		</g>
+		<!-- графики -->
+		<g transform="translate(420 40)">
+			<rect width="250" height="220" class="grid" />
+			<path d="M0 110H250M125 0V220" class="grid" opacity="0.6" />
+			<polyline data-gp class="tr-p" />
+			<polyline data-gu class="tr-u" />
+			<polyline data-gi class="tr-i" />
+			<line data-cur x1="0" y1="0" x2="0" y2="220" stroke="currentColor" stroke-width="1" opacity="0.6" />
+			<text class="ts" x="2" y="-6">u</text>
+			<text class="ts" x="22" y="-6" fill="var(--sl-color-accent)">i</text>
+			<text class="ts" x="40" y="-6" fill="var(--pcb-ok)">p = u·i</text>
+			<text class="ts" x="248" y="236" text-anchor="end">два периода →</text>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Частота f (лог.)</span><input type="range" data-f min="1" max="3" step="0.01" value="2.2" /><output data-fv></output></label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, si, $ } from '../../lib/water';
+
+	const R0 = 10,
+		L0 = 10e-3,
+		C0 = 100e-6,
+		UM = 10;
+	class WaterAC extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			let el = (r.querySelector('input[type=radio]:checked') as HTMLInputElement).value,
+				f = 10 ** 2.2,
+				th = 0;
+			const drops = new Drops($(r, '[data-d]'), new Path([[50, 140], [50, 40], [220, 40], [220, 260], [50, 260], [50, 140]]), 15);
+			let phi = 0,
+				Im = 0,
+				Xl = 0,
+				Xc = 0,
+				Zr = 0,
+				Zx = 0;
+			const W = 250,
+				H = 220;
+			const calc = () => {
+				const w = 2 * Math.PI * f;
+				Xl = w * L0;
+				Xc = 1 / (w * C0);
+				Zr = el.includes('R') ? R0 : 0;
+				Zx = (el.includes('L') ? Xl : 0) - (el.includes('C') ? Xc : 0);
+				const Zm = Math.hypot(Zr, Zx);
+				phi = Math.atan2(Zx, Zr);
+				Im = UM / Zm;
+				$(r, '[data-fv]').textContent = si(f, 'Гц');
+				for (const k of ['R', 'L', 'C'])
+					($(r, `[data-e${k}]`) as SVGGElement).style.opacity = el.includes(k) ? '1' : '0.15';
+				// статичные графики за два периода
+				const scI = Math.min(1, Im / 2) / Math.max(Im, 1e-9); // ток нормируем: 2 А = полная шкала
+				const pu: string[] = [],
+					pi: string[] = [],
+					pp: string[] = [];
+				for (let k = 0; k <= 200; k++) {
+					const a = (4 * Math.PI * k) / 200;
+					const x = (W * k) / 200;
+					const u = Math.sin(a),
+						i = Im * scI * Math.sin(a - phi);
+					const p = u * i;
+					pu.push(`${x.toFixed(1)},${(H / 2 - (u * H) / 2.3).toFixed(1)}`);
+					pi.push(`${x.toFixed(1)},${(H / 2 - (i * H) / 2.3).toFixed(1)}`);
+					pp.push(`${x.toFixed(1)},${(H / 2 - (p * H) / 2.3).toFixed(1)}`);
+				}
+				$(r, '[data-gu]').setAttribute('points', pu.join(' '));
+				$(r, '[data-gi]').setAttribute('points', pi.join(' '));
+				$(r, '[data-gp]').setAttribute('points', pp.join(' '));
+				const U = UM / Math.SQRT2,
+					I = Im / Math.SQRT2;
+				const deg = (phi * 180) / Math.PI;
+				$(r, '[data-phi]').textContent = `φ = ${fm(deg, 0)}°`;
+				$(r, '[data-fx]').textContent = `Z = ${fm(Zr, 1)} ${Zx >= 0 ? '+' : '−'} j${fm(Math.abs(Zx), 1)} Ом · |Z| = ${fm(Math.hypot(Zr, Zx), 1)} Ом · Im = ${si(Im, 'А')}`;
+				$(r, '[data-fx2]').textContent = `XL = ωL = ${fm(Xl, 1)} Ом, XC = 1/(ωC) = ${fm(Xc, 1)} Ом. P = U·I·cosφ = ${fm(U * I * Math.cos(phi), 2)} Вт (уходит в тепло), Q = U·I·sinφ = ${fm(U * I * Math.sin(phi), 2)} вар (качается туда-обратно), S = U·I = ${fm(U * I, 2)} В·А.${el === 'RLC' && Math.abs(Zx) < 1 ? ' Резонанс: XL ≈ XC, мембрана и колесо отдают энергию друг другу, насос видит чистое R.' : ''}`;
+			};
+			calc();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-f]')) f = 10 ** +t.value;
+				if (t.type === 'radio') el = t.value;
+				calc();
+			});
+			animate(r, (dt) => {
+				th = (th + 2 * Math.PI * 0.4 * dt) % (4 * Math.PI);
+				const u = Math.sin(th);
+				const q = -Math.cos(th - phi); // смещение воды ∝ ∫i dt
+				const iN = Math.min(1, Im / 2);
+				drops.set(18 * iN * q);
+				$(r, '[data-imp]').setAttribute('transform', `rotate(${(70 * u).toFixed(1)} 50 140)`);
+				$(r, '[data-wheel]').setAttribute('transform', `rotate(${(90 * iN * q).toFixed(1)} 220 148)`);
+				// мембрана: прогиб ∝ заряду, т.е. ∝ q
+				const b = 20 * q * (el.includes('C') ? 1 : 0);
+				$(r, '[data-mem]').setAttribute('d', `M198 216 Q220 ${(216 + b).toFixed(1)} 242 216`);
+				paint([$(r, '[data-p="top"]')], (1 + u) / 2);
+				paint([$(r, '[data-p="bot"]')], (1 - u) / 2);
+				paint([$(r, '[data-p="s1"]')], 0.5);
+				// векторы: U под углом ωt, I под углом ωt − φ (экран: y вниз)
+				const ru = 60,
+					ri = 60 * iN;
+				// вращение против часовой стрелки; проекция на вертикаль = мгновенное значение
+				const ux = ru * Math.cos(th),
+					uy = -ru * Math.sin(th);
+				const ix = ri * Math.cos(th - phi),
+					iy = -ri * Math.sin(th - phi);
+				$(r, '[data-vu]').setAttribute('x2', ux.toFixed(1));
+				$(r, '[data-vu]').setAttribute('y2', uy.toFixed(1));
+				$(r, '[data-vi]').setAttribute('x2', ix.toFixed(1));
+				$(r, '[data-vi]').setAttribute('y2', iy.toFixed(1));
+				$(r, '[data-vuh]').setAttribute('cx', ux.toFixed(1));
+				$(r, '[data-vuh]').setAttribute('cy', uy.toFixed(1));
+				$(r, '[data-vih]').setAttribute('cx', ix.toFixed(1));
+				$(r, '[data-vih]').setAttribute('cy', iy.toFixed(1));
+				const cx = (W * th) / (4 * Math.PI);
+				$(r, '[data-cur]').setAttribute('x1', cx.toFixed(1));
+				$(r, '[data-cur]').setAttribute('x2', cx.toFixed(1));
+			});
+		}
+	}
+	customElements.define('water-ac', WaterAC);
+</script>

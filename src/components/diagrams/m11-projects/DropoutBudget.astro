@@ -1,0 +1,49 @@
+---
+/**
+ * Рис. 11.3: «бюджет» напряжения при питании от 5 В.
+ * LM1117: падение до 1,3 В (макс., 800 мА). SS14: до 0,5 В при 1 А. DMP3099L: R ≈ 0,065–0,1 Ом.
+ * Масштаб: 1 В = 100 px.
+ */
+import Figure from '../Figure.astro';
+
+const S = 90;
+const rows = [
+	{ y: 46, name: 'Защита диодом SS14', segs: [['3,3 В выход', 3.3, 'var(--sl-color-accent)'], ['1,3 В LDO', 1.3, 'var(--pcb-altium)'], ['0,5 В диод', 0.5, 'var(--pcb-bad)']], ok: false },
+	{ y: 126, name: 'Защита транзистором VT1', segs: [['3,3 В выход', 3.3, 'var(--sl-color-accent)'], ['1,3 В LDO', 1.3, 'var(--pcb-altium)'], ['VT1 ≈ 0,05 В', 0.05, 'var(--pcb-ok)']], ok: true },
+];
+const x0 = 165;
+---
+
+<Figure n="11.3" caption="Хватит ли 5 вольт? Выход 3,3 В плюс наихудшее падение на LM1117 (1,3 В) — уже 4,6 В. С диодом Шоттки ещё 0,5 В, и сумма вылезает за 5 В: при большом токе стабилизатор выйдет из режима стабилизации. С P-канальным транзистором потери — сотые доли вольта.">
+	<svg viewBox="0 0 700 200" role="img" aria-label="Две полосы: с диодом сумма 5,1 вольта больше 5, с транзистором 4,65 вольта меньше 5.">
+		{
+			rows.map((r) => {
+				let x = x0;
+				return (
+					<g>
+						<text class="t t-s" x="10" y={r.y + 22}>{r.name}</text>
+						{r.segs.map(([label, v, color]) => {
+							const w = (v as number) * S;
+							const seg = (
+								<g>
+									<rect x={x} y={r.y} width={w} height="34" fill={color as string} opacity="0.85" />
+									{w > 60 ? (
+										<text class="t t-s" x={x + w / 2} y={r.y + 22} text-anchor="middle" fill="#111">{label}</text>
+									) : (
+										<text class="t t-s" x={x + w / 2} y={r.y - 6} text-anchor="middle">{label}</text>
+									)}
+								</g>
+							);
+							x += w;
+							return seg;
+						})}
+						<text class="t t-s t-acc" x={Math.max(x + 10, x0 + 5 * S + 10)} y={r.y + 22}>{r.ok ? '4,65 В ✓' : '5,1 В ✗'}</text>
+					</g>
+				);
+			})
+		}
+		<path d={`M${x0 + 5 * S} 25 V170`} stroke="var(--pcb-bad)" stroke-width="2" stroke-dasharray="6 4" />
+		<text class="t t-s" x={x0 + 5 * S} y="190" text-anchor="middle">5,0 В от USB или адаптера</text>
+		<text class="t t-s t-mut" x={x0} y="190" text-anchor="middle">0</text>
+	</svg>
+</Figure>

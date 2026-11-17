@@ -1,0 +1,50 @@
+---
+/**
+ * Практическое задание в конце урока.
+ *   <Assignment time={30}>…текст задания, можно списком…</Assignment>
+ */
+interface Props {
+	title?: string;
+	/** Оценка времени на задание, мин. */
+	time?: number;
+}
+const { title = 'Практическое задание', time } = Astro.props;
+---
+
+<section class="assignment" aria-label={title}>
+	<p class="assignment__title">
+		<span aria-hidden="true">🎯</span>
+		{title}
+		{time && <span class="time">~{time} мин</span>}
+	</p>
+	<div class="assignment__body"><slot /></div>
+</section>
+
+<style>
+	.assignment {
+		margin-block: 1.5rem;
+		padding: 0.9rem 1.1rem;
+		border: 2px solid var(--sl-color-accent);
+		border-radius: var(--pcb-radius);
+	}
+	.assignment__title {
+		display: flex;
+		align-items: baseline;
+		gap: 0.45rem;
+		margin: 0;
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	.time {
+		margin-inline-start: auto;
+		font-weight: 500;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.assignment__body > :global(:first-child) {
+		margin-top: 0.4rem;
+	}
+	.assignment__body > :global(:last-child) {
+		margin-bottom: 0;
+	}
+</style>

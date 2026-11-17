@@ -1,0 +1,40 @@
+---
+/**
+ * Рис. 12.6в: делитель Уилкинсона на 2,45 ГГц, FR-4 εr = 4,3, препрег h = 0,2 мм (верх → L2 земля).
+ * Размеры посчитаны по Hammerstad–Jensen (src/lib/microstrip.ts): 50 Ом — 0,39 мм; 70,7 Ом — 0,21 мм, λг/4 ≈ 17,3 мм.
+ */
+import Figure from '../Figure.astro';
+
+const c = { x: 300, y: 130, r: 70 };
+---
+
+<Figure n="12.6в" caption="Делитель Уилкинсона 1:2 на 2,45 ГГц для FR-4 (εr = 4,3, до земли 0,2 мм). Две дуги по 70,7 Ом длиной λг/4 ≈ 17,3 мм и резистор 100 Ом между выходами. Резистор не потребляет мощность, пока выходы нагружены одинаково, зато развязывает их друг от друга. Длины электрические, их нужно проверить в EM-симуляторе.">
+	<svg viewBox="0 0 660 270" role="img" aria-label="Вход 50 Ом слева разветвляется на две дуги по 70,7 Ом, дуги сходятся справа к двум выходам 50 Ом, между концами дуг стоит резистор 100 Ом.">
+		<!-- вход -->
+		<rect x="40" y={c.y - 4} width={c.x - c.r - 40} height="8" fill="var(--pcb-copper)" />
+		<text class="t" x="40" y={c.y - 16}>вход, порт 1</text>
+		<text class="t t-s" x="40" y={c.y + 26}>50 Ом, W 0,39 мм</text>
+
+		<!-- дуги -->
+		<path d={`M${c.x - c.r} ${c.y} A${c.r} ${c.r} 0 0 1 ${c.x + c.r * 0.6} ${c.y - c.r * 0.8}`} fill="none" stroke="var(--pcb-copper)" stroke-width="4" />
+		<path d={`M${c.x - c.r} ${c.y} A${c.r} ${c.r} 0 0 0 ${c.x + c.r * 0.6} ${c.y + c.r * 0.8}`} fill="none" stroke="var(--pcb-copper)" stroke-width="4" />
+		<text class="t t-s t-acc" x={c.x - 20} y={c.y - c.r - 12} text-anchor="middle">70,7 Ом, W 0,21 мм</text>
+		<text class="t t-s t-acc" x={c.x - 20} y={c.y + c.r + 22} text-anchor="middle">λг/4 ≈ 17,3 мм каждая</text>
+
+		<!-- резистор 0402 -->
+		<rect x={c.x + c.r * 0.6 - 7} y={c.y - c.r * 0.8 + 4} width="14" height="9" fill="var(--pcb-copper)" />
+		<rect x={c.x + c.r * 0.6 - 7} y={c.y + c.r * 0.8 - 13} width="14" height="9" fill="var(--pcb-copper)" />
+		<rect x={c.x + c.r * 0.6 - 6} y={c.y - c.r * 0.8 + 13} width="12" height={c.r * 1.6 - 26} fill="#2a2a2a" />
+		<text class="t t-acc" x={c.x + c.r * 0.6 - 16} y={c.y + 4} text-anchor="end">100 Ом</text>
+		<text class="t t-s t-mut" x={c.x + c.r * 0.6 - 16} y={c.y + 20} text-anchor="end">0402</text>
+
+		<!-- выходы -->
+		<rect x={c.x + c.r * 0.6} y={c.y - c.r * 0.8 - 4} width="230" height="8" fill="var(--pcb-copper)" />
+		<rect x={c.x + c.r * 0.6} y={c.y + c.r * 0.8 - 4} width="230" height="8" fill="var(--pcb-copper)" />
+		<text class="t" x="470" y={c.y - c.r * 0.8 - 14}>порт 2, −3 дБ</text>
+		<text class="t" x="470" y={c.y + c.r * 0.8 + 22}>порт 3, −3 дБ</text>
+		<text class="t t-s" x="470" y={c.y + 4}>выходы 50 Ом,</text>
+		<text class="t t-s" x="470" y={c.y + 19}>развязка между ними</text>
+		<text class="t t-s" x="470" y={c.y + 34}>обычно ~20 дБ и лучше</text>
+	</svg>
+</Figure>

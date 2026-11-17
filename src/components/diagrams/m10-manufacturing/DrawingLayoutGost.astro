@@ -1,0 +1,47 @@
+---
+/**
+ * Рис. 10.5: компоновка чертежа печатной платы на листе A3 по ЕСКД.
+ * Рамка: 20 мм слева, 5 мм с остальных сторон (ГОСТ 2.301/2.104); основная надпись форма 1 — 185×55 мм.
+ * Масштаб рисунка: 1 мм = 1,5 px (лист A3 420×297 мм).
+ */
+import Figure from '../Figure.astro';
+
+const k = 1.5;
+const W = 420 * k;
+const H = 297 * k;
+const tbW = 185 * k;
+const tbH = 55 * k;
+const fx = 20 * k; // левое поле
+const f = 5 * k; // остальные поля
+---
+
+<Figure n="10.5" caption="Типичная компоновка чертежа печатной платы на листе A3: вид платы с координатной сеткой или размерами, таблица отверстий, технические требования над основной надписью. Рамка — 20 мм слева под подшивку и 5 мм с остальных сторон; основная надпись по форме 1 — 185×55 мм.">
+	<svg viewBox={`-6 -6 ${W + 12} ${H + 12}`} role="img" aria-label="Схема листа A3: рамка, основная надпись в правом нижнем углу, слева вид платы, справа таблица отверстий и технические требования.">
+		<!-- лист и рамка -->
+		<rect x="0" y="0" width={W} height={H} class="ln-thin" />
+		<rect x={fx} y={f} width={W - fx - f} height={H - 2 * f} class="ln" />
+		<!-- основная надпись -->
+		<rect x={W - f - tbW} y={H - f - tbH} width={tbW} height={tbH} class="ln" />
+		<path class="ln-thin" d={`M${W - f - tbW + 17 * k * 4} ${H - f - tbH} V${H - f} M${W - f - tbW} ${H - f - tbH + 25 * k} H${W - f - tbW + 17 * k * 4}`} />
+		<text class="t t-s" x={W - f - tbW / 2 + 30} y={H - f - tbH / 2 - 4} text-anchor="middle">Основная надпись</text>
+		<text class="t t-s t-mut" x={W - f - tbW / 2 + 30} y={H - f - tbH / 2 + 12} text-anchor="middle">форма 1, 185×55 мм</text>
+		<!-- вид платы с сеткой -->
+		<rect x={fx + 30} y={f + 30} width="260" height="170" fill="var(--pcb-mask)" opacity="0.5" />
+		{[...Array(14).keys()].map((i) => <line x1={fx + 30 + i * 20} y1={f + 30} x2={fx + 30 + i * 20} y2={f + 200} class="ln-thin" />)}
+		{[...Array(9).keys()].map((i) => <line x1={fx + 30} y1={f + 30 + i * 21.25} x2={fx + 290} y2={f + 30 + i * 21.25} class="ln-thin" />)}
+		<text class="t t-s" x={fx + 160} y={f + 220} text-anchor="middle">Вид платы 2:1, координатная сетка</text>
+		<path class="ln" d={`M${fx + 30} ${f + 240} H${fx + 290} M${fx + 30} ${f + 234} V${f + 246} M${fx + 290} ${f + 234} V${f + 246}`} />
+		<text class="t t-s t-mono" x={fx + 160} y={f + 260} text-anchor="middle">габаритный размер</text>
+		<!-- таблица отверстий -->
+		<rect x={fx + 360} y={f + 30} width="210" height="110" class="ln" />
+		{[1, 2, 3, 4].map((i) => <line x1={fx + 360} y1={f + 30 + i * 22} x2={fx + 570} y2={f + 30 + i * 22} class="ln-thin" />)}
+		<text class="t t-s" x={fx + 465} y={f + 46} text-anchor="middle" font-weight="700">Таблица отверстий</text>
+		<text class="t t-s t-mut" x={fx + 465} y={f + 68} text-anchor="middle" font-size="10">Ø отв. · знак · Ø площ. · мет. · кол.</text>
+		<!-- техтребования -->
+		<rect x={W - f - tbW} y={H - f - tbH - 100} width={tbW} height="92" fill="none" class="ln-dash" />
+		<text class="t t-s" x={W - f - tbW + 10} y={H - f - tbH - 82} font-weight="700">Технические требования</text>
+		{[0, 1, 2, 3].map((i) => <line x1={W - f - tbW + 10} y1={H - f - tbH - 66 + i * 15} x2={W - f - 20} y2={H - f - tbH - 66 + i * 15} class="ln-thin" />)}
+		<!-- поля -->
+		<text class="t t-s t-acc" x={fx / 2} y={H / 2} text-anchor="middle" transform={`rotate(-90 ${fx / 2} ${H / 2})`}>20 мм</text>
+	</svg>
+</Figure>

@@ -1,0 +1,32 @@
+---
+/** Рис. 5.6: путь обратного тока в сплошном полигоне земли и вокруг прорези. */
+import Figure from '../Figure.astro';
+const cu = 'var(--pcb-copper)';
+---
+
+<Figure n="5.6" caption="Вид сверху: дорожка на верхнем слое, сплошная земля на нижнем. Слева быстрый обратный ток идёт в земле прямо под дорожкой, и площадь петли минимальна. Справа прорезь в земле заставляет ток обходить её — петля (заштрихована) становится большой антенной, растут помехи и излучение.">
+	<svg viewBox="0 0 660 240" role="img" aria-label="Две панели. Слева: дорожка от U1 к U2 над сплошной землёй, обратный ток пунктиром прямо под ней. Справа: в земле прорезь поперёк дорожки, обратный ток обходит прорезь, образуя большую петлю.">
+		{[0, 340].map((ox) => (
+			<g>
+				<rect x={ox + 10} y="20" width="300" height="190" rx="6" fill={cu} opacity="0.18" />
+				<rect x={ox + 20} y="95" width="36" height="36" rx="3" class="ln" />
+				<rect x={ox + 264} y="95" width="36" height="36" rx="3" class="ln" />
+				<text class="t t-s" x={ox + 38} y="118" text-anchor="middle">U1</text>
+				<text class="t t-s" x={ox + 282} y="118" text-anchor="middle">U2</text>
+				<path d={`M${ox + 56} 108 H${ox + 264}`} stroke={cu} stroke-width="6" />
+			</g>
+		))}
+		<!-- слева: возврат прямо под дорожкой -->
+		<path class="ln-acc" d="M264 120 H56" stroke-dasharray="6 5" />
+		<path class="ln-acc" d="M70 114 L56 120 L70 126" />
+		<text class="t t-s" x="160" y="45" text-anchor="middle">сплошная земля</text>
+		<text class="t t-acc t-s" x="160" y="148" text-anchor="middle">возврат прямо под дорожкой</text>
+		<!-- справа: прорезь -->
+		<rect x="490" y="50" width="16" height="130" fill="var(--sl-color-bg)" />
+		<text class="t t-s" x="498" y="42" text-anchor="middle">прорезь</text>
+		<path d="M604 120 H520 V188 H476 V120 H396 V108 H604 Z" fill="var(--pcb-bad)" opacity="0.18" />
+		<path class="ln-acc" d="M604 120 H520 V188 H476 V120 H396" stroke-dasharray="6 5" />
+		<path class="ln-acc" d="M410 114 L396 120 L410 126" />
+		<text class="t t-s" x="500" y="205" text-anchor="middle" fill="var(--pcb-bad)">большая петля = антенна</text>
+	</svg>
+</Figure>

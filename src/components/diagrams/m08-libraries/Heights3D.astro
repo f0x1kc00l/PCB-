@@ -1,0 +1,29 @@
+---
+/** Рис. 8.5: вид сбоку — высоты 3D-модели и зазор до крышки корпуса. */
+import Figure from '../Figure.astro';
+---
+
+<Figure n="8.5" caption="Вид сбоку на компонент на плате. Standoff Height — зазор между платой и низом корпуса, Overall Height — полная высота над платой. По 3D-моделям Altium проверяет, не упрётся ли компонент в соседа или в крышку корпуса (правило Component Clearance).">
+	<svg viewBox="0 0 620 230" role="img" aria-label="Сбоку: плата, на ней корпус микросхемы с выводами, приподнятый над платой. Отмечены Standoff Height и Overall Height, сверху пунктиром крышка корпуса прибора.">
+		<!-- крышка -->
+		<path class="ln-dash" d="M60 50 H560" />
+		<text class="t t-s t-mut" x="560" y="42" text-anchor="end">крышка корпуса прибора</text>
+		<!-- плата -->
+		<rect x="60" y="160" width="500" height="22" fill="var(--pcb-fr4)" />
+		<rect x="60" y="154" width="500" height="6" fill="var(--pcb-mask)" />
+		<rect x="190" y="150" width="40" height="5" fill="var(--pcb-copper)" />
+		<rect x="370" y="150" width="40" height="5" fill="var(--pcb-copper)" />
+		<!-- корпус и выводы -->
+		<rect x="230" y="96" width="140" height="44" rx="3" fill="#2c2c2c" />
+		<path d="M230 120 H214 V150 H196 M370 120 H386 V150 H404" fill="none" stroke="#bdbdbd" stroke-width="4" />
+		<!-- размеры -->
+		<path class="ln-acc" d="M440 140 V150 M432 140 H448 M432 150 H448" />
+		<text class="t t-s t-acc" x="456" y="149">Standoff Height</text>
+		<path class="ln-acc" d="M140 96 V154 M132 96 H148 M132 154 H148" />
+		<text class="t t-s t-acc" x="124" y="128" text-anchor="end">Overall Height</text>
+		<path class="ln-thin" d="M148 96 H230" />
+		<path class="ln" d="M300 58 V90 M294 84 L300 90 L306 84" />
+		<text class="t t-s" x="310" y="76">зазор до крышки</text>
+		<text class="t t-s t-mut" x="560" y="200" text-anchor="end">плата</text>
+	</svg>
+</Figure>

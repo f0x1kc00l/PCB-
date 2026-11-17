@@ -1,0 +1,143 @@
+---
+/**
+ * Карта курса на главной: модули по порядку, число уроков, суммарное время
+ * и прогресс по каждому модулю (заполняется на клиенте из localStorage).
+ */
+import { getCollection } from 'astro:content';
+import { modules } from '../../data/modules.mjs';
+import { lessonHref } from '../../lib/site';
+
+const docs = await getCollection('docs');
+
+const cards = modules.map((m) => {
+	const lessons = docs
+		.filter((d) => d.id.startsWith(`${m.dir}/`))
+		.sort((a, b) => (a.data.sidebar?.order ?? 0) - (b.data.sidebar?.order ?? 0));
+	const minutes = lessons.reduce((sum, l) => sum + (l.data.duration ?? 0), 0);
+	const ready = lessons.filter((l) => l.data.status === 'ready').length;
+	return {
+		...m,
+		count: lessons.length,
+		hours: Math.round((minutes / 60) * 10) / 10,
+		ready,
+		first: lessons[0] ? lessonHref(lessons[0].id) : undefined,
+		hrefs: lessons.map((l) => lessonHref(l.id)),
+	};
+});
+---
+
+<ol class="course-map not-content">
+	{
+		cards.map((c) => (
+			<li class="module" data-hrefs={JSON.stringify(c.hrefs)}>
+				<a href={c.first} class="module__link">
+					<span class="module__num">{c.n}</span>
+					<span class="module__body">
+						<span class="module__title">{c.label}</span>
+						<span class="module__summary">{c.summary}</span>
+						<span class="module__meta">
+							{c.count} ур. · ~{c.hours} ч{c.ready < c.count && <> · готово {c.ready} из {c.count}</>}
+						</span>
+						<span class="module__bar" aria-hidden="true">
+							<span data-fill />
+						</span>
+					</span>
+				</a>
+			</li>
+		))
+	}
+</ol>
+
+<script>
+	import { getProgress, normalizePath, onProgressChange } from '../../lib/progress';
+
+	function render() {
+		const done = getProgress();
+		document.querySelectorAll<HTMLElement>('.course-map .module').forEach((m) => {
+			const hrefs: string[] = JSON.parse(m.dataset.hrefs ?? '[]');
+			const n = hrefs.filter((h) => done[normalizePath(h)]).length;
+			const pct = hrefs.length ? (n / hrefs.length) * 100 : 0;
+			m.querySelector<HTMLElement>('[data-fill]')!.style.width = `${pct}%`;
+			m.classList.toggle('is-complete', hrefs.length > 0 && n === hrefs.length);
+		});
+	}
+	render();
+	onProgressChange(render);
+</script>
+
+<style>
+	.course-map {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+		gap: 0.75rem;
+		margin: 1.5rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	.module__link {
+		display: flex;
+		gap: 0.8rem;
+		height: 100%;
+		padding: 0.9rem 1rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: var(--pcb-radius);
+		color: inherit;
+		text-decoration: none;
+		transition:
+			border-color 0.15s ease,
+			transform 0.15s ease;
+	}
+	.module__link:hover {
+		border-color: var(--sl-color-accent);
+		transform: translateY(-1px);
+	}
+	.module__num {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 2.2rem;
+		height: 2.2rem;
+		border-radius: 0.4rem;
+		background: var(--sl-color-accent-low);
+		color: var(--sl-color-accent-high);
+		font-family: var(--pcb-mono);
+		font-weight: 700;
+	}
+	.is-complete .module__num {
+		background: var(--pcb-ok);
+		color: var(--sl-color-black);
+	}
+	.module__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-width: 0;
+		flex: 1;
+	}
+	.module__title {
+		font-weight: 650;
+		color: var(--sl-color-white);
+	}
+	.module__summary {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.module__meta {
+		margin-top: auto;
+		padding-top: 0.3rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.module__bar {
+		height: 0.25rem;
+		border-radius: 1rem;
+		background: var(--sl-color-gray-5);
+		overflow: hidden;
+	}
+	.module__bar span {
+		display: block;
+		width: 0;
+		height: 100%;
+		background: var(--sl-color-accent);
+	}
+</style>

@@ -1,0 +1,113 @@
+---
+/**
+ * Схема пути обучения: этапы курса стрелками слева направо.
+ * На узком экране переносится в столбик.
+ */
+const stages = [
+	{ n: '1–2', t: 'Электричество и компоненты', d: 'Закон Ома, R, C, диоды, транзисторы' },
+	{ n: '3', t: 'Схемотехника', d: 'Читаем схемы, считаем мультивибратор' },
+	{ n: '4–5', t: 'Печатная плата', d: 'Как устроена и как её проектируют' },
+	{ n: '6–7', t: 'Altium: первая плата', d: 'Мультивибратор от схемы до Gerber' },
+	{ n: '8–10', t: 'Библиотеки и производство', d: 'Свои компоненты, файлы, заказ' },
+	{ n: '11', t: 'Свои проекты', d: 'LDO, МК + USB, твоя идея' },
+];
+/** Необязательный модуль после основного пути. */
+const extra = { n: '12', t: 'ВЧ- и СВЧ-платы', d: 'Линии 50 Ом, согласование, антенны, LoRa-узел' };
+---
+
+<ol class="path not-content" aria-label="Путь обучения">
+	{
+		stages.map((s, i) => (
+			<li class:list={['stage', { 'stage--goal': i === stages.length - 1 }]}>
+				<span class="stage__n">Модули {s.n}</span>
+				<span class="stage__t">{s.t}</span>
+				<span class="stage__d">{s.d}</span>
+			</li>
+		))
+	}
+</ol>
+<p class="extra not-content">
+	<span class="extra__tag">Дополнительно</span>
+	<strong>Модуль {extra.n}. {extra.t}</strong> — {extra.d}. Для тех, кто дошёл до беспроводных проектов.
+</p>
+
+<style>
+	.extra {
+		margin-top: 0.9rem;
+		padding: 0.6rem 0.8rem;
+		border: 1px dashed var(--pcb-altium);
+		border-radius: 0.3rem;
+		font-size: var(--sl-text-sm);
+	}
+	.extra__tag {
+		margin-inline-end: 0.5rem;
+		padding: 0.05rem 0.4rem;
+		border-radius: 0.25rem;
+		background: var(--pcb-altium);
+		color: var(--sl-color-black);
+		font-size: var(--sl-text-xs);
+		font-weight: 700;
+	}
+	.path {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		gap: 1.4rem;
+		margin: 1.25rem 0 0;
+		padding: 0;
+		list-style: none;
+		counter-reset: stage;
+	}
+	@media (max-width: 60rem) {
+		.path {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+	@media (max-width: 36rem) {
+		.path {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+	}
+	.stage {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		padding: 0.7rem 0.8rem;
+		border-top: 3px solid var(--pcb-copper);
+		border-radius: 0.3rem;
+		background: var(--sl-color-gray-6);
+	}
+	/* Стрелка к следующему этапу — как дорожка на плате с переходным отверстием. */
+	.stage:not(:last-child)::after {
+		content: '';
+		position: absolute;
+		top: 1.2rem;
+		inset-inline-end: -1.25rem;
+		width: 1.1rem;
+		height: 3px;
+		background: var(--pcb-copper);
+	}
+	@media (max-width: 36rem) {
+		.stage:not(:last-child)::after {
+			display: none;
+		}
+	}
+	.stage--goal {
+		border-top-color: var(--pcb-ok);
+	}
+	.stage__n {
+		font-family: var(--pcb-mono);
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.stage__t {
+		font-weight: 650;
+		line-height: 1.25;
+		color: var(--sl-color-white);
+	}
+	.stage__d {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+	}
+</style>

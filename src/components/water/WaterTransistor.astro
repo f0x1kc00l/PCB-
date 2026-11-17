@@ -1,0 +1,236 @@
+---
+/**
+ * Транзистор как кран, которым управляет маленький поток (BJT) или давление на мембрану (MOSFET).
+ * NPN: Iк = β·Iб, пока не упрётся в нагрузку (насыщение) — Хоровиц §2.01–2.02.
+ * PNP: те же правила, полярности наоборот (§2.01): эмиттер у плюса, ток базы ВЫТЕКАЕТ.
+ * MOSFET: затвор — герметичная камера с поршнем; ток затвора течёт только пока поршень
+ * движется (заряд ёмкости затвора), в покое Iз = 0 — §3.01, §3.14.
+ *   <WaterTransistor mode="bjt" /> · mode="pnp" · mode="mosfet"
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+	mode?: 'bjt' | 'pnp' | 'mosfet';
+}
+const { n, mode = 'bjt' } = Astro.props;
+const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
+---
+
+<WaterFrame
+	tag="water-transistor"
+	n={n}
+	title="Транзистор: кран с гидроприводом"
+	map={[
+		['большая труба', 'цепь коллектор–эмиттер (сток–исток)'],
+		['малая труба / камера', 'база (затвор)'],
+		['задвижка', 'канал транзистора'],
+		['сужение', 'нагрузка Rк'],
+	]}
+	caption="NPN: малый поток в базу толкает лопатку и приподнимает задвижку — большой поток в β раз больше. Малый поток сливается в эмиттер: Iэ = Iк + Iб. PNP — зеркало: эмиттер у плюса, нагрузка внизу, а управляющий поток ВЫТЕКАЕТ из базы. MOSFET: затвор — глухая камера с поршнем, вода в неё входит только пока поршень движется (заряд ёмкости затвора)."
+>
+	<div class="water__btns" style="margin:0 0 .5rem">
+		<span class="water__seg" role="radiogroup" aria-label="Тип транзистора">
+			<label><input type="radio" name={uid} value="bjt" checked={mode === 'bjt'} /> NPN</label>
+			<label><input type="radio" name={uid} value="pnp" checked={mode === 'pnp'} /> PNP</label>
+			<label><input type="radio" name={uid} value="mosfet" checked={mode === 'mosfet'} /> N-MOSFET</label>
+		</span>
+	</div>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Вертикальная большая труба через нагрузку и задвижку; слева малая управляющая труба или камера с поршнем.">
+		<g stroke-width="14">
+			<polyline data-p="vcc" class="pipe" points="300,20 300,60" />
+			<line data-p="rc" class="pipe" x1="300" y1="60" x2="300" y2="110" />
+			<polyline data-p="c" class="pipe" points="300,110 300,150" />
+			<polyline data-p="e" class="pipe" points="300,190 300,222" />
+			<line data-p="rc2" class="pipe" x1="300" y1="222" x2="300" y2="256" />
+			<polyline data-p="gnd" class="pipe" points="300,256 300,280" />
+		</g>
+		<text class="ts" x="316" y="28">+Uпит (насос)</text>
+		<text class="ts" x="316" y="292">земля</text>
+		<text class="t" data-lt1 x="316" y="90">Rк — нагрузка</text>
+		<text class="t" data-lt2 x="316" y="140">коллектор</text>
+		<text class="t" data-lt3 x="316" y="214">эмиттер</text>
+		<text class="t" data-lt4 x="316" y="244"></text>
+		<rect x="270" y="150" width="60" height="40" rx="5" class="wall" />
+		<rect data-gate x="276" y="150" width="48" height="40" fill="var(--sl-color-accent)" opacity="0.85" />
+		<!-- NPN: малая труба втекает в базу и сливается в эмиттер -->
+		<g data-npn>
+			<polyline data-p="b" class="pipe" stroke-width="5" points="60,170 270,170 290,170 290,200 300,210" />
+			<text class="t" x="60" y="138">база: поток В базу Iб</text>
+		</g>
+		<!-- PNP: малая труба выходит из эмиттерной части и вытекает из базы -->
+		<g data-pnp>
+			<polyline data-p="bp" class="pipe" stroke-width="5" points="300,120 284,130 284,170 270,170 60,170" />
+			<text class="t" x="60" y="138">база: поток ИЗ базы Iб</text>
+		</g>
+		<g data-paddle><path d="M240 158V182" stroke="var(--sl-color-accent)" stroke-width="4" /></g>
+		<!-- MOSFET: камера с поршнем -->
+		<g data-mos>
+			<polyline data-p="g" class="pipe" stroke-width="5" points="60,170 160,170" />
+			<rect x="160" y="150" width="90" height="40" rx="4" class="wall" />
+			<rect data-gw x="161" y="151" width="0" height="38" fill="var(--water-hi)" opacity="0.4" />
+			<rect data-pist x="161" y="151" width="6" height="38" fill="var(--sl-color-accent)" />
+			<line data-rod x1="167" y1="170" x2="270" y2="170" class="ln" stroke-width="3" />
+			<text class="t" x="60" y="138">затвор: давление Uзи</text>
+			<text class="ts" x="205" y="210" text-anchor="middle">камера глухая — вода не проходит</text>
+		</g>
+		<g data-d></g>
+		<g transform="translate(470 40)">
+			<text class="th" data-mode x="0" y="0"></text>
+			<text class="t tm" data-l1 x="0" y="30"></text>
+			<text class="t tm" data-l2 x="0" y="52"></text>
+			<text class="t tm" data-l3 x="0" y="74"></text>
+			<rect x="0" y="100" width="180" height="12" class="wall" />
+			<rect data-bar x="1" y="101" width="0" height="10" fill="var(--sl-color-accent)" />
+			<text class="ts" x="0" y="128">ток нагрузки: от 0 до Uпит/Rк</text>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row" data-rowb><span>Ток базы Iб</span><input type="range" data-ib min="0" max="1" step="0.01" value="0.2" /><output data-ibv></output></label>
+		<label class="water__row" data-rowg><span>Напряжение затвор–исток Uзи</span><input type="range" data-vg min="0" max="5" step="0.05" value="1" /><output data-vgv></output></label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, si, $ } from '../../lib/water';
+
+	const VCC = 5,
+		RC = 100,
+		BETA = 100,
+		VTH = 1.5,
+		KN = 0.2,
+		ICMAX = VCC / RC;
+	class WaterTransistor extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			let mode = (r.querySelector('input[type=radio]:checked') as HTMLInputElement).value,
+				Ib = 0.2e-3,
+				Vg = 1,
+				Vgs = 1,
+				Ic = 0,
+				Igate = 0;
+			const g = $(r, '[data-d]');
+			const big = new Drops(g, new Path([[300, 20], [300, 280]]), 15);
+			const sNpn = new Drops(g, new Path([[60, 170], [290, 170], [290, 200], [300, 210], [300, 280]]), 18, 1.8);
+			const sPnp = new Drops(g, new Path([[300, 120], [284, 130], [284, 170], [60, 170]]), 18, 1.8);
+			const gate = new Drops(g, new Path([[60, 170], [160, 170]]), 14, 1.8);
+			const P = (k: string) => $(r, `[data-p="${k}"]`);
+			const vis = (sel: string, on: boolean) => (($(r, sel) as SVGElement).style.display = on ? '' : 'none');
+			const show = () => {
+				const npn = mode === 'bjt',
+					pnp = mode === 'pnp',
+					mos = mode === 'mosfet';
+				vis('[data-npn]', npn);
+				vis('[data-pnp]', pnp);
+				vis('[data-mos]', mos);
+				vis('[data-paddle]', !mos);
+				vis('[data-p="rc2"]', true);
+				(r.querySelector('[data-rowb]') as HTMLElement).style.display = mos ? 'none' : '';
+				(r.querySelector('[data-rowg]') as HTMLElement).style.display = mos ? '' : 'none';
+				sNpn.hide(!npn);
+				sPnp.hide(!pnp);
+				gate.hide(!mos);
+				// у PNP нагрузка внизу (между коллектором и землёй), у NPN и N-MOSFET — сверху
+				P('rc').setAttribute('stroke-width', pnp ? '14' : '5');
+				P('rc2').setAttribute('stroke-width', pnp ? '5' : '14');
+				const L = pnp
+					? ['эмиттер (Э) — у плюса', '', 'коллектор (К)', 'Rк — нагрузка']
+					: mos
+						? ['Rк — нагрузка', 'сток (D)', 'исток (S)', '']
+						: ['Rк — нагрузка', 'коллектор (К)', 'эмиттер (Э)', ''];
+				['[data-lt1]', '[data-lt2]', '[data-lt3]', '[data-lt4]'].forEach((s, i) => ($(r, s).textContent = L[i]));
+			};
+			show();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-ib]')) Ib = +t.value * 1e-3;
+				if (t.matches('[data-vg]')) Vg = +t.value;
+				if (t.type === 'radio') {
+					mode = t.value;
+					show();
+				}
+			});
+			animate(r, (dt) => {
+				let open: number, state: string, l1: string, l2: string, l3: string, note: string;
+				if (mode !== 'mosfet') {
+					const pnp = mode === 'pnp';
+					const want = BETA * Ib;
+					Ic = Math.min(want, ICMAX);
+					const sat = want >= ICMAX * 0.98;
+					open = Ic / ICMAX;
+					state = Ib < 1e-6 ? 'отсечка (закрыт)' : sat ? 'насыщение (открыт)' : 'активный режим';
+					l1 = `Iб = ${si(Ib, 'А')} ${pnp ? '(вытекает)' : '(втекает)'}`;
+					l2 = `β·Iб = ${si(want, 'А')}`;
+					l3 = `Iк = ${si(Ic, 'А')}, Iэ = ${si(Ic + Ib, 'А')}`;
+					note = sat
+						? `Задвижка открыта полностью, а Iк больше не растёт: его ограничивает нагрузка (${VCC} В / ${RC} Ом = ${si(ICMAX, 'А')}). Это насыщение — так работает ключ. Хоровиц советует давать Iб с запасом.`
+						: Ib < 1e-6
+							? pnp
+								? 'База PNP подтянута к плюсу — из неё ничего не вытекает, транзистор закрыт.'
+								: 'Нет потока в базу — задвижка закрыта, ток коллектора ноль.'
+							: pnp
+								? 'У PNP всё зеркально: эмиттер у плюса, база должна быть на ~0,7 В НИЖЕ эмиттера, и ток из базы вытекает. Iк = β·Iб, как у NPN.'
+								: `Iк = β·Iб: малый поток управляет в ${BETA} раз большим. Но β у реальных транзисторов гуляет от 50 до 500 — на него нельзя полагаться в точных схемах.`;
+					$(r, '[data-paddle]').setAttribute('transform', `translate(${(40 * Math.min(1, Ib / 0.5e-3)).toFixed(1)} 0)`);
+					const v = Math.min(80, 160 * (Ib / 1e-3)) * dt;
+					if (pnp) sPnp.step(v);
+					else sNpn.step(v);
+				} else {
+					const tauG = 0.25;
+					const prev = Vgs;
+					Vgs = Vg + (Vgs - Vg) * Math.exp(-dt / tauG);
+					Igate = dt > 0 ? (Vgs - prev) / dt : 0;
+					const idw = Vgs > VTH ? KN * (Vgs - VTH) ** 2 : 0;
+					Ic = Math.min(idw, ICMAX);
+					open = Ic / ICMAX;
+					state = Vgs < VTH ? 'закрыт (Uзи < Uпор)' : idw >= ICMAX ? 'открыт полностью' : 'приоткрыт';
+					l1 = `Uзи = ${fm(Vgs, 2)} В, Uпор = ${fm(VTH, 1)} В`;
+					l2 = `Iз = ${Math.abs(Igate) > 0.02 ? 'течёт (идёт заряд)' : '0'}`;
+					l3 = `Iс = ${si(Ic, 'А')}`;
+					note =
+						Math.abs(Igate) > 0.02
+							? 'Поршень едет — в камеру затекает вода: это ток заряда ёмкости затвора. Поэтому драйверу MOSFET нужен импульсный ток, а между ним и затвором ставят резистор.'
+							: Vgs < VTH
+								? 'Давление на поршень меньше порогового — задвижка закрыта.'
+								: 'Поршень стоит — ток в затвор не течёт вообще, а большой поток идёт. Управление давлением без расхода — главное отличие от BJT.';
+					const px = 61 + (80 * Math.min(Vgs, 5)) / 5;
+					$(r, '[data-pist]').setAttribute('x', px.toFixed(1));
+					$(r, '[data-gw]').setAttribute('width', (px - 61).toFixed(1));
+					$(r, '[data-rod]').setAttribute('x1', (px + 6).toFixed(1));
+					gate.step(Math.max(-150, Math.min(150, 60 * Igate)) * dt);
+				}
+				$(r, '[data-gate]').setAttribute('x', String(276 + 44 * open));
+				$(r, '[data-gate]').setAttribute('width', String(48 - 44 * open));
+				big.step(100 * open * dt);
+				$(r, '[data-bar]').setAttribute('width', (178 * open).toFixed(1));
+				$(r, '[data-mode]').textContent = state;
+				$(r, '[data-l1]').textContent = l1;
+				$(r, '[data-l2]').textContent = l2;
+				$(r, '[data-l3]').textContent = l3;
+				$(r, '[data-ibv]').textContent = si(Ib, 'А');
+				$(r, '[data-vgv]').textContent = fm(Vg, 2) + ' В';
+				const drop = Ic * RC; // падение на нагрузке
+				if (mode === 'pnp') {
+					const uk = drop; // потенциал коллектора = падение на нагрузке над землёй
+					paint([P('vcc'), P('rc'), P('c')], 1);
+					paint([P('e')], uk / VCC);
+					paint([P('rc2')], uk / VCC / 2);
+					paint([P('gnd')], 0);
+					paint([P('bp')], 0.5);
+					$(r, '[data-fx]').textContent = `Uэк ${VCC - uk < 0.05 ? '≈ 0 В' : '= ' + fm(VCC - uk, 2) + ' В'} · на нагрузке ${fm(uk, 2)} В`;
+				} else {
+					const uc = VCC - drop;
+					paint([P('vcc')], 1);
+					paint([P('rc')], (1 + uc / VCC) / 2);
+					paint([P('c')], uc / VCC);
+					paint([P('e'), P('rc2'), P('gnd')], 0);
+					paint([P('b'), P('g')], mode === 'bjt' ? 0.3 : Vg / 5);
+					$(r, '[data-fx]').textContent = `${mode === 'bjt' ? 'Uкэ' : 'Uси'} ${uc < 0.05 ? '≈ 0 В (у реального ключа — Uкэ.нас ≈ 0,1–0,3 В или Iс·Rси.отк)' : '= ' + fm(uc, 2) + ' В'}`;
+				}
+				$(r, '[data-fx2]').textContent = note;
+			});
+		}
+	}
+	customElements.define('water-transistor', WaterTransistor);
+</script>

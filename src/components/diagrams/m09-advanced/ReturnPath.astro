@@ -1,0 +1,45 @@
+---
+/** Рис. 9.1: путь обратного тока по сплошному полигону земли — на постоянном токе и на высокой частоте. */
+import Figure from '../Figure.astro';
+
+/** Одна панель: вид сверху на плату со сплошной землёй. ox — сдвиг панели. */
+const panel = (ox: number) => ({
+	board: `M${ox + 10} 30 H${ox + 300} V230 H${ox + 10} Z`,
+	trace: `M${ox + 70} 190 H${ox + 240} V80`,
+});
+const a = panel(0);
+const b = panel(340);
+---
+
+<Figure n="9.1" caption="Сигнал идёт по дорожке (оранжевая линия), а обратный ток возвращается к источнику по сплошному слою земли (пунктир). На постоянном токе он выбирает путь с наименьшим сопротивлением — напрямик. На высоких частотах — путь с наименьшей индуктивностью, то есть прямо под дорожкой, повторяя её форму. Разрез в земле под дорожкой ломает этот путь.">
+	<svg viewBox="0 0 660 270" role="img" aria-label="Две панели: плата со слоем земли, дорожка от источника к приёмнику. Слева обратный ток идёт по прямой, справа — под дорожкой.">
+		<!-- ===== Постоянный ток ===== -->
+		<text class="t" x="10" y="18" font-weight="700">Постоянный ток: напрямик</text>
+		<path d={a.board} fill="var(--pcb-mask)" opacity="0.25" />
+		<path d={a.board} class="ln-thin" />
+		<text class="t t-s t-mut" x="290" y="222" text-anchor="end">слой GND</text>
+		<rect x="30" y="175" width="40" height="30" rx="3" class="ln" />
+		<text class="t t-s" x="50" y="194" text-anchor="middle">TX</text>
+		<rect x="220" y="50" width="40" height="30" rx="3" class="ln" />
+		<text class="t t-s" x="240" y="69" text-anchor="middle">RX</text>
+		<path d={a.trace} class="ln-acc" />
+		<path d="M226 80 L64 176" class="ln-dash" stroke="var(--pcb-altium)" style="opacity:1;stroke:var(--pcb-altium);stroke-width:2" />
+		<path d="M80 166 L68 174 L82 176" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
+		<text class="t t-s" x="110" y="118" fill="var(--pcb-altium)">обратный ток</text>
+
+		<!-- ===== Высокая частота ===== -->
+		<text class="t" x="350" y="18" font-weight="700">Высокая частота: под дорожкой</text>
+		<path d={b.board} fill="var(--pcb-mask)" opacity="0.25" />
+		<path d={b.board} class="ln-thin" />
+		<text class="t t-s t-mut" x="630" y="222" text-anchor="end">слой GND</text>
+		<rect x="370" y="175" width="40" height="30" rx="3" class="ln" />
+		<text class="t t-s" x="390" y="194" text-anchor="middle">TX</text>
+		<rect x="560" y="50" width="40" height="30" rx="3" class="ln" />
+		<text class="t t-s" x="580" y="69" text-anchor="middle">RX</text>
+		<path d={b.trace} class="ln-acc" />
+		<path d="M590 82 V200 H410" fill="none" stroke="var(--pcb-altium)" stroke-width="2" stroke-dasharray="5 4" />
+		<path d="M424 194 L410 200 L424 206" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
+		<text class="t t-s" x="470" y="222" fill="var(--pcb-altium)">обратный ток</text>
+		<text class="t t-acc t-s" x="470" y="182">сигнал</text>
+	</svg>
+</Figure>

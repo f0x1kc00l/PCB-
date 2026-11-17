@@ -1,0 +1,38 @@
+---
+/**
+ * Рис. 4.5 (урок 4.4): гарантийный поясок (annular ring), вид сверху.
+ * Слева — отверстие по центру, справа — сверло ушло в сторону, поясок порван.
+ */
+import Figure from '../Figure.astro';
+
+const CU = 'var(--pcb-copper)';
+const BG = 'var(--sl-color-bg)';
+---
+
+<Figure n="4.5" caption="Поясок — медное кольцо между краем отверстия и краем площадки, его ширина равна (D − d) / 2. Сверло всегда немного уходит от центра, поэтому поясок закладывают с запасом. Если запаса не хватило, отверстие «выкусывает» край площадки (breakout), и соединение с дорожкой может оборваться.">
+	<svg viewBox="0 0 640 240" role="img" aria-label="Слева площадка с отверстием по центру и размерами D и d, поясок отмечен. Справа то же отверстие смещено и выходит за край площадки.">
+		<!-- ===== Нормально ===== -->
+		<text class="t" x="20" y="18" font-weight="700">Отверстие по центру</text>
+		<rect x="40" y="114" width="70" height="16" fill={CU} />
+		<circle cx="150" cy="122" r="62" fill={CU} />
+		<circle cx="150" cy="122" r="30" fill={BG} />
+		<!-- размеры -->
+		<path class="ln" d="M88 210 H212 M88 204 V216 M212 204 V216" />
+		<text class="t t-s" x="150" y="230" text-anchor="middle">D — диаметр площадки</text>
+		<path class="ln" d="M120 122 H180 M120 116 V128 M180 116 V128" />
+		<text class="t t-s" x="150" y="114" text-anchor="middle">d</text>
+		<path class="ln-acc" d="M180 80 H212 M186 75 L180 80 L186 85 M206 75 L212 80 L206 85" />
+		<text class="t t-s t-acc" x="230" y="70">поясок =</text>
+		<text class="t t-s t-acc" x="230" y="86">(D − d) / 2</text>
+
+		<!-- ===== Смещение ===== -->
+		<text class="t" x="340" y="18" font-weight="700">Сверло ушло в сторону</text>
+		<rect x="340" y="114" width="70" height="16" fill={CU} />
+		<circle cx="450" cy="122" r="62" fill={CU} />
+		<circle cx="490" cy="104" r="30" fill={BG} stroke="var(--pcb-bad)" stroke-width="2" />
+		<path class="ln-dash" d="M450 60 V184 M388 122 H512" />
+		<text class="t t-s" x="530" y="72" fill="var(--pcb-bad)">разрыв пояска</text>
+		<text class="t t-s" x="530" y="88" fill="var(--pcb-bad)">(breakout)</text>
+		<text class="t t-s t-mut" x="450" y="216" text-anchor="middle">пунктир — центр площадки</text>
+	</svg>
+</Figure>

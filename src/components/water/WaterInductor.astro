@@ -1,0 +1,185 @@
+---
+/**
+ * Катушка = тяжёлое колесо-маховик в трубе. Его трудно раскрутить и трудно остановить:
+ * U = L·dI/dt (Хоровиц §1.16). Резко закрыть кран — гидроудар (индуктивный выброс, §1.31).
+ * Обратный клапан в обход колеса = защитный диод.
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-inductor"
+	n={n}
+	title="Катушка: тяжёлое колесо в трубе"
+	map={[
+		['масса колеса', 'индуктивность L'],
+		['скорость колеса', 'ток I'],
+		['давление, которое колесо создаёт при разгоне/торможении', 'U = L·dI/dt'],
+		['гидроудар', 'индуктивный выброс'],
+		['обходной обратный клапан', 'защитный диод'],
+	]}
+	caption="Открой кран — колесо раскручивается не сразу, расход растёт по экспоненте с τ = L/R. Закрой кран без обходного клапана — разогнанная вода врезается в кран: давление на нём подскакивает в сотни раз (гидроудар). Включи обратный клапан — вода спокойно кружит через него, пока колесо не остановится."
+>
+	<svg viewBox="0 0 680 300" role="img" aria-label="Насос, кран, сужение R и тяжёлое колесо-маховик в трубе, параллельно колесу обходная труба с обратным клапаном. Справа осциллограмма тока и напряжения на катушке.">
+		<g stroke-width="12">
+			<polyline data-p="hi" class="pipe" points="60,128 60,50 120,50" />
+			<line data-p="valve" class="pipe" x1="120" y1="50" x2="150" y2="50" />
+			<polyline data-p="a" class="pipe" points="150,50 300,50 300,112" />
+			<line data-p="r" class="pipe" x1="300" y1="188" x2="300" y2="220" />
+			<polyline data-p="lo" class="pipe" points="300,220 300,250 60,250 60,152" />
+			<g data-byp>
+				<polyline data-p="bp" class="pipe" points="300,80 350,80 350,205 300,205" stroke-width="7" />
+			</g>
+		</g>
+		<path data-valve d="M120 38L135 50L120 62ZM150 38L135 50L150 62Z" class="ln" />
+		<text class="ts" x="135" y="80" text-anchor="middle">кран</text>
+		<!-- обратный клапан на обходе: треугольник вниз -->
+		<g data-bypv><path d="M340 150L360 150L350 134Z M340 134H360" class="ln" /><text class="ts" x="368" y="146">обратный клапан</text></g>
+		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
+		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
+		<text class="ts" x="88" y="144">насос U</text>
+		<!-- колесо-маховик -->
+		<circle cx="300" cy="150" r="38" fill="var(--water-wall)" fill-opacity="0.15" class="wall" />
+		<g data-wheel>
+			<circle cx="300" cy="150" r="30" fill="none" stroke="currentColor" stroke-width="6" />
+			<path d="M300 120V180M270 150H330M279 129L321 171M321 129L279 171" class="ln" />
+		</g>
+		<text class="t" x="248" y="154" text-anchor="end">L</text>
+		<text class="t" x="284" y="210" text-anchor="end">R</text>
+		<text data-boom x="135" y="28" text-anchor="middle" class="th" fill="var(--water-danger)" style="fill:var(--water-danger)"></text>
+		<g data-d></g>
+		<g transform="translate(420 50)">
+			<rect width="240" height="200" class="grid" />
+			<path d="M0 100H240M60 0V200M120 0V200M180 0V200" class="grid" opacity="0.5" />
+			<polyline data-ti class="tr-i" />
+			<polyline data-tu class="tr-u" />
+			<text class="ts" x="4" y="-6" fill="var(--sl-color-accent)">I (оранжевая)</text>
+			<text class="ts" x="236" y="-6" text-anchor="end">UL (синяя)</text>
+			<text class="ts" x="120" y="218" text-anchor="middle">время → (замедлено в 500 раз)</text>
+		</g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Масса колеса L</span><input type="range" data-l min="10" max="100" step="5" value="50" /><output data-lv></output></label>
+	</div>
+	<div class="water__btns">
+		<button type="button" data-sb aria-pressed="false">Открыть кран</button>
+		<label class="water__check"><input type="checkbox" data-dd /> обратный клапан (диод)</label>
+	</div>
+	<p class="water__readout" data-fx></p>
+	<p class="water__note" data-fx2></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, si, Scope, $ } from '../../lib/water';
+
+	class WaterInductor extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			const U = 12,
+				R = 10,
+				SLOW = 500,
+				RARC = 1000;
+			let L = 0.05,
+				I = 0,
+				UL = 0,
+				open = false,
+				diode = false,
+				ang = 0,
+				wang = 0,
+				peak = 0,
+				boomT = 0;
+			const g = $(r, '[data-d]');
+			const main = new Drops(g, new Path([[60, 140], [60, 50], [300, 50], [300, 250], [60, 250], [60, 140]]), 15);
+			const loop = new Drops(g, new Path([[300, 80], [300, 205], [350, 205], [350, 80], [300, 80]]), 13);
+			loop.hide(true);
+			const sc = new Scope([$(r, '[data-ti]'), $(r, '[data-tu]')], { x: 0, y: 0, w: 240, h: 200 }, 240);
+			const P = (k: string) => $(r, `[data-p="${k}"]`);
+			const upd = () => {
+				$(r, '[data-lv]').textContent = si(L, 'Гн');
+				const b = $(r, '[data-sb]');
+				b.textContent = open ? 'Закрыть кран' : 'Открыть кран';
+				b.setAttribute('aria-pressed', String(open));
+				($(r, '[data-byp]') as SVGGElement).style.display = diode ? '' : 'none';
+				($(r, '[data-bypv]') as SVGGElement).style.display = diode ? '' : 'none';
+				P('valve').style.display = open ? '' : 'none';
+				$(r, '[data-valve]').setAttribute('fill', open ? 'none' : 'currentColor');
+			};
+			upd();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-l]')) L = +t.value * 1e-3;
+				if (t.matches('[data-dd]')) diode = t.checked;
+				upd();
+			});
+			$(r, '[data-sb]').addEventListener('click', () => {
+				open = !open;
+				peak = 0;
+				upd();
+			});
+			let acc = 0;
+			animate(r, (dtv) => {
+				// физическое время = видимое / SLOW; интегрируем мелкими шагами
+				const T = dtv / SLOW;
+				const N = 200;
+				const h = T / N;
+				let ulMax = 0;
+				let viaDiode = false;
+				for (let i = 0; i < N; i++) {
+					let ul: number;
+					if (open) ul = U - I * R;
+					else if (diode && I > 0) {
+						ul = -(0.7 + I * R * 0.5);
+						viaDiode = true;
+					} else ul = -I * RARC; // дуга на контактах крана
+					I += (ul / L) * h;
+					if (I < 1e-6 && !open) I = 0;
+					if (Math.abs(ul) > Math.abs(ulMax)) ulMax = ul;
+				}
+				UL = T > 0 ? ulMax : open ? U - I * R : 0;
+				if (!open && !diode && Math.abs(UL) > 50) {
+					peak = Math.max(peak, Math.abs(UL));
+					boomT = 1.2;
+				}
+				boomT = Math.max(0, boomT - dtv);
+				$(r, '[data-boom]').textContent = boomT > 0 ? `ГИДРОУДАР! ~${fm(peak, 0)} В` : '';
+				const k = 120;
+				if (viaDiode) {
+					loop.hide(false);
+					loop.step(k * I * dtv);
+				} else {
+					loop.hide(true);
+					main.step(k * I * dtv);
+				}
+				wang += 500 * I * dtv;
+				ang += open ? 500 * I * dtv : 0;
+				$(r, '[data-wheel]').setAttribute('transform', `rotate(${wang.toFixed(1)} 300 150)`);
+				$(r, '[data-imp]').setAttribute('transform', `rotate(${ang.toFixed(1)} 60 140)`);
+				paint([P('hi')], 1);
+				paint([P('a')], open ? 1 : boomT > 0 ? 1 : 0);
+				paint([P('lo'), P('bp')], 0);
+				paint([P('r')], open ? (I * R) / U / 2 : 0);
+				paint([P('valve')], open ? 1 : 0.5);
+				acc += dtv;
+				while (acc >= 1 / 60) {
+					acc -= 1 / 60;
+					sc.push([I / (U / R), Math.max(-1.05, UL / U)]);
+				}
+				sc.draw([true, false]);
+				const tau = L / R;
+				$(r, '[data-fx]').textContent = `τ = L/R = ${si(L, 'Гн')} / ${R} Ом = ${si(tau, 'с')} · I = ${si(I, 'А')} · UL = ${fm(UL, 1)} В`;
+				$(r, '[data-fx2]').textContent = open
+					? 'Разгон: UL = L·dI/dt «съедает» часть давления насоса, пока колесо не раскрутится.'
+					: diode
+						? 'Ток катушки замкнулся через диод: на катушке всего несколько вольт (0,7 В диода плюс падение на сопротивлении обмотки) вместо сотен, а энергия L·I²/2 спокойно уходит в тепло.'
+						: peak > 0
+							? `Без диода ток пришлось оборвать за доли микросекунды: UL = −L·dI/dt ≈ ${fm(peak, 0)} В — искра, сгоревший транзистор. Синяя линия улетела за экран.`
+							: 'Кран закрыт, колесо стоит.';
+			});
+		}
+	}
+	customElements.define('water-inductor', WaterInductor);
+</script>

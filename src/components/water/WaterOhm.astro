@@ -1,0 +1,164 @@
+---
+/**
+ * Закон Ома: водяной контур рядом с электрическим, оба анимированы.
+ * Насос ↔ батарейка, сужение ↔ резистор, кран ↔ ключ.
+ * Слайдеры U и R, кнопка «разомкнуть». Цвет трубы — давление (потенциал).
+ *   <WaterOhm n="1.2а" />
+ */
+import WaterFrame from './WaterFrame.astro';
+interface Props {
+	n?: string;
+}
+const { n } = Astro.props;
+---
+
+<WaterFrame
+	tag="water-ohm"
+	n={n}
+	title="Закон Ома: вода и электричество"
+	map={[
+		['насос', 'источник ЭДС'],
+		['давление', 'потенциал / напряжение U'],
+		['расход, л/с', 'ток I'],
+		['сужение', 'резистор R'],
+		['кран', 'ключ'],
+	]}
+	caption="Цвет трубы — давление: тёмный — высокое, бледный — низкое. Всё давление насоса «теряется» на сужении — так же всё напряжение батарейки падает на резисторе. Закрой кран: расход ноль, но давление никуда не делось, теперь оно целиком приложено к крану (а напряжение — к разомкнутому ключу)."
+>
+	<svg viewBox="0 0 680 290" role="img" aria-label="Слева водяной контур: насос, труба, сужение, кран. Справа электрическая цепь: батарейка, резистор, ключ. Капли бегут со скоростью, пропорциональной току.">
+		<text class="th" x="175" y="22" text-anchor="middle">Вода</text>
+		<text class="th" x="505" y="22" text-anchor="middle">Электричество</text>
+		<!-- вода -->
+		<g stroke-width="12" class="pipe">
+			<polyline data-w="hi" class="pipe" points="60,122 60,50 290,50 290,106" />
+			<line data-w="mid" class="pipe" x1="290" y1="106" x2="290" y2="174" />
+			<polyline data-w="out" class="pipe" points="290,174 290,230 190,230" />
+			<line data-w="valve" class="pipe" x1="190" y1="230" x2="160" y2="230" />
+			<polyline data-w="lo" class="pipe" points="160,230 60,230 60,158" />
+		</g>
+		<path data-valve d="M160 218L175 230L160 242ZM190 218L175 230L190 242Z" class="ln" />
+		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
+		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
+		<!-- электричество -->
+		<g stroke-width="5">
+			<polyline data-e="hi" class="wire" points="390,132 390,50 620,50 620,110" />
+			<polyline data-e="out" class="wire" points="620,170 620,230 520,230" />
+			<polyline data-e="lo" class="wire" points="490,230 390,230 390,148" />
+		</g>
+		<path class="ln" d="M376 132H404" stroke-width="2" />
+		<path class="ln" d="M383 148H397" stroke-width="5" />
+		<text class="ts" x="368" y="136" text-anchor="end">+</text>
+		<text class="ts" x="368" y="153" text-anchor="end">−</text>
+		<rect data-res x="611" y="110" width="18" height="60" fill="var(--elec-hi)" class="ln" />
+		<circle cx="490" cy="230" r="3" class="edot" />
+		<circle cx="520" cy="230" r="3" class="edot" />
+		<line data-sw x1="490" y1="230" x2="520" y2="230" class="ln" stroke-width="2.5" />
+		<text class="ts" x="88" y="144">насос</text>
+		<text class="ts" x="276" y="144" text-anchor="end">сужение</text>
+		<text class="ts" x="175" y="262" text-anchor="middle">кран</text>
+		<text class="ts" x="414" y="144">батарейка</text>
+		<text class="ts" x="600" y="144" text-anchor="end">резистор</text>
+		<text class="ts" x="505" y="262" text-anchor="middle">ключ</text>
+		<!-- манометры: столбик = давление относительно нижней трубы -->
+		<g class="ts">
+			<rect x="306" y="60" width="8" height="160" class="wall" />
+			<rect data-gauge x="307" y="60" width="6" height="0" fill="var(--water-hi)" />
+			<text x="322" y="66">p</text>
+		</g>
+		<g data-dw></g>
+		<g data-de></g>
+	</svg>
+	<div class="water__controls">
+		<label class="water__row"><span>Давление насоса = напряжение U</span><input type="range" data-u min="0" max="12" step="0.5" value="6" /><output data-uv>6 В</output></label>
+		<label class="water__row"><span>Сужение = сопротивление R</span><input type="range" data-r min="1" max="20" step="1" value="3" /><output data-rv>3 Ом</output></label>
+	</div>
+	<div class="water__btns">
+		<button type="button" data-sb aria-pressed="false">Закрыть кран (разомкнуть ключ)</button>
+	</div>
+	<p class="water__readout" data-fx>I = U / R</p>
+	<p class="water__note" data-pw></p>
+</WaterFrame>
+
+<script>
+	import { Path, Drops, animate, paint, fm, $ } from '../../lib/water';
+
+	class WaterOhm extends HTMLElement {
+		connectedCallback() {
+			const r = this;
+			let U = 6,
+				R = 3,
+				closed = true,
+				ang = 0;
+			const loop = new Path([
+				[60, 140],
+				[60, 50],
+				[290, 50],
+				[290, 230],
+				[60, 230],
+				[60, 140],
+			]);
+			const dw = new Drops($(r, '[data-dw]'), loop, 15.5);
+			const de = new Drops($(r, '[data-de]'), loop, 15.5, 2.4, 'edot', 330);
+			const W = (k: string) => $(r, `[data-w="${k}"]`);
+			const E = (k: string) => $(r, `[data-e="${k}"]`);
+			const upd = () => {
+				const I = closed ? U / R : 0;
+				const on = U > 0 ? 1 : 0;
+				$(r, '[data-uv]').textContent = fm(U, 1) + ' В';
+				$(r, '[data-rv]').textContent = R + ' Ом';
+				paint([W('hi')], on);
+				paint([E('hi')], on, 'elec');
+				paint([W('lo'), W('valve')], 0);
+				paint([E('lo')], 0, 'elec');
+				// за сужением давление низкое, если кран открыт; если закрыт — высокое до самого крана
+				paint([W('out')], closed ? 0 : on);
+				paint([E('out')], closed ? 0 : on, 'elec');
+				paint([W('mid')], closed ? 0.5 * on : on);
+				$(r, '[data-w="mid"]').setAttribute('stroke-width', Math.max(2, 10 / Math.sqrt(R)).toFixed(1));
+				W('valve').style.display = closed ? '' : 'none';
+				$(r, '[data-valve]').setAttribute('fill', closed ? 'none' : 'currentColor');
+				const sw = $(r, '[data-sw]');
+				sw.setAttribute('x2', closed ? '520' : '514');
+				sw.setAttribute('y2', closed ? '230' : '212');
+				const P = U * I;
+				$(r, '[data-res]').setAttribute('fill-opacity', (0.08 + 0.92 * Math.sqrt(P / 144)).toFixed(2));
+				const g = $(r, '[data-gauge]');
+				const h = (160 * U) / 12;
+				g.setAttribute('y', String(220 - h));
+				g.setAttribute('height', String(h));
+				const b = $(r, '[data-sb]');
+				b.textContent = closed ? 'Закрыть кран (разомкнуть ключ)' : 'Открыть кран (замкнуть ключ)';
+				b.setAttribute('aria-pressed', String(!closed));
+				const Is = I < 1 ? fm(I, 3) : fm(I, 2);
+				$(r, '[data-fx]').textContent = closed
+					? `I = U / R = ${fm(U, 1)} / ${R} = ${Is} А`
+					: 'I = 0 — цепь разомкнута';
+				$(r, '[data-pw]').textContent =
+					U === 0
+						? 'U = 0 — разности давлений нет, толкать воду нечему.'
+						: closed
+							? `P = U · I = ${fm(P, 1)} Вт уходит в тепло на резисторе (вода греется трением в сужении).`
+							: `Тока нет, но напряжение осталось: все ${fm(U, 1)} В приложены к разрыву.`;
+				return I;
+			};
+			let I = upd();
+			r.addEventListener('input', (e) => {
+				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-u]')) U = +t.value;
+				if (t.matches('[data-r]')) R = +t.value;
+				I = upd();
+			});
+			$(r, '[data-sb]').addEventListener('click', () => {
+				closed = !closed;
+				I = upd();
+			});
+			animate(r, (dt) => {
+				dw.step(16 * I * dt);
+				de.step(16 * I * dt);
+				ang += 40 * I * dt;
+				$(r, '[data-imp]').setAttribute('transform', `rotate(${ang.toFixed(1)} 60 140)`);
+			});
+		}
+	}
+	customElements.define('water-ohm', WaterOhm);
+</script>
