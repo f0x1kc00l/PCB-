@@ -64,6 +64,7 @@ const counts = Object.fromEntries(decks.map(([k]) => [k, data.filter((c) => c.d 
 </flash-cards>
 
 <script>
+	import '../../lib/reset';
 	type Card = { id: string; d: string; f: string; b: string };
 	const KEY = 'pcb-course:cards:v1';
 	const DKEY = 'pcb-course:cards-deck:v1';

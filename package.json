@@ -2,7 +2,7 @@
   "name": "pcb-course",
   "description": "Сайт-учебник: схемотехника с нуля по плану «Искусства схемотехники» Хоровица и Хилла",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=22.23.4"
