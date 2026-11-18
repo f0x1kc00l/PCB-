@@ -3,21 +3,21 @@
 import Figure from './Figure.astro';
 ---
 
-<Figure n="1.1" caption="Разность уровней воды толкает воду по трубе, сужение ограничивает расход. Так же напряжение толкает заряды через проводник, а резистор ограничивает ток.">
+<Figure n={Astro.props.n ?? "1.1"} caption="Разность уровней воды толкает воду по трубе, сужение ограничивает расход. Так же напряжение толкает заряды через проводник, а резистор ограничивает ток.">
 	<svg viewBox="0 0 660 250" role="img" aria-label="Слева: верхний бак с водой соединён трубой с сужением с нижним баком. Справа: батарейка, провод и резистор, по кругу течёт ток I.">
 		<!-- ===== Вода ===== -->
 		<text class="t" x="10" y="18" font-weight="700">Вода</text>
 		<!-- верхний бак -->
 		<path class="ln" d="M20 40 V150 H100 V40" />
-		<rect x="22" y="62" width="76" height="86" fill="var(--pcb-altium)" opacity="0.35" />
+		<rect x="22" y="62" width="76" height="86" fill="var(--pcb-blue)" opacity="0.35" />
 		<!-- нижний бак -->
 		<path class="ln" d="M230 150 V215 H300 V150" />
-		<rect x="232" y="190" width="66" height="23" fill="var(--pcb-altium)" opacity="0.35" />
+		<rect x="232" y="190" width="66" height="23" fill="var(--pcb-blue)" opacity="0.35" />
 		<!-- труба с сужением -->
 		<path class="ln" d="M100 132 H150 V138 H190 V132 H250 V160" />
 		<path class="ln" d="M100 146 H150 V142 H190 V146 H236 V160" />
-		<rect x="101" y="133" width="49" height="12" fill="var(--pcb-altium)" opacity="0.35" />
-		<rect x="190" y="133" width="45" height="12" fill="var(--pcb-altium)" opacity="0.35" />
+		<rect x="101" y="133" width="49" height="12" fill="var(--pcb-blue)" opacity="0.35" />
+		<rect x="190" y="133" width="45" height="12" fill="var(--pcb-blue)" opacity="0.35" />
 		<!-- стрелка потока -->
 		<path class="ln-acc" d="M112 120 H140 M134 115 L140 120 L134 125" />
 		<!-- разность уровней -->

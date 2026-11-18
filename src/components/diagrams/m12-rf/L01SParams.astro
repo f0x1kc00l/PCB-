@@ -3,7 +3,7 @@
 import Figure from '../Figure.astro';
 ---
 
-<Figure n="12.1б" caption="Устройство с двумя портами (фильтр, усилитель, кусок линии). На порт 1 падает волна a₁. Часть её отражается обратно (b₁), часть проходит на порт 2 (b₂). S11 = b₁/a₁ показывает отражение — насколько вход согласован. S21 = b₂/a₁ — передачу (усиление или потери).">
+<Figure n={Astro.props.n ?? "12.1б"} caption="Устройство с двумя портами (фильтр, усилитель, кусок линии). На порт 1 падает волна a₁. Часть её отражается обратно (b₁), часть проходит на порт 2 (b₂). S11 = b₁/a₁ показывает отражение — насколько вход согласован. S21 = b₂/a₁ — передачу (усиление или потери).">
 	<svg viewBox="0 0 640 210" role="img" aria-label="Прямоугольник «устройство» с портами 1 и 2. Слева падающая волна a1 и отражённая b1, справа прошедшая b2 и падающая a2.">
 		<rect class="ln" x="240" y="50" width="160" height="110" rx="8" />
 		<text class="t" x="320" y="100" text-anchor="middle" font-weight="700">устройство</text>
@@ -13,8 +13,8 @@ import Figure from '../Figure.astro';
 		<!-- порт 1 -->
 		<path class="ln-acc" d="M60 80 H230 M220 74 L230 80 L220 86" />
 		<text class="t t-acc" x="70" y="70">a₁ — падающая</text>
-		<path d="M230 130 H60 M70 124 L60 130 L70 136" fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" />
-		<text class="t" x="70" y="152" fill="var(--pcb-altium)">b₁ — отражённая</text>
+		<path d="M230 130 H60 M70 124 L60 130 L70 136" fill="none" stroke="var(--pcb-blue)" stroke-width="2.5" />
+		<text class="t" x="70" y="152" fill="var(--pcb-blue)">b₁ — отражённая</text>
 		<!-- порт 2 -->
 		<path class="ln-acc" d="M410 80 H580 M570 74 L580 80 L570 86" />
 		<text class="t t-acc" x="440" y="70">b₂ — прошедшая</text>

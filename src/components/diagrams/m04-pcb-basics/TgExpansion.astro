@@ -19,7 +19,7 @@ const ticksT = [50, 100, 150, 200, 250];
 const ticksP = [1, 2, 3, 4];
 ---
 
-<Figure n="4.2" caption="Пока температура ниже Tg, плата по толщине расширяется медленно; выше Tg смола размягчается и расширение по оси Z резко ускоряется. При бессвинцовой пайке плата проходит через 240–250 °C, и именно в этой зоне растягиваются и трескаются стенки переходных отверстий. Чем выше Tg, тем меньше суммарное расширение. Значения условные, типовые для FR-4.">
+<Figure n={Astro.props.n ?? "4.2"} caption="Пока температура ниже Tg, плата по толщине расширяется медленно; выше Tg смола размягчается и расширение по оси Z резко ускоряется. При бессвинцовой пайке плата проходит через 240–250 °C, и именно в этой зоне растягиваются и трескаются стенки переходных отверстий. Чем выше Tg, тем меньше суммарное расширение. Значения условные, типовые для FR-4.">
 	<svg viewBox="0 0 540 290" role="img" aria-label="График теплового расширения по оси Z от температуры: излом на Tg 140 и 170 градусов, после излома крутой рост. Зона пайки от 217 до 260 градусов заштрихована.">
 		<!-- зона бессвинцовой пайки -->
 		<rect x={x(217)} y={y(4.2)} width={x(260) - x(217)} height={y(0) - y(4.2)} fill="var(--sl-color-accent)" opacity="0.12" />
@@ -35,12 +35,12 @@ const ticksP = [1, 2, 3, 4];
 		<text class="t t-s" x={x(25) + 6} y={y(4.4) + 4}>расширение по Z</text>
 		<!-- кривые -->
 		<path d={path(140)} fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
-		<path d={path(170)} fill="none" stroke="var(--pcb-altium)" stroke-width="2.5" stroke-dasharray="7 4" />
+		<path d={path(170)} fill="none" stroke="var(--pcb-blue)" stroke-width="2.5" stroke-dasharray="7 4" />
 		<path class="ln-dash" d={`M${x(140)} ${y(0)} V${y(exp(140, 140))}`} />
 		<path class="ln-dash" d={`M${x(170)} ${y(0)} V${y(exp(170, 170))}`} />
 		<text class="t t-s t-acc" x={x(140)} y={y(0) - 6} text-anchor="end">Tg 140</text>
-		<text class="t t-s" x={x(170) + 4} y={y(0) - 6} fill="var(--pcb-altium)">Tg 170</text>
+		<text class="t t-s" x={x(170) + 4} y={y(0) - 6} fill="var(--pcb-blue)">Tg 170</text>
 		<text class="t t-s t-acc" x={x(205)} y={y(exp(205, 140)) - 8} text-anchor="end">обычный FR-4</text>
-		<text class="t t-s" x={x(222)} y={y(exp(222, 170)) + 18} fill="var(--pcb-altium)">high-Tg</text>
+		<text class="t t-s" x={x(222)} y={y(exp(222, 170)) + 18} fill="var(--pcb-blue)">high-Tg</text>
 	</svg>
 </Figure>

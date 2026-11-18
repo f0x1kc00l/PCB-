@@ -26,27 +26,35 @@ const cards = modules.map((m) => {
 });
 ---
 
-<ol class="course-map not-content">
-	{
-		cards.map((c) => (
-			<li class="module" data-hrefs={JSON.stringify(c.hrefs)}>
-				<a href={c.first} class="module__link">
-					<span class="module__num">{c.n}</span>
-					<span class="module__body">
-						<span class="module__title">{c.label}</span>
-						<span class="module__summary">{c.summary}</span>
-						<span class="module__meta">
-							{c.count} ур. · ~{c.hours} ч{c.ready < c.count && <> · готово {c.ready} из {c.count}</>}
-						</span>
-						<span class="module__bar" aria-hidden="true">
-							<span data-fill />
-						</span>
-					</span>
-				</a>
-			</li>
-		))
-	}
-</ol>
+{
+	[
+		{ title: '', items: cards.filter((c) => c.part !== 'extra') },
+		{ title: 'Дополнительные модули', items: cards.filter((c) => c.part === 'extra') },
+	].map((group) => (
+		<>
+			{group.title && <p class="course-map__group not-content">{group.title}</p>}
+			<ol class="course-map not-content">
+				{group.items.map((c) => (
+					<li class="module" data-hrefs={JSON.stringify(c.hrefs)}>
+						<a href={c.first} class="module__link">
+							<span class="module__num">{c.n}</span>
+							<span class="module__body">
+								<span class="module__title">{c.part === 'book' ? `Глава ${c.n}. ` : ''}{c.label}</span>
+								<span class="module__summary">{c.summary}</span>
+								<span class="module__meta">
+									{c.count} ур. · ~{c.hours} ч{c.ready < c.count && <> · готово {c.ready} из {c.count}</>}
+								</span>
+								<span class="module__bar" aria-hidden="true">
+									<span data-fill />
+								</span>
+							</span>
+						</a>
+					</li>
+				))}
+			</ol>
+		</>
+	))
+}
 
 <script>
 	import { getProgress, normalizePath, onProgressChange } from '../../lib/progress';
@@ -68,11 +76,22 @@ const cards = modules.map((m) => {
 <style>
 	.course-map {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
 		gap: 0.75rem;
 		margin: 1.5rem 0 0;
 		padding: 0;
 		list-style: none;
+	}
+	.course-map__group {
+		margin: 1.75rem 0 0;
+		font-size: var(--sl-text-sm);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--sl-color-gray-3);
+	}
+	.course-map__group + .course-map {
+		margin-top: 0.6rem;
 	}
 	.module__link {
 		display: flex;

@@ -17,7 +17,7 @@ const { preset = '2' } = Astro.props;
 type Kind = 'silk' | 'mask' | 'copper' | 'core' | 'prepreg';
 interface Layer {
 	name: string; // по-русски
-	altium: string; // название в Altium
+	cad: string; // типичное название в САПР / расширение Gerber
 	kind: Kind;
 	thickness: string; // типовая толщина
 	px: number; // высота полосы на рисунке
@@ -26,7 +26,7 @@ interface Layer {
 
 const silkTop: Layer = {
 	name: 'Шелкография (верх)',
-	altium: 'Top Overlay',
+	cad: 'Top Silkscreen · .GTO',
 	kind: 'silk',
 	thickness: '≈ 10–20 мкм (краска)',
 	px: 16,
@@ -34,23 +34,23 @@ const silkTop: Layer = {
 };
 const maskTop: Layer = {
 	name: 'Паяльная маска (верх)',
-	altium: 'Top Solder',
+	cad: 'Top Solder Mask · .GTS',
 	kind: 'mask',
 	thickness: '≈ 10–30 мкм',
 	px: 18,
 	about:
-		'Защитный лак, обычно зелёный. Закрывает медь, кроме площадок под пайку. В Altium слой Top Solder рисует ОКНА в маске, а не саму маску. Слой Top Paste (трафарет для пасты) — это не слой платы, а данные для изготовления трафарета.',
+		'Защитный лак, обычно зелёный. Закрывает медь, кроме площадок под пайку. В САПР и Gerber слой маски рисует ОКНА в маске, а не саму маску. Слой пасты (Paste, трафарет) — это не слой платы, а данные для изготовления трафарета.',
 };
-const cu = (name: string, altium: string, about: string, thickness = '35 мкм (1 oz) — типично для внешних'): Layer => ({
+const cu = (name: string, cad: string, about: string, thickness = '35 мкм (1 oz) — типично для внешних'): Layer => ({
 	name,
-	altium,
+	cad,
 	kind: 'copper',
 	thickness,
 	px: 22,
 	about,
 });
-const maskBot: Layer = { ...maskTop, name: 'Паяльная маска (низ)', altium: 'Bottom Solder' };
-const silkBot: Layer = { ...silkTop, name: 'Шелкография (низ)', altium: 'Bottom Overlay' };
+const maskBot: Layer = { ...maskTop, name: 'Паяльная маска (низ)', cad: 'Bottom Solder Mask · .GBS' };
+const silkBot: Layer = { ...silkTop, name: 'Шелкография (низ)', cad: 'Bottom Silkscreen · .GBO' };
 
 const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[] }> = {
 	'2': {
@@ -59,17 +59,17 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 		layers: [
 			silkTop,
 			maskTop,
-			cu('Медь, верхний слой', 'Top Layer', 'Дорожки, площадки компонентов, полигоны. На двухслойке здесь обычно основная трассировка.'),
+			cu('Медь, верхний слой', 'Top Copper · .GTL', 'Дорожки, площадки компонентов, полигоны. На двухслойке здесь обычно основная трассировка.'),
 			{
 				name: 'Диэлектрик (ядро)',
-				altium: 'Dielectric — Core',
+				cad: 'Dielectric (Core)',
 				kind: 'core',
 				thickness: '≈ 1,5 мм',
 				px: 120,
 				about:
 					'Стеклотекстолит FR-4: стеклоткань, пропитанная эпоксидной смолой. Даёт механическую прочность и изолирует слои меди друг от друга.',
 			},
-			cu('Медь, нижний слой', 'Bottom Layer', 'Вторая сторона: дорожки и, часто, сплошной полигон земли (GND).'),
+			cu('Медь, нижний слой', 'Bottom Copper · .GBL', 'Вторая сторона: дорожки и, часто, сплошной полигон земли (GND).'),
 			maskBot,
 			silkBot,
 		],
@@ -80,10 +80,10 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 		layers: [
 			silkTop,
 			maskTop,
-			cu('Медь L1, верх', 'Top Layer', 'Сигнальный слой с компонентами.'),
+			cu('Медь L1, верх', 'Top Copper · .GTL', 'Сигнальный слой с компонентами.'),
 			{
 				name: 'Препрег',
-				altium: 'Dielectric — Prepreg',
+				cad: 'Dielectric (Prepreg)',
 				kind: 'prepreg',
 				thickness: '≈ 0,1–0,2 мм',
 				px: 26,
@@ -92,28 +92,28 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 			},
 			cu(
 				'Медь L2, земля',
-				'Signal или Plane-слой (имя задаёшь сам)',
-				'Обычно сплошная земля GND — опорный слой для сигналов на L1. В Altium может быть слоем-плоскостью (Plane), который рисуется в негативе.',
+				'Inner 1 (In1) · .G2',
+				'Обычно сплошная земля GND — опорный слой для сигналов на L1. В некоторых САПР это слой-плоскость (Plane), который рисуется в негативе.',
 				'18–35 мкм',
 			),
 			{
 				name: 'Ядро',
-				altium: 'Dielectric — Core',
+				cad: 'Dielectric (Core)',
 				kind: 'core',
 				thickness: '≈ 1,0–1,2 мм',
 				px: 60,
 				about: 'Готовый ламинат FR-4 с медью с двух сторон, на нём травят внутренние слои L2 и L3.',
 			},
-			cu('Медь L3, питание', 'Signal или Plane-слой', 'Полигоны питания (3V3, 5V) или ещё один сигнальный слой.', '18–35 мкм'),
+			cu('Медь L3, питание', 'Inner 2 (In2) · .G3', 'Полигоны питания (3V3, 5V) или ещё один сигнальный слой.', '18–35 мкм'),
 			{
 				name: 'Препрег',
-				altium: 'Dielectric — Prepreg',
+				cad: 'Dielectric (Prepreg)',
 				kind: 'prepreg',
 				thickness: '≈ 0,1–0,2 мм',
 				px: 26,
 				about: 'Симметрично верхнему препрегу: стек делают симметричным, чтобы плату не выгибало при нагреве.',
 			},
-			cu('Медь L4, низ', 'Bottom Layer', 'Сигнальный слой, иногда с компонентами.'),
+			cu('Медь L4, низ', 'Bottom Copper · .GBL', 'Сигнальный слой, иногда с компонентами.'),
 			maskBot,
 			silkBot,
 		],
@@ -162,9 +162,9 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 						<div class="info__item" data-info={i} hidden>
 							<p class="info__name">{l.name}</p>
 							<dl>
-								<dt>В Altium</dt>
+								<dt>В САПР / Gerber</dt>
 								<dd>
-									<code>{l.altium}</code>
+									<code>{l.cad}</code>
 								</dd>
 								<dt>Толщина</dt>
 								<dd>{l.thickness}</dd>

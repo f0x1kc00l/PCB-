@@ -1,6 +1,6 @@
 ---
 /**
- * Блок «Ссылки» в конце урока: глава учебника, документация Altium, стандарты.
+ * Блок «Ссылки» в конце урока: глава учебника, стандарты и другие источники.
  * Обычно выводится автоматически в подвале из frontmatter урока,
  * но его можно вставить и вручную: <References book={[{ ch: 1, sec: '1.03', page: 14 }]} />
  */
@@ -19,12 +19,11 @@ interface Link {
 }
 interface Props {
 	book?: BookRef[];
-	altium?: Link[];
 	sources?: Link[];
 }
 
-const { book = [], altium = [], sources = [] } = Astro.props;
-const empty = book.length + altium.length + sources.length === 0;
+const { book = [], sources = [] } = Astro.props;
+const empty = book.length + sources.length === 0;
 // Ссылки группируем по учебникам: сначала Хоровиц, потом Малорацкий.
 const bookGroups = (['horowitz', 'maloratsky'] as const)
 	.map((key) => ({ info: BOOKS[key], refs: book.filter((b) => (b.book ?? 'horowitz') === key) }))
@@ -50,20 +49,6 @@ const bookGroups = (['horowitz', 'maloratsky'] as const)
 					<p class="ref-source">{g.info.full}</p>
 				</div>
 			))}
-			{altium.length > 0 && (
-				<div class="ref-group">
-					<p class="ref-label">🛠 Документация Altium</p>
-					<ul>
-						{altium.map((l) => (
-							<li>
-								<a href={l.url} target="_blank" rel="noopener">
-									{l.title} ↗
-								</a>
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
 			{sources.length > 0 && (
 				<div class="ref-group">
 					<p class="ref-label">📐 Стандарты и другие источники</p>

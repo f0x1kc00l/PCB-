@@ -18,11 +18,11 @@ const card = (x: number, w: number, items: string[][], title: string, color: str
 const cards = [card(232, 208, fab, 'Изготовление платы', 'var(--sl-color-accent)'), card(450, 236, asm, 'Сборка (монтаж)', 'var(--pcb-altium)')];
 ---
 
-<Figure n="10.1" caption="Проект в Altium превращается в два комплекта файлов. Первый нужен заводу, чтобы изготовить «голую» плату, второй — монтажному участку, чтобы поставить на неё компоненты. Если заказываешь только платы и паяешь сам, второй комплект нужен тебе самому.">
-	<svg viewBox="0 0 690 290" role="img" aria-label="Проект Altium слева, стрелки к двум карточкам: изготовление платы (Gerber, сверловка, чертёж, или ODB++/IPC-2581) и сборка (BOM, Pick and Place, сборочный чертёж, Gerber пасты).">
+<Figure n={Astro.props.n ?? "10.1"} caption="Проект платы в САПР превращается в два комплекта файлов. Первый нужен заводу, чтобы изготовить «голую» плату, второй — монтажному участку, чтобы поставить на неё компоненты. Если заказываешь только платы и паяешь сам, второй комплект нужен тебе самому.">
+	<svg viewBox="0 0 690 290" role="img" aria-label="Проект САПР слева, стрелки к двум карточкам: изготовление платы (Gerber, сверловка, чертёж, или ODB++/IPC-2581) и сборка (BOM, Pick and Place, сборочный чертёж, Gerber пасты).">
 		<!-- проект -->
 		<rect x="20" y="105" width="170" height="90" rx="10" class="ln" />
-		<text class="t" x="105" y="138" text-anchor="middle" font-weight="700">Проект Altium</text>
+		<text class="t" x="105" y="138" text-anchor="middle" font-weight="700">Проект в САПР</text>
 		<text class="t t-s t-mono t-mut" x="105" y="160" text-anchor="middle">.PrjPcb .SchDoc</text>
 		<text class="t t-s t-mono t-mut" x="105" y="177" text-anchor="middle">.PcbDoc .OutJob</text>
 		<path class="ln-acc" d="M190 135 C210 135 210 80 228 80 M221 75 L228 80 L221 85" />

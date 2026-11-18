@@ -48,7 +48,7 @@ export function gnd(x: number, y: number, cls = 'ln'): string {
 /**
  * NPN-транзистор (ГОСТ 2.730, с окружностью-корпусом). Центр (cx, cy).
  * Выводы: база (cx∓30, cy), коллектор (cx±6, cy−26), эмиттер (cx±6, cy+26).
- * mirror = true — база справа (зеркальный, как Q2 в руководстве Altium).
+ * mirror = true — база справа (зеркальный, как Q2 в мультивибраторе).
  */
 export function npn(cx: number, cy: number, mirror = false, cls = 'ln'): string {
 	const s = mirror ? -1 : 1;

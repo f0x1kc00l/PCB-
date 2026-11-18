@@ -1,0 +1,22 @@
+---
+/**
+ * Короткая формула внутри строки текста: <M t="r_e = 25\,\text{мВ}/I_К" />.
+ * Длинные формулы оформляй через <Formula>, чтобы они не ломали строку на телефоне.
+ */
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+interface Props {
+	t: string;
+}
+const html = katex.renderToString(Astro.props.t, { displayMode: false, throwOnError: true, strict: 'ignore', output: 'html' });
+---
+
+<span class="m" set:html={html} />
+
+<style>
+	.m :global(.katex) {
+		font-size: 1.05em;
+		white-space: nowrap;
+	}
+</style>

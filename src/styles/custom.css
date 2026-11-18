@@ -14,8 +14,8 @@
 	--pcb-tip-bg: #12291f;
 	--pcb-warn: #f0a33a;
 	--pcb-warn-bg: #2e2210;
-	--pcb-altium: #8fa8ff;
-	--pcb-altium-bg: #1a2140;
+	--pcb-blue: #8fa8ff;
+	--pcb-blue-bg: #1a2140;
 	--pcb-book: #d6a76b;
 	--pcb-book-bg: #2a2117;
 	--pcb-ok: #4cbf86;
@@ -27,6 +27,9 @@
 	--pcb-mask: #1f7a4a;
 	--pcb-silk: #f2f2f2;
 	--pcb-paste: #9aa3ad;
+
+	--pcb-formula-bg: #161d26;
+	--pcb-figure-bg: transparent;
 
 	--pcb-radius: 0.5rem;
 	--pcb-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monospace;
@@ -41,14 +44,15 @@
 	--pcb-tip-bg: #e7f6ee;
 	--pcb-warn: #9a5a00;
 	--pcb-warn-bg: #fdf1df;
-	--pcb-altium: #3550c8;
-	--pcb-altium-bg: #eaeefd;
+	--pcb-blue: #3550c8;
+	--pcb-blue-bg: #eaeefd;
 	--pcb-book: #8a5a1c;
 	--pcb-book-bg: #f8efe3;
 	--pcb-ok: #19784a;
 	--pcb-bad: #c22d2d;
 
 	--pcb-silk: #ffffff;
+	--pcb-formula-bg: #f6f3ef;
 }
 
 /* Галочка у пройденных уроков в боковом меню (класс ставит Sidebar.astro). */
@@ -325,6 +329,8 @@
 }
 .water__stage {
 	display: flex;
+	min-width: 0;
+	max-width: 100%;
 	flex-wrap: nowrap;
 	justify-content: center;
 	align-items: center;
@@ -332,6 +338,7 @@
 }
 .water .water__stage svg {
 	flex: var(--w) 1 0px;
+	min-width: 0;
 	width: auto;
 	max-width: none;
 	margin: 0;
@@ -482,4 +489,98 @@
 	.water__row > span:first-child {
 		min-width: 7.5rem;
 	}
+}
+
+/* ===================================================================
+ * Единый стиль и адаптивность для всех страниц курса.
+ * =================================================================== */
+
+/* Длинные слова и формулы в тексте не должны раздвигать страницу. */
+.sl-markdown-content {
+	overflow-wrap: break-word;
+}
+.sl-markdown-content :is(p, li) {
+	hyphens: auto;
+}
+
+/* Таблицы: на узком экране прокручиваются внутри себя, страница не уезжает вбок. */
+.sl-markdown-content table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+.sl-markdown-content table :is(th, td) {
+	vertical-align: top;
+}
+@media (max-width: 40rem) {
+	.sl-markdown-content table {
+		font-size: var(--sl-text-sm);
+	}
+	.sl-markdown-content table :is(th, td) {
+		padding: 0.4rem 0.55rem;
+	}
+}
+
+/* Раскрывающиеся ответы к задачам: крупная зона нажатия, видимая рамка. */
+.sl-markdown-content details {
+	margin-block: 0.6rem;
+	border: 1px solid var(--sl-color-hairline-light);
+	border-inline-start: 3px solid var(--pcb-ok);
+	border-radius: 0 var(--pcb-radius) var(--pcb-radius) 0;
+	background: var(--sl-color-gray-7, transparent);
+	padding: 0 0.85rem;
+}
+.sl-markdown-content details[open] {
+	padding-bottom: 0.7rem;
+}
+.sl-markdown-content details > summary {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0.35rem 0;
+	font-weight: 600;
+	color: var(--pcb-ok);
+	cursor: pointer;
+	list-style: none;
+}
+.sl-markdown-content details > summary::-webkit-details-marker {
+	display: none;
+}
+.sl-markdown-content details > summary::before {
+	content: '▸';
+	margin-inline-end: 0.5rem;
+	transition: transform 0.15s;
+}
+.sl-markdown-content details[open] > summary::before {
+	transform: rotate(90deg);
+}
+.sl-markdown-content details > :not(summary) {
+	margin-top: 0.3rem;
+}
+.sl-markdown-content li > details {
+	margin-top: 0.4rem;
+}
+
+/* Цитата-правило (золотые правила ОУ и т. п.) */
+.sl-markdown-content blockquote {
+	border-inline-start-color: var(--sl-color-accent);
+	background: var(--sl-color-accent-low);
+	padding: 0.6rem 1rem;
+	border-radius: 0 var(--pcb-radius) var(--pcb-radius) 0;
+}
+
+/* Главная: картинка героя не должна занимать весь экран телефона. */
+@media (max-width: 50rem) {
+	.hero > img,
+	.hero > .hero-html {
+		max-width: 16rem;
+		margin-inline: auto;
+	}
+}
+
+/* Кнопки и ссылки-кнопки: зона касания не меньше 44 px. */
+.sl-markdown-content .sl-link-button,
+.hero .sl-link-button {
+	min-height: 44px;
 }

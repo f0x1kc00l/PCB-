@@ -24,7 +24,7 @@ export interface SymbolRow {
 	ansi: string;
 	gostStd: string; // номер ГОСТ
 	refGost: string; // позиционное обозначение по ГОСТ 2.710
-	refIntl: string; // обычное в зарубежных схемах и в библиотеках Altium
+	refIntl: string; // обычное в зарубежных схемах и библиотеках САПР
 	note?: string;
 }
 
@@ -268,8 +268,8 @@ export const symbols: SymbolRow[] = [
 		ansi: groundBars,
 		gostStd: 'ГОСТ 2.721',
 		refGost: '—',
-		refIntl: '— (в Altium — Power Port)',
-		note: 'В Altium это не компонент, а порт питания (Power Port) со стилем Ground.',
+		refIntl: '— (в САПР — символ питания)',
+		note: 'В САПР это обычно не компонент, а символ питания (power port) с именем цепи GND.',
 	},
 	{
 		id: 'battery',

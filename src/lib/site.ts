@@ -31,14 +31,14 @@ export const BOOKS = { horowitz: BOOK, maloratsky: BOOK_MAL } as const;
 
 /**
  * Добавляет base-путь сайта к внутренней ссылке.
- * withBase('/m01-electricity/02-ohms-law/') → '/pcb-course/m01-electricity/02-ohms-law/' на GitHub Pages.
+ * withBase('/m01-basics/02-ohms-law/') → '/pcb-course/m01-basics/02-ohms-law/' на GitHub Pages.
  */
 export function withBase(path: string): string {
 	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 	return `${base}/${path.replace(/^\//, '')}`;
 }
 
-/** Ссылка на урок по его id из коллекции ("m01-electricity/02-ohms-law"). */
+/** Ссылка на урок по его id из коллекции ("m01-basics/02-ohms-law"). */
 export function lessonHref(id: string): string {
 	return withBase(`${id}/`);
 }

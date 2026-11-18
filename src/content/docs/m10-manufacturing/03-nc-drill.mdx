@@ -1,6 +1,6 @@
 ---
 title: NC Drill
-description: Файл сверловки Excellon — что в нём, как его настроить в Altium, металлизированные и неметаллизированные отверстия, пазы, совпадение с Gerber.
+description: Файл сверловки Excellon — что в нём, какие настройки важны, металлизированные и неметаллизированные отверстия, пазы, совпадение с Gerber.
 sidebar:
   label: 10.3 NC Drill
   order: 3
@@ -8,14 +8,11 @@ duration: 25
 status: ready
 goals:
   - понимать, что содержит файл сверловки и почему он отдельный
-  - настраивать NC Drill Setup в Altium так, чтобы сверловка совпала с Gerber
+  - настраивать выгрузку сверловки так, чтобы она совпала с Gerber
   - разделять металлизированные и неметаллизированные отверстия и правильно передавать пазы
 prerequisites:
   - m10-manufacturing/02-gerber-odb
-  - m04-pcb-basics/04-holes-vias
-altium:
-  - title: Preparing Fabrication Data — раздел NC Drill
-    url: https://www.altium.com/documentation/altium-designer/gerber-x2-support
+  - m08-pcb-basics/04-holes-vias
 sources:
   - title: "JLCPCB. PCB Capabilities — минимальные отверстия и пояски (пример)"
     url: https://jlcpcb.com/capabilities/pcb-capabilities
@@ -24,8 +21,6 @@ sources:
 ---
 
 import Callout from '../../../components/lesson/Callout.astro';
-import MenuPath from '../../../components/lesson/MenuPath.astro';
-import Screenshot from '../../../components/lesson/Screenshot.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
@@ -44,39 +39,33 @@ import Quiz from '../../../components/interactive/Quiz.astro';
 Завод сверлит их на разных этапах: металлизированные — до осаждения меди, неметаллизированные — обычно после. Поэтому их удобно передавать **отдельными файлами**.
 
 <Callout type="tip">
-  В файле сверловки указан **диаметр сверла**, а в Altium ты задаёшь **готовый диаметр отверстия** (finished hole size).
+  В файле сверловки указан **диаметр сверла**, а в САПР ты задаёшь **готовый диаметр отверстия** (finished hole size).
   Металлизация «съедает» часть диаметра, и завод сам добавляет припуск. Не увеличивай отверстия «на металлизацию»
   самостоятельно, если завод явно не попросил.
 </Callout>
 
-## Настройка в Altium
+## Настройки выгрузки
 
-В редакторе платы: <MenuPath path="File » Fabrication Outputs » NC Drill Files" /> → диалог **NC Drill Setup**.
-
-<Screenshot src="screenshots/m10-manufacturing/l03-nc-drill-setup.png" alt="диалог NC Drill Setup" />
+Названия пунктов в разных САПР отличаются, но смысл один:
 
 | Группа | Параметр | Что выбрать |
 |---|---|---|
-| **NC Drill Format** | Units | те же единицы, что у Gerber |
-| | Format | наибольшая точность, например 2:5 для дюймов (для мм — 4:4); как у Gerber |
-| **Leading/Trailing Zeroes** | Keep / Suppress… | как у Gerber; чаще всего оставляют значение по умолчанию |
-| **Coordinate Positions** | Reference to absolute / relative origin | **та же точка отсчёта, что у Gerber** |
-| **Other** | Generate separate NC Drill files for plated & non-plated holes | **включить** |
-| | Use drilled slot command (G85) | см. ниже про пазы |
-| | Generate EIA Binary Drill File (.DRL) | обычно не нужен, заводы берут текстовый .TXT |
+| **Формат** | Единицы | те же единицы, что у Gerber |
+| | Точность | наибольшая точность, например 2:5 для дюймов (для мм — 4:4); как у Gerber |
+| **Нули** | Подавление leading/trailing | как у Gerber; чаще всего оставляют значение по умолчанию |
+| **Начало координат** | абсолютное или от точки привязки платы | **та же точка отсчёта, что у Gerber** |
+| **Файлы** | Раздельные файлы для металлизированных и неметаллизированных отверстий | **включить** |
+| | Пазы командой G85 | см. ниже про пазы |
+| | Формат файла | текстовый Excellon — его берут все заводы |
 
-Altium создаст текстовые файлы сверловки (`.TXT`, при разделении — `-Plated.TXT` и `-NonPlated.TXT`), отчёт `.DRR` (таблица инструментов — полезно глянуть) и отчёт по парам слоёв `.LDP`.
+Результат — текстовые файлы Excellon (часто отдельно для металлизированных и неметаллизированных отверстий) и иногда отчёт с таблицей инструментов — его полезно глянуть.
 
-<Callout type="altium">
-  Сверловка из Altium — текстовый Excellon. При импорте в редактор CAM самого Altium поддерживаются только текстовые
-  (ASCII) файлы сверловки, двоичный .DRL туда не загрузить. Это ещё одна причина не путать .TXT и .DRL.
-</Callout>
 
 ## Пазы (slots)
 
 Овальное отверстие под широкий вывод разъёма или кнопки — это **паз**. Передать его можно двумя способами:
 
-1. **Командой сверловки G85** («drilled slot»): паз описан как отрезок, который станок проходит сверлом. В Altium это опция **Use drilled slot command (G85)**.
+1. **Командой сверловки G85** («drilled slot»): паз описан как отрезок, который станок проходит сверлом.
 2. **Фрезеровкой по контуру** на механическом слое, как вырез.
 
 Заводы по-разному относятся к этим вариантам. Посмотри требования своего производителя и **явно напиши в комментарии к заказу**, что на плате есть пазы.
@@ -131,7 +120,7 @@ Altium создаст текстовые файлы сверловки (`.TXT`, 
       explain: 'Металлизированные сверлят до металлизации, неметаллизированные — отдельно. Раздельные файлы исключают путаницу.',
     },
     {
-      q: 'Какой диаметр ты задаёшь у отверстия в Altium?',
+      q: 'Какой диаметр ты задаёшь у отверстия в САПР?',
       options: ['Диаметр сверла с припуском на металлизацию', 'Готовый диаметр отверстия', 'Диаметр площадки'],
       answer: 1,
       explain: 'Ты задаёшь готовый (finished) диаметр. Припуск на металлизацию добавляет завод.',

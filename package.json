@@ -1,6 +1,6 @@
 {
   "name": "pcb-course",
-  "description": "Сайт-учебник: печатные платы с нуля в Altium Designer",
+  "description": "Сайт-учебник: схемотехника с нуля по плану «Искусства схемотехники» Хоровица и Хилла",
   "type": "module",
   "version": "0.1.0",
   "private": true,

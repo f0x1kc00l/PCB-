@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Иллюстрация для главной: инвертирующий усилитель на ОУ и сигналы на входе и выходе. Декоративная. -->
+  <rect x="8" y="8" width="404" height="284" rx="18" fill="#0e3a63" opacity=".08"/>
+  <g stroke="#7d8da3" stroke-width="3">
+    <path d="M40 150 H80 M140 150 H186 M168 150 V86 H214 M274 86 H330 V170 M300 170 H380"/>
+    <rect x="80" y="139" width="60" height="22" rx="2"/>
+    <rect x="214" y="75" width="60" height="22" rx="2"/>
+    <path d="M186 186 H176 V216 M162 216 H190 M168 224 H184 M173 232 H179"/>
+    <circle cx="168" cy="150" r="5" fill="#7d8da3"/>
+    <circle cx="330" cy="170" r="5" fill="#7d8da3"/>
+    <circle cx="40" cy="150" r="7" fill="none"/>
+    <circle cx="380" cy="170" r="7" fill="none"/>
+  </g>
+  <path d="M196 120 L300 170 L196 220 Z" stroke="#e08a45" stroke-width="4" fill="#e08a45" fill-opacity=".12"/>
+  <path d="M206 152 H222" stroke="#e08a45" stroke-width="4"/>
+  <path d="M206 190 H222 M214 182 V198" stroke="#e08a45" stroke-width="4"/>
+  <path d="M30 262 q12 -26 24 0 t24 0 t24 0 t24 0" stroke="#5aa2f0" stroke-width="3"/>
+  <path d="M290 248 q18 40 36 0 t36 0" stroke="#e08a45" stroke-width="3"/>
+  <path d="M30 262 H126 M290 248 H364" stroke="#7d8da3" stroke-width="1" stroke-dasharray="4 4"/>
+</svg>

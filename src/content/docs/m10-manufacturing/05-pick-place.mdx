@@ -1,6 +1,6 @@
 ---
 title: Pick&Place
-description: Файл координат для монтажного автомата — центр компонента, поворот, сторона; настройка Pick and Place Setup в Altium и типичные проблемы с поворотами.
+description: Файл координат для монтажного автомата — центр компонента, поворот, сторона; настройки выгрузки и типичные проблемы с поворотами.
 sidebar:
   label: 10.5 Pick&Place
   order: 5
@@ -8,20 +8,15 @@ duration: 25
 status: ready
 goals:
   - понимать, что содержит файл Pick&Place и как его использует монтажный автомат
-  - настраивать выгрузку Pick and Place в Altium
+  - настраивать выгрузку Pick and Place в САПР
   - знать, почему повороты и нижняя сторона — главный источник ошибок, и как их проверять
 prerequisites:
   - m10-manufacturing/04-bom
-altium:
-  - title: Pick and Place Setup (диалог)
-    url: https://www.altium.com/documentation/altium-designer/workspacemanager-dlg-pickplacesetup-formpick-and-place-setup-ad?version=21
 sources:
   - title: "IPC-7351B — ориентация «нулевого угла» посадочных мест"
 ---
 
 import Callout from '../../../components/lesson/Callout.astro';
-import MenuPath from '../../../components/lesson/MenuPath.astro';
-import Screenshot from '../../../components/lesson/Screenshot.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
@@ -33,7 +28,7 @@ import PickPlaceCoords from '../../../components/diagrams/m10-manufacturing/Pick
 
 В каждой строке — один компонент:
 
-<PickPlaceCoords />
+<PickPlaceCoords n="10.5" />
 
 - **Designator** — позиционное обозначение (связь с BOM);
 - **X, Y** — координаты относительно начала координат платы;
@@ -44,31 +39,25 @@ import PickPlaceCoords from '../../../components/diagrams/m10-manufacturing/Pick
 
 ## Какую точку считать координатой
 
-Altium умеет выдавать три разные точки:
+САПР обычно умеют выдавать три разные точки:
 
 - **Center X/Y** — середина между крайними площадками компонента;
 - **Ref X/Y** — точка привязки посадочного места (его начало координат в библиотеке);
 - **Pad X/Y** — координата первого вывода.
 
-Автомату нужен **центр корпуса**. Если в твоих посадочных местах точка привязки стоит в центре (так делает IPC Compliant Footprint Wizard, урок [8.4](../../m08-libraries/04-ipc-wizard/)), Center и Ref совпадут. Если привязка на первом выводе, выгружай Center.
+Автомату нужен **центр корпуса**. Если в твоих посадочных местах точка привязки стоит в центре (так рисуют посадочные места по IPC-7351), Center и Ref совпадут. Если привязка на первом выводе, выгружай Center.
 
 ## Начало координат платы
 
 Координаты отсчитываются от **начала координат (origin)** платы. Поставь его в левый нижний угол контура до выгрузки — так ждут почти все монтажники. Начало координат одно для Gerber, сверловки и Pick&Place, и оно должно совпадать во всех файлах.
 
-## Настройка в Altium
+## Настройки выгрузки
 
-В редакторе платы: <MenuPath path="File » Assembly Outputs » Generates pick and place files" /> → диалог **Pick and Place Setup**.
-
-<Screenshot src="screenshots/m10-manufacturing/l05-pick-place-setup.png" alt="диалог Pick and Place Setup: список колонок и настройки вывода" />
-
-- **All Columns** — включи галочку **Show** у нужных колонок: Designator, Comment, Layer, Footprint, Center-X, Center-Y, Rotation. Справа виден предпросмотр файла.
-- **Units** — Metric (мм); **Show Units** — показывать ли единицы в значениях.
-- **Formats** — **CSV** (его ждут почти все) и/или Text.
-- **Include Standard (No BOM) Items** — включать ли компоненты без BOM, например реперные знаки.
-- **Y-Flip Bottom Side Components** — меняет знак Ref-Y и Pad-Y у компонентов снизу. Включай, только если монтажник явно просит.
-
-В файл попадают только компоненты с типом **Standard**. Графические элементы (тип Graphical) исключаются.
+- **Колонки** — включи нужные: Designator, Comment, Layer, Footprint, Center-X, Center-Y, Rotation. Справа виден предпросмотр файла.
+- **Единицы** — миллиметры.
+- **Формат** — **CSV** (его ждут почти все).
+- **Компоненты без BOM** (реперные знаки, логотипы) — обычно исключают.
+- **Отражение координат нижней стороны** — включай, только если монтажник явно просит.
 
 <Callout type="warning">
   **Повороты — главный источник брака при заказной сборке.** «Нулевой угол» посадочного места в твоей библиотеке и в
@@ -84,16 +73,16 @@ Altium умеет выдавать три разные точки:
 
 ## Практика
 
-1. Поставь начало координат мультивибратора в левый нижний угол контура: <MenuPath path="Edit » Origin » Set" />, затем щёлкни в углу контура (вернуть исходное: <MenuPath path="Edit » Origin » Reset" />).
+1. Поставь начало координат платы в левый нижний угол контура.
 2. Выгрузи Pick&Place в CSV, миллиметры, с колонками Designator, Comment, Footprint, Center-X, Center-Y, Rotation, Layer.
-3. Открой CSV в таблице. Сверь количество строк с BOM. Совпадает ли X/Y у двух-трёх компонентов с тем, что показывает Altium, если навести курсор на центр компонента?
+3. Открой CSV в таблице. Сверь количество строк с BOM. Совпадает ли X/Y у двух-трёх компонентов с тем, что показывает САПР, если навести курсор на центр компонента?
 
 <Mistakes
   items={[
     {
       problem: 'На собранной плате диоды и микросхемы развернуты',
       why: 'Нулевой угол посадочного места в твоей библиотеке не совпал с принятым у монтажника.',
-      fix: 'Проверяй предпросмотр расстановки у сервиса. Делай посадочные места по IPC-7351 (урок 8.4) и при необходимости корректируй углы по запросу монтажника.',
+      fix: 'Проверяй предпросмотр расстановки у сервиса. Делай посадочные места по IPC-7351 и при необходимости корректируй углы по запросу монтажника.',
     },
     {
       problem: 'Все компоненты сдвинуты на одинаковое расстояние',

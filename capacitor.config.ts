@@ -11,7 +11,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
 	appId: 'com.pcbcourse.app',
-	appName: 'PCB с нуля',
+	appName: 'Схемотехника с нуля',
 	webDir: 'dist',
 	android: {
 		// В отладочной сборке можно подключить chrome://inspect и смотреть консоль WebView.

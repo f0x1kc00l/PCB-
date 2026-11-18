@@ -3,7 +3,7 @@
  *
  * Хранится объект { "<путь урока>": <время отметки, мс> }.
  * Путь урока — pathname страницы без завершающего слэша, например
- * "/m01-electricity/02-ohms-law" (вместе с base, если сайт лежит в подпапке).
+ * "/m01-basics/02-ohms-law" (вместе с base, если сайт лежит в подпапке).
  *
  * localStorage может быть недоступен (приватный режим, запрет cookies,
  * встроенный браузер), поэтому каждое обращение обёрнуто в try/catch:
@@ -21,10 +21,10 @@ export type ProgressMap = Record<string, number>;
  * Ключ страницы для хранения прогресса.
  *
  * Для урока это «/<модуль>/<урок>» независимо от того, где лежит сайт:
- *   /m01-electricity/02-ohms-law/                    (обычный сайт)
- *   /pcb-course/m01-electricity/02-ohms-law/         (GitHub Pages в подпапке)
- *   /m01-electricity/02-ohms-law/index.html          (Android-приложение)
- * → везде «/m01-electricity/02-ohms-law». Поэтому прогресс не теряется при переезде сайта.
+ *   /m01-basics/02-ohms-law/                    (обычный сайт)
+ *   /pcb-course/m01-basics/02-ohms-law/         (GitHub Pages в подпапке)
+ *   /m01-basics/02-ohms-law/index.html          (Android-приложение)
+ * → везде «/m01-basics/02-ohms-law». Поэтому прогресс не теряется при переезде сайта.
  * Прочие пути просто очищаются от index.html и завершающего слэша.
  */
 export function normalizePath(path: string): string {

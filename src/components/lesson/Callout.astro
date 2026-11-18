@@ -4,13 +4,12 @@
  *
  *   <Callout type="tip">Совет…</Callout>
  *   <Callout type="warning">Внимание…</Callout>
- *   <Callout type="altium">Особенность Altium…</Callout>
  *   <Callout type="book" where="гл. 1, §1.03, с. 14">Из учебника…</Callout>
  *
  * title — свой заголовок вместо стандартного.
  */
 interface Props {
-	type: 'tip' | 'warning' | 'altium' | 'book';
+	type: 'tip' | 'warning' | 'book';
 	title?: string;
 	/** Для type="book": где в учебнике смотреть. */
 	where?: string;
@@ -19,7 +18,6 @@ interface Props {
 const PRESETS = {
 	tip: { icon: '💡', title: 'Совет' },
 	warning: { icon: '⚠️', title: 'Внимание' },
-	altium: { icon: '🛠', title: 'Особенность Altium' },
 	book: { icon: '📖', title: 'Из учебника' },
 } as const;
 
@@ -49,10 +47,6 @@ const preset = PRESETS[type];
 	.callout--warning {
 		--c: var(--pcb-warn);
 		--c-bg: var(--pcb-warn-bg);
-	}
-	.callout--altium {
-		--c: var(--pcb-altium);
-		--c-bg: var(--pcb-altium-bg);
 	}
 	.callout--book {
 		--c: var(--pcb-book);

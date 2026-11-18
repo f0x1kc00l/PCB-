@@ -1,144 +1,90 @@
-# PCB с нуля — сайт-учебник
+# Схемотехника с нуля — сайт-учебник
 
-Курс для полного новичка: от закона Ома до собственной двухслойной печатной платы в Altium Designer.
-Статический сайт на [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
+Курс электроники для начинающих по плану первого тома «Искусства схемотехники» П. Хоровица и У. Хилла:
+главы 1–6 курса = главы 1–6 книги (основы, транзисторы, ПТ, ОУ, фильтры и генераторы, источники питания),
+плюс дополнительные модули: практикум и печатные платы (устройство, проектирование, производство, ВЧ/СВЧ).
+Статический сайт на [Astro](https://astro.build) + [Starlight](https://starlight.astro.build), адаптивный — от телефона до широкого монитора.
 
 ## Быстрый старт
 
-Нужен **Node.js 22.23 или новее** (Astro 7 ниже не запустится). Проверка: `node -v`.
+Нужен **Node.js 22.23 или новее**. Проверка: `node -v`.
 
 ```bash
-npm install      # один раз — установить зависимости
-npm run dev      # локальный сервер с автообновлением: http://localhost:4321
-```
-
-Поиск по сайту (Pagefind) строится только при сборке, поэтому в `npm run dev` он не работает. Чтобы проверить поиск:
-
-```bash
-npm run build    # собрать сайт в папку dist/
-npm run preview  # открыть собранную версию: http://localhost:4321
+npm install      # один раз
+npm run dev      # локальный сервер: http://localhost:4321
+npm run build    # сборка в dist/ (вместе с поиском Pagefind)
+npm run preview  # посмотреть собранную версию
 ```
 
 ## Структура
 
 ```
 src/
-├── content/docs/            ← ВСЕ УРОКИ ЗДЕСЬ
-│   ├── index.mdx            главная
-│   ├── m00-intro/ … m11-projects/   модули (папка = модуль)
-│   └── appendix/            приложения
+├── content/docs/                 ← ВСЕ УРОКИ
+│   ├── index.mdx                 главная
+│   ├── m00-intro/                как устроен курс
+│   ├── m01-basics/ … m06-power/  главы 1–6 (по книге)
+│   ├── m07-practice/             практикум: схемы, корпуса, даташиты, макетка
+│   ├── m08-pcb-basics/ … m11-rf/ печатные платы (доп. модули)
+│   └── appendix/                 приложения A–I
 ├── components/
-│   ├── lesson/              врезки, скриншоты, пути меню, клавиши, ошибки, задание, ссылки
-│   ├── interactive/         квиз, калькуляторы, стек слоёв, таблица УГО, кнопка «пройдено»
-│   ├── home/                блоки главной страницы
-│   └── overrides/           переопределённые части Starlight: крошки, прогресс, подвал
-├── data/
-│   ├── modules.mjs          список модулей (меню + карта на главной)
-│   └── symbols.ts           таблица УГО ГОСТ ↔ IEC ↔ ANSI
-├── lib/                     прогресс (localStorage), единицы, формула IPC-2221
-└── styles/custom.css        цвета темы и общие стили виджетов
-public/screenshots/          сюда кладёшь скриншоты Altium
-android/                     проект Android-приложения (Capacitor)
-assets/                      исходники иконки и сплэш-экрана приложения
-scripts/build-android.mjs    сборка сайта для приложения
+│   ├── lesson/        врезки, формулы (Formula, M), ошибки, задание, ссылки
+│   ├── diagrams/      схемы: sch.ts (условные обозначения), circuits.ts (реестр схем), Circuit.astro
+│   ├── interactive/   квиз, калькуляторы, стек слоёв, таблица УГО, «урок пройден»
+│   ├── water/         водяные аналогии
+│   ├── home/          блоки главной
+│   └── overrides/     переопределённые части Starlight
+├── data/modules.mjs   список модулей (меню + карта на главной)
+├── lib/               прогресс, единицы, формулы IPC и микрополоска
+└── styles/custom.css  тема, адаптивная вёрстка
+public/spravka/        карманная справка (отдельная страница)
 ```
 
 ## Как написать урок
 
-Заготовки всех уроков уже лежат в `src/content/docs/mNN-…/` как `.md` со `status: draft`.
-Чтобы наполнить урок, переименуй файл в `.mdx` (нужно для компонентов) и пиши.
-
-### Frontmatter (паспорт урока)
+Frontmatter (паспорт урока):
 
 ```yaml
 ---
-title: Делитель напряжения               # заголовок H1
-description: Одна строка для поиска и соцсетей
+title: Инвертирующий усилитель
+description: Одна строка для поиска
 sidebar:
-  label: 1.5 Делитель напряжения         # как урок называется в меню
-  order: 5                               # порядок в модуле
-duration: 40                             # минут
-status: ready                            # draft — показывается плашка «в разработке»
+  label: "4.1 Основные схемы включения ОУ"   # номер = глава.урок
+  order: 1
+duration: 35
+status: ready                 # draft — плашка «в разработке»
 goals:
-  - рассчитать делитель под нужное напряжение
-prerequisites:                           # id уроков = путь без расширения
-  - m01-electricity/02-ohms-law
-book:                                    # ссылки на учебники
-  - { ch: 1, sec: "1.03", page: 14 }                     # Хоровиц, Хилл, т. 1 (по умолчанию)
-  - { book: maloratsky, ch: 1, sec: "1.2", page: 18 }    # Малорацкий, СВЧ (страница книги)
-altium:                                  # страницы документации Altium
-  - title: Создание проекта
-    url: https://www.altium.com/ru/documentation/altium-designer/tutorial/creating-project-schematic-document
-sources:                                 # стандарты и прочее (url не обязателен)
-  - title: IPC-2221B
+  - вывести усиление из золотых правил
+prerequisites:
+  - m04-opamps/00-intro       # id урока = путь без расширения
+book:                         # Хоровиц, Хилл, т. 1 (по умолчанию)
+  - { ch: 4, sec: "4.04", page: 184, note: "инвертирующий усилитель" }
+  - { book: maloratsky, ch: 1, sec: "1.2", page: 18 }
+sources:
+  - title: Даташит LM358
+    url: https://www.ti.com/product/LM358
 ---
 ```
 
-Паспорт (время, цели, пререквизиты) выводится под заголовком автоматически, блок «Ссылки» — внизу урока. Руками писать их не нужно.
-
-### Компоненты
-
-Импорт в начале `.mdx` (путь от `src/content/docs/<модуль>/`):
-
-```mdx
-import Callout from '../../../components/lesson/Callout.astro';
-import MenuPath from '../../../components/lesson/MenuPath.astro';
-import Kbd from '../../../components/lesson/Kbd.astro';
-import Screenshot from '../../../components/lesson/Screenshot.astro';
-import Mistakes from '../../../components/lesson/Mistakes.astro';
-import Assignment from '../../../components/lesson/Assignment.astro';
-import Quiz from '../../../components/interactive/Quiz.astro';
-```
+Компоненты (импорт от `src/content/docs/<модуль>/`):
 
 | Что | Пример |
 |---|---|
-| Врезка «Совет» | `<Callout type="tip">…</Callout>` |
-| Врезка «Внимание» | `<Callout type="warning">…</Callout>` |
-| Врезка «Особенность Altium» | `<Callout type="altium">…</Callout>` |
-| Врезка «Из учебника» | `<Callout type="book" where="гл. 1, §1.03, с. 14">…</Callout>` |
-| Путь в меню | `<MenuPath path="Design » Update PCB Document" />`, непроверенный: `verify` |
-| Горячие клавиши | `<Kbd keys="Ctrl+S" />`, по очереди: `<Kbd keys="P, W" />` |
-| Скриншот | `<Screenshot src="screenshots/m07/l02-components.png" alt="панель Components, поиск 2N3904" />` |
-| Типичные ошибки | `<Mistakes items={[{ problem: '…', why: '…', fix: '…' }]} />` |
-| Квиз | `<Quiz questions={[{ q: '…', options: ['…','…'], answer: 0, explain: '…' }]} />` |
-| Задание | `<Assignment time={30}>…</Assignment>` |
+| Формула (KaTeX, LaTeX) | `<Formula tex="K = -\frac{R_2}{R_1}" label="инвертирующий" />` — части через `\qquad` переносятся на телефоне |
+| Формула в строке | `<M t="r_e = 25\,\text{мВ}/I_К" />` |
+| Схема из реестра | `<Circuit id="oa-inverting" n="4.1" caption="…" />` (новые схемы — в `circuits.ts`) |
+| Врезки | `<Callout type="tip">`, `type="warning"`, `type="book" where="гл. 4, §4.04, с. 184"` |
+| Ошибки, квиз, задание | `<Mistakes items={[…]} />`, `<Quiz questions={[…]} />`, `<Assignment time={30}>…</Assignment>` |
 | Калькуляторы | `<OhmCalc />`, `<DividerCalc />`, `<TraceWidthCalc />`, `<MultivibratorCalc />`, `<MicrostripCalc />` |
-| Стек слоёв | `<LayerStack preset="2" />` или `"4"` |
-| Таблица УГО | `<SymbolTable />` или `<SymbolTable only={['resistor','cap']} />` |
 
-Живой пример всех компонентов — урок `m00-intro/01-how-course-works.mdx`.
+Ссылки между уроками — **относительные**: `[урок 1.2](../../m01-basics/02-ohms-law/)`, в том же модуле — `[2.3](../03-basic-circuits/)`.
 
-### Скриншоты
-
-Пока файла нет, на странице видна рамка `[СКРИНШОТ: …]` с путём. Положи картинку в `public/<путь из src>` и пересобери сайт — рамка сменится картинкой.
-
-### Ссылки между уроками
-
-Пиши **относительные** ссылки — они работают и на GitHub Pages в подпапке:
-
-```md
-[урок 1.2](../../m01-electricity/02-ohms-law/)    из другого модуля
-[урок 0.3](../03-install-altium/)                  из того же модуля
-```
-
-### Сводные приложения
-
-Две страницы приложений собираются автоматически из уроков. Перезапусти скрипт после правок:
+Сводные приложения пересобираются скриптами:
 
 ```bash
-python3 scripts/gen_appendix.py .
+python3 scripts/gen_appendix.py .                                        # D. Типичные ошибки, F. Карта учебника
+python3 scripts/gen_glossary.py src/content/docs/appendix/01-glossary.mdx  # A. Глоссарий
 ```
-
-- **D. Типичные ошибки** — все блоки `<Mistakes>` из уроков;
-- **F. Карта учебника** — ссылки `book` из frontmatter: параграф Хоровица → уроки.
-
-Глоссарий (A) генерируется из списка терминов в `scripts/gen_glossary.py`:
-`python3 scripts/gen_glossary.py src/content/docs/appendix/01-glossary.mdx`.
-
-### Метки [ПРОВЕРИТЬ]
-
-Места, которые не удалось сверить с документацией Altium AD 26, помечены `[ПРОВЕРИТЬ]` или `<MenuPath … verify />`.
-Список: `grep -rn "ПРОВЕРИТЬ\| verify" src/content/docs`. Проверил в своей версии — убери метку.
 
 ## Публикация
 
@@ -196,7 +142,7 @@ APK появится в `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 Почему нужен `app-links.js`: встроенный сервер Capacitor на любой адрес без расширения отдаёт корневой `index.html`
 (так удобно одностраничным приложениям). У нас каждый урок — отдельная страница, поэтому скрипт превращает
-`/m01-electricity/02-ohms-law/` в `/m01-electricity/02-ohms-law/index.html`. Скрипт попадает только в сборку приложения.
+`/m01-basics/02-ohms-law/` в `/m01-basics/02-ohms-law/index.html`. Скрипт попадает только в сборку приложения.
 
 ### Google Play
 
@@ -207,27 +153,16 @@ Debug-APK годится для своего телефона и раздачи 
 
 ## Прогресс ученика
 
-Хранится в `localStorage` браузера под ключами `pcb-course:progress:v1` и `pcb-course:last:v1`.
-Урок считается уроком, если лежит в папке `mNN-…`; приложения и главная в прогресс не входят.
+Хранится в `localStorage` под ключами `pcb-course:progress:v1` и `pcb-course:last:v1` (имена ключей оставлены прежними).
+Уроком считается страница из папки `mNN-…`.
 
 ## Источники
 
-- П. Хоровиц, У. Хилл. Искусство схемотехники, т. 1. — М.: Мир, 1993.
-- Л. Г. Малорацкий. Микроминиатюризация элементов и устройств СВЧ. — М.: Сов. радио, 1976 (модуль 12).
-- [Altium Designer Tutorial](https://www.altium.com/ru/documentation/altium-designer/tutorial)
-- IPC-2221B, IPC-2152, IPC-7351B, IPC-A-600, IPC-A-610; ГОСТ 2.702, 2.710, 2.417 и ГОСТ на УГО (см. `src/data/symbols.ts`).
+- П. Хоровиц, У. Хилл. Искусство схемотехники, т. 1. — М.: Мир, 1993 — главы 1–6.
+- Л. Г. Малорацкий. Микроминиатюризация элементов и устройств СВЧ. — М.: Сов. радио, 1976 — модуль 11.
+- Даташиты производителей; IPC-2221B, IPC-2152, IPC-7351B, IPC-A-600, IPC-A-610; ГОСТ 2.702, 2.710 и ГОСТ на УГО.
 
-## Водяные аналогии и карманная справка
+## Карманная справка
 
-- Анимации «вода ↔ электричество» — `src/components/water/` (движок — `src/lib/water.ts`), вставлены в уроки 1.1–1.7, 2.2–2.7, 3.4, 3.7, 5.7 и собраны в приложении «I. Водяные аналогии».
-- Карманная справка — `public/spravka/index.html` (на сайте: `/spravka/`). Одна страница без зависимостей: термины простыми словами, аналогии, формулы, ссылки на Хоровица, поиск.
-  Тексты — `scripts/spravka/cards.py`, формулы — там же в словаре `TEX` (стандартный LaTeX). Формулы заранее рендерятся в HTML через KaTeX со встроенными шрифтами (`scripts/spravka/tex2html.mjs`), поэтому справка работает без интернета.
-  Пересборка: `npm run build && python3 scripts/spravka/build_spravka.py && npm run build`.
-
-## Полупроводники и транзисторы (добавлено)
-
-- Урок 2.4а «Полупроводники и p-n-переход» (`m02-components/035-semiconductors.mdx`) с анимацией `WaterPN`.
-- Урок 2.7а «Семейство транзисторов» (`m02-components/075-transistor-family.mdx`): Дарлингтон, комплементарная пара, JFET, обогащённый/обеднённый тип, IGBT, оптопара, тиристор.
-- PNP в уроке 2.6: ключ в верхнем плече, режим PNP в `WaterTransistor`. Символы PNP, N- и P-MOSFET в `src/data/symbols.ts`.
-- Урок 1.1: раздел «замкнута / разомкнута / КЗ» с анимацией `WaterCircuit`.
-- Глоссарий и карта учебника пересобраны (`scripts/gen_glossary.py`, `scripts/gen_appendix.py`).
+`public/spravka/index.html` (на сайте — `/spravka/`): термины простыми словами, водяные аналогии, формулы.
+Тексты — `scripts/spravka/cards.py`, пересборка: `npm run build && python3 scripts/spravka/build_spravka.py && npm run build`.

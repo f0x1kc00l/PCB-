@@ -22,7 +22,7 @@ const bookRef = z.object({
 	note: z.string().optional(), // пояснение: «частично», «рис. 2.3» и т.п.
 });
 
-/** Внешняя ссылка: документация Altium, стандарт, даташит. */
+/** Внешняя ссылка: стандарт, даташит, статья. */
 const extLink = z.object({
 	title: z.string(),
 	url: z.url(),
@@ -41,8 +41,6 @@ export const collections = {
 				prerequisites: z.array(z.string()).optional(),
 				/** Ссылки на главы учебника схемотехники. */
 				book: z.array(bookRef).optional(),
-				/** Страницы документации Altium. */
-				altium: z.array(extLink).optional(),
 				/** Прочие источники: стандарты IPC/ГОСТ, даташиты, статьи. */
 				sources: z.array(extLink.or(z.object({ title: z.string() }))).optional(),
 				/** draft — урок-заготовка (показывается плашка «в разработке»). */

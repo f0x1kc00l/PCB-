@@ -1,0 +1,93 @@
+---
+/**
+ * Формула в стандартной записи LaTeX, отрисованная KaTeX при сборке (без JavaScript в браузере).
+ *
+ *   <Formula tex="U = I R" />                          — выключная формула в рамке
+ *   <Formula tex="f_c = \frac{1}{2\pi RC}" label="частота среза" />
+ *
+ * Внутри кавычек атрибута обратная косая черта пишется как есть: tex="\frac{a}{b}".
+ * На узком экране длинная формула прокручивается внутри своей рамки, страница не уезжает вбок.
+ */
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+interface Props {
+	tex: string;
+	/** Подпись справа (на телефоне — под формулой): что это за формула. */
+	label?: string;
+}
+const { tex, label } = Astro.props;
+// Части, разделённые \qquad, рендерим отдельно: на широком экране они стоят в строку,
+// на узком переносятся друг под друга вместо горизонтальной прокрутки.
+const parts = tex.split(/\\qquad/).map((p) => p.trim().replace(/,\s*$/, '')).filter(Boolean);
+const html = parts
+	.map(
+		(p) =>
+			`<span class="formula__part">${katex.renderToString('\\displaystyle ' + p, { displayMode: false, throwOnError: true, strict: 'ignore', output: 'html' })}</span>`,
+	)
+	.join('');
+---
+
+<div class="formula not-content" role="math" aria-label={tex}>
+	<div class="formula__body" set:html={html} />
+	{label && <div class="formula__label">{label}</div>}
+</div>
+
+<style>
+	.formula {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem 1rem;
+		margin-block: 1rem;
+		padding: 0.55rem 1rem;
+		border-inline-start: 3px solid var(--sl-color-accent);
+		border-radius: 0 var(--pcb-radius) var(--pcb-radius) 0;
+		background: var(--pcb-formula-bg);
+	}
+	.formula__body {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow-x: auto;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+	}
+	.formula__body {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		gap: 0.4rem 2.2rem;
+		padding-block: 0.4rem;
+	}
+	.formula__part {
+		max-width: 100%;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding-block: 0.15rem;
+	}
+	.formula__body :global(.katex) {
+		font-size: 1.12em;
+	}
+	.formula__label {
+		flex: 0 1 auto;
+		max-width: 40%;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		text-align: end;
+	}
+	@media (max-width: 40rem) {
+		.formula {
+			flex-direction: column;
+			align-items: stretch;
+			padding: 0.5rem 0.75rem;
+		}
+		.formula__label {
+			max-width: none;
+			text-align: start;
+		}
+		.formula__body :global(.katex) {
+			font-size: 1.05em;
+		}
+	}
+</style>

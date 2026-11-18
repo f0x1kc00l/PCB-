@@ -1,0 +1,28 @@
+---
+/**
+ * Схема из реестра circuits.ts в рамке с подписью:
+ *   <Circuit id="oa-inverting" n="4.1" caption="Инвертирующий усилитель" />
+ */
+import Figure from './Figure.astro';
+import { circuits } from './circuits';
+
+interface Props {
+	id: string;
+	n?: string;
+	caption: string;
+}
+const { id, n, caption } = Astro.props;
+const make = circuits[id];
+if (!make) throw new Error(`Схема «${id}» не найдена в circuits.ts`);
+const c = make();
+---
+
+<Figure n={n} caption={caption}>
+	<svg
+		viewBox={`0 0 ${c.w} ${c.h}`}
+		role="img"
+		aria-label={c.alt}
+		style={`max-width:${Math.round(c.w * 1.35)}px`}
+		set:html={c.svg}
+	/>
+</Figure>

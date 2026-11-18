@@ -11,7 +11,7 @@ const a = panel(0);
 const b = panel(340);
 ---
 
-<Figure n="9.1" caption="Сигнал идёт по дорожке (оранжевая линия), а обратный ток возвращается к источнику по сплошному слою земли (пунктир). На постоянном токе он выбирает путь с наименьшим сопротивлением — напрямик. На высоких частотах — путь с наименьшей индуктивностью, то есть прямо под дорожкой, повторяя её форму. Разрез в земле под дорожкой ломает этот путь.">
+<Figure n={Astro.props.n ?? "9.1"} caption="Сигнал идёт по дорожке (оранжевая линия), а обратный ток возвращается к источнику по сплошному слою земли (пунктир). На постоянном токе он выбирает путь с наименьшим сопротивлением — напрямик. На высоких частотах — путь с наименьшей индуктивностью, то есть прямо под дорожкой, повторяя её форму. Разрез в земле под дорожкой ломает этот путь.">
 	<svg viewBox="0 0 660 270" role="img" aria-label="Две панели: плата со слоем земли, дорожка от источника к приёмнику. Слева обратный ток идёт по прямой, справа — под дорожкой.">
 		<!-- ===== Постоянный ток ===== -->
 		<text class="t" x="10" y="18" font-weight="700">Постоянный ток: напрямик</text>
@@ -23,9 +23,9 @@ const b = panel(340);
 		<rect x="220" y="50" width="40" height="30" rx="3" class="ln" />
 		<text class="t t-s" x="240" y="69" text-anchor="middle">RX</text>
 		<path d={a.trace} class="ln-acc" />
-		<path d="M226 80 L64 176" class="ln-dash" stroke="var(--pcb-altium)" style="opacity:1;stroke:var(--pcb-altium);stroke-width:2" />
-		<path d="M80 166 L68 174 L82 176" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
-		<text class="t t-s" x="110" y="118" fill="var(--pcb-altium)">обратный ток</text>
+		<path d="M226 80 L64 176" class="ln-dash" stroke="var(--pcb-blue)" style="opacity:1;stroke:var(--pcb-blue);stroke-width:2" />
+		<path d="M80 166 L68 174 L82 176" fill="none" stroke="var(--pcb-blue)" stroke-width="2" />
+		<text class="t t-s" x="110" y="118" fill="var(--pcb-blue)">обратный ток</text>
 
 		<!-- ===== Высокая частота ===== -->
 		<text class="t" x="350" y="18" font-weight="700">Высокая частота: под дорожкой</text>
@@ -37,9 +37,9 @@ const b = panel(340);
 		<rect x="560" y="50" width="40" height="30" rx="3" class="ln" />
 		<text class="t t-s" x="580" y="69" text-anchor="middle">RX</text>
 		<path d={b.trace} class="ln-acc" />
-		<path d="M590 82 V200 H410" fill="none" stroke="var(--pcb-altium)" stroke-width="2" stroke-dasharray="5 4" />
-		<path d="M424 194 L410 200 L424 206" fill="none" stroke="var(--pcb-altium)" stroke-width="2" />
-		<text class="t t-s" x="470" y="222" fill="var(--pcb-altium)">обратный ток</text>
+		<path d="M590 82 V200 H410" fill="none" stroke="var(--pcb-blue)" stroke-width="2" stroke-dasharray="5 4" />
+		<path d="M424 194 L410 200 L424 206" fill="none" stroke="var(--pcb-blue)" stroke-width="2" />
+		<text class="t t-s" x="470" y="222" fill="var(--pcb-blue)">обратный ток</text>
 		<text class="t t-acc t-s" x="470" y="182">сигнал</text>
 	</svg>
 </Figure>

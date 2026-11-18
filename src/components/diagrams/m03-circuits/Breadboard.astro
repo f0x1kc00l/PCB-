@@ -12,7 +12,7 @@ const yBot = (i: number) => 175 + i * 16;
 const hl = 4; // подсвеченный столбец
 ---
 
-<Figure n="3.10" caption="Внутри макетной платы гнёзда соединены группами: каждые пять гнёзд одного столбца (a–e или f–j) — одна цепь (подсвечено), по разные стороны центральной канавки — разные цепи. Длинные шины вдоль краёв — для питания (+) и земли (−). У некоторых плат шины разорваны посередине: проверь мультиметром.">
+<Figure n={Astro.props.n ?? "3.10"} caption="Внутри макетной платы гнёзда соединены группами: каждые пять гнёзд одного столбца (a–e или f–j) — одна цепь (подсвечено), по разные стороны центральной канавки — разные цепи. Длинные шины вдоль краёв — для питания (+) и земли (−). У некоторых плат шины разорваны посередине: проверь мультиметром.">
 	<svg viewBox="0 0 640 300" role="img" aria-label="Макетная плата сверху: две пары шин питания по краям, посередине 16 столбцов по пять гнёзд сверху и снизу от канавки. Один столбец подсвечен как единая цепь.">
 		<rect x="20" y="10" width="600" height="280" rx="8" fill="var(--sl-color-gray-6)" stroke="var(--sl-color-gray-4)" />
 		<!-- шины -->
@@ -38,7 +38,7 @@ const hl = 4; // подсвеченный столбец
 		<rect x="40" y="148" width="570" height="10" fill="var(--sl-color-gray-5)" />
 		<!-- подсветка одного столбца -->
 		<rect x={x0 + hl * pitch - 9} y={yTop(0) - 9} width="18" height="82" rx="4" fill="var(--sl-color-accent)" opacity="0.35" />
-		<rect x={x0 + hl * pitch - 9} y={yBot(0) - 9} width="18" height="82" rx="4" fill="var(--pcb-altium)" opacity="0.3" />
+		<rect x={x0 + hl * pitch - 9} y={yBot(0) - 9} width="18" height="82" rx="4" fill="var(--pcb-blue)" opacity="0.3" />
 		{
 			Array.from({ length: cols }, (_, c) => (
 				<g>
@@ -59,6 +59,6 @@ const hl = 4; // подсвеченный столбец
 		<rect x={x0 + hl * pitch + 12} y="91" width="120" height="18" rx="3" fill="var(--sl-color-gray-6)" />
 		<text class="t t-s t-acc" x={x0 + hl * pitch + 16} y="104">5a–5e: одна цепь</text>
 		<rect x={x0 + hl * pitch + 12} y="197" width="130" height="18" rx="3" fill="var(--sl-color-gray-6)" />
-		<text class="t t-s" x={x0 + hl * pitch + 16} y="210" fill="var(--pcb-altium)">5f–5j: другая цепь</text>
+		<text class="t t-s" x={x0 + hl * pitch + 16} y="210" fill="var(--pcb-blue)">5f–5j: другая цепь</text>
 	</svg>
 </Figure>
