@@ -30,6 +30,7 @@ import Quiz from '../../../components/interactive/Quiz.astro';
 import MosfetSwitch from '../../../components/diagrams/m02-components/MosfetSwitch.astro';
 import SymbolTable from '../../../components/interactive/SymbolTable.astro';
 import WaterTransistor from '../../../components/water/WaterTransistor.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 ## Управление напряжением, а не током
 
@@ -112,9 +113,9 @@ VGS(th) у него от 0,65 до 1,45 В. Раз RDS(on) гарантиров�
 
 ## Практика
 
-1. Нужно включать светодиодную ленту 12 В / 1,5 А от МК на 3,3 В. Какие параметры MOSFET искать? *(N-канал, VDS ≥ 20–30 В, ID с запасом ≥ 3 А, RDS(on) гарантирован при VGS ≤ 2,5–3,3 В.)*
-2. Посчитай потери на AO3400A при 1,5 А и VGS = 2,5 В. *(1,5² · 0,048 ≈ 0,11 Вт.)*
-3. Зачем резистор 100 кОм между затвором и истоком? *(Держит транзистор закрытым, пока вывод МК не настроен, и разряжает ёмкость затвора.)*
+1. Нужно включать светодиодную ленту 12 В / 1,5 А от МК на 3,3 В. Какие параметры MOSFET искать? <Reveal>N-канал, VDS ≥ 20–30 В, ID с запасом ≥ 3 А, RDS(on) гарантирован при VGS ≤ 2,5–3,3 В.</Reveal>
+2. Посчитай потери на AO3400A при 1,5 А и VGS = 2,5 В. <Reveal>1,5² · 0,048 ≈ 0,11 Вт.</Reveal>
+3. Зачем резистор 100 кОм между затвором и истоком? <Reveal>Держит транзистор закрытым, пока вывод МК не настроен, и разряжает ёмкость затвора.</Reveal>
 
 <Mistakes
   items={[

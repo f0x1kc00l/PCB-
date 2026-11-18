@@ -48,9 +48,12 @@ const { n } = Astro.props;
 			<rect data-gauge x="307" y="60" width="6" height="0" fill="var(--water-hi)" />
 			<text x="322" y="66">p</text>
 		</g>
+		<rect class="pair-hot" data-pair="src" x="36" y="116" width="48" height="48" rx="8" tabindex="0" data-say="Насос ↔ батарейка: создаёт давление (напряжение), но сам не «расходуется» — гонит воду (заряды) по кругу." />
+		<rect class="pair-hot" data-pair="r" x="274" y="98" width="32" height="84" rx="8" tabindex="0" data-say="Сужение ↔ резистор: на нём теряется давление (падает напряжение), и чем уже — тем меньше расход (ток)." />
+		<rect class="pair-hot" data-pair="sw" x="150" y="212" width="50" height="36" rx="8" tabindex="0" data-say="Кран ↔ ключ. Осторожно со словами: кран «открыт» — течёт, а ключ течёт, когда «замкнут»." />
 		<g data-dw></g>
 	</svg>
-	<svg viewBox="340 8 340 282" style="--w:340" aria-hidden="true">
+	<svg viewBox="340 8 340 282" style="--w:340" role="img" aria-label="Электрическая цепь: батарейка, резистор, ключ.">
 		<text class="th" x="505" y="22" text-anchor="middle">Электричество</text>
 		<!-- электричество -->
 		<g stroke-width="5">
@@ -69,9 +72,13 @@ const { n } = Astro.props;
 		<text class="ts" x="414" y="144">батарейка</text>
 		<text class="ts" x="600" y="144" text-anchor="end">резистор</text>
 		<text class="ts" x="505" y="262" text-anchor="middle">ключ</text>
+		<rect class="pair-hot" data-pair="src" x="360" y="120" width="60" height="40" rx="8" tabindex="0" data-say="Насос ↔ батарейка: создаёт давление (напряжение), но сам не «расходуется» — гонит воду (заряды) по кругу." />
+		<rect class="pair-hot" data-pair="r" x="603" y="102" width="34" height="76" rx="8" tabindex="0" data-say="Сужение ↔ резистор: на нём теряется давление (падает напряжение), и чем уже — тем меньше расход (ток)." />
+		<rect class="pair-hot" data-pair="sw" x="482" y="216" width="46" height="28" rx="8" tabindex="0" data-say="Кран ↔ ключ. Осторожно со словами: кран «открыт» — течёт, а ключ течёт, когда «замкнут»." />
 		<g data-de></g>
 	</svg>
 	</div>
+	<p class="water__pairnote" data-pairnote>Наведи или нажми на насос, сужение или кран — подсветится его электрический двойник.</p>
 	<div class="water__controls">
 		<label class="water__row"><span>Давление насоса = напряжение U</span><input type="range" data-u min="0" max="12" step="0.5" value="6" /><output data-uv>6 В</output></label>
 		<label class="water__row"><span>Сужение = сопротивление R</span><input type="range" data-r min="1" max="20" step="1" value="3" /><output data-rv>3 Ом</output></label>

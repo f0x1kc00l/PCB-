@@ -102,6 +102,9 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Частота f (лог.)</span><input type="range" data-f min="1" max="3" step="0.01" value="2.2" /><output data-fv></output></label>
+		<label class="water__row"><span>Сужение R</span><input type="range" data-r min="1" max="100" step="1" value="10" /><output data-rv></output></label>
+		<label class="water__row"><span>Колесо L (лог.)</span><input type="range" data-l min="0" max="2" step="0.01" value="1" /><output data-lv></output></label>
+		<label class="water__row"><span>Мембрана C (лог.)</span><input type="range" data-c min="1" max="3" step="0.01" value="2" /><output data-cv></output></label>
 	</div>
 	<p class="water__readout" data-fx></p>
 	<p class="water__note" data-fx2></p>
@@ -110,15 +113,15 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 <script>
 	import { Path, Drops, animate, paint, fm, si, $ } from '../../lib/water';
 
-	const R0 = 10,
-		L0 = 10e-3,
-		C0 = 100e-6,
-		UM = 10;
+	const UM = 10;
 	class WaterAC extends HTMLElement {
 		connectedCallback() {
 			const r = this;
 			let el = (r.querySelector('input[type=radio]:checked') as HTMLInputElement).value,
 				f = 10 ** 2.2,
+				R0 = 10,
+				L0 = 10e-3,
+				C0 = 100e-6,
 				th = 0;
 			const drops = new Drops($(r, '[data-d]'), new Path([[50, 140], [50, 40], [220, 40], [220, 260], [50, 260], [50, 140]]), 15);
 			let phi = 0,
@@ -139,6 +142,9 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 				phi = Math.atan2(Zx, Zr);
 				Im = UM / Zm;
 				$(r, '[data-fv]').textContent = si(f, 'Гц');
+				$(r, '[data-rv]').textContent = R0 + ' Ом';
+				$(r, '[data-lv]').textContent = si(L0, 'Гн');
+				$(r, '[data-cv]').textContent = si(C0, 'Ф');
 				for (const k of ['R', 'L', 'C'])
 					($(r, `[data-e${k}]`) as SVGGElement).style.opacity = el.includes(k) ? '1' : '0.15';
 				// статичные графики за два периода
@@ -164,12 +170,15 @@ const OPTS = ['R', 'L', 'C', 'RL', 'RC', 'RLC'] as const;
 				const deg = (phi * 180) / Math.PI;
 				$(r, '[data-phi]').textContent = `φ = ${fm(deg, 0)}°`;
 				$(r, '[data-fx]').textContent = `Z = ${fm(Zr, 1)} ${Zx >= 0 ? '+' : '−'} j${fm(Math.abs(Zx), 1)} Ом · |Z| = ${fm(Math.hypot(Zr, Zx), 1)} Ом · Im = ${si(Im, 'А')}`;
-				$(r, '[data-fx2]').textContent = `XL = ωL = ${fm(Xl, 1)} Ом, XC = 1/(ωC) = ${fm(Xc, 1)} Ом. P = U·I·cosφ = ${fm(U * I * Math.cos(phi), 2)} Вт (уходит в тепло), Q = U·I·sinφ = ${fm(U * I * Math.sin(phi), 2)} вар (качается туда-обратно), S = U·I = ${fm(U * I, 2)} В·А.${el === 'RLC' && Math.abs(Zx) < 1 ? ' Резонанс: XL ≈ XC, мембрана и колесо отдают энергию друг другу, насос видит чистое R.' : ''}`;
+				$(r, '[data-fx2]').textContent = `XL = ωL = ${fm(Xl, 1)} Ом, XC = 1/(ωC) = ${fm(Xc, 1)} Ом. P = U·I·cosφ = ${fm(U * I * Math.cos(phi), 2)} Вт (уходит в тепло), Q = U·I·sinφ = ${fm(U * I * Math.sin(phi), 2)} вар (качается туда-обратно), S = U·I = ${fm(U * I, 2)} В·А.${el === 'RLC' && Math.abs(Zx) < 1 ? ' Резонанс: XL ≈ XC, мембрана и колесо отдают энергию друг другу, насос видит чистое R.' : ''}${el.includes('L') && el.includes('C') ? ` Резонансная частота f₀ = 1/(2π√(LC)) = ${si(1 / (2 * Math.PI * Math.sqrt(L0 * C0)), 'Гц')}.` : ''}`;
 			};
 			calc();
 			r.addEventListener('input', (e) => {
 				const t = e.target as HTMLInputElement;
 				if (t.matches('[data-f]')) f = 10 ** +t.value;
+				if (t.matches('[data-r]')) R0 = +t.value;
+				if (t.matches('[data-l]')) L0 = 10 ** +t.value * 1e-3;
+				if (t.matches('[data-c]')) C0 = 10 ** +t.value * 1e-6;
 				if (t.type === 'radio') el = t.value;
 				calc();
 			});

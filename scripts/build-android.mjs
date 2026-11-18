@@ -12,6 +12,7 @@ const env = { ...process.env, CAPACITOR: '1' };
 const run = (cmd) => execSync(cmd, { stdio: 'inherit', env });
 
 run('npx astro build');
+run('node scripts/postbuild.mjs');
 run('npx cap sync android');
 
 console.log('\nГотово. Дальше: открой папку android/ в Android Studio (npx cap open android)');

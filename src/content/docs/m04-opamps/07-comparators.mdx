@@ -22,6 +22,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 **Компаратор** сравнивает два напряжения и выдаёт логический уровень: «больше» или «меньше». Это ОУ без обратной связи — но специально для этого сделанный.
 
@@ -56,8 +57,8 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 ## Практика
 
-1. Компаратор LM393 от 12 В должен выдать уровень для МК на 3,3 В. Куда подключить подтягивающий резистор? *(К 3,3 В: выход — открытый коллектор, высокий уровень задаёт резистор.)*
-2. Нужен гистерезис 0,2 В при Uп = 5 В. Отношение R1/(R1 + R2)? *(0,04 → например, R1 = 10 кОм, R2 = 240 кОм.)*
+1. Компаратор LM393 от 12 В должен выдать уровень для МК на 3,3 В. Куда подключить подтягивающий резистор? <Reveal>К 3,3 В: выход — открытый коллектор, высокий уровень задаёт резистор.</Reveal>
+2. Нужен гистерезис 0,2 В при Uп = 5 В. Отношение R1/(R1 + R2)? <Reveal>0,04 → например, R1 = 10 кОм, R2 = 240 кОм.</Reveal>
 
 <Mistakes
   items={[

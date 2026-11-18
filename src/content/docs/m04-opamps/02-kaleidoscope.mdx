@@ -24,6 +24,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Те же два правила дают десятки схем. Здесь — самые нужные.
 
@@ -82,9 +83,9 @@ import M from '../../../components/lesson/M.astro';
 
 ## Практика
 
-1. Сумматор: R1 = R2 = R3 = Rос = 10 кОм, входы 0,5; 1; −0,3 В. Выход? *(−(0,5 + 1 − 0,3) = −1,2 В.)*
-2. Интегратор: R = 100 кОм, C = 1 мкФ, на входе 1 В. Скорость изменения выхода? *(−1/(0,1) = −10 В/с.)*
-3. Фотодиод даёт 2 мкА, нужно 2 В на выходе. R? *(1 МОм; выход −2 В в инвертирующем включении.)*
+1. Сумматор: R1 = R2 = R3 = Rос = 10 кОм, входы 0,5; 1; −0,3 В. Выход? <Reveal>−(0,5 + 1 − 0,3) = −1,2 В.</Reveal>
+2. Интегратор: R = 100 кОм, C = 1 мкФ, на входе 1 В. Скорость изменения выхода? <Reveal>−1/(0,1) = −10 В/с.</Reveal>
+3. Фотодиод даёт 2 мкА, нужно 2 В на выходе. R? <Reveal>1 МОм; выход −2 В в инвертирующем включении.</Reveal>
 
 <Mistakes
   items={[

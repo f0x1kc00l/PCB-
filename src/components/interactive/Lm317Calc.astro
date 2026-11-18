@@ -1,0 +1,129 @@
+---
+/**
+ * LM317: регулируемый стабилизатор напряжения и источник тока.
+ *   Uвых = Uоп · (1 + R2/R1) + Iadj · R2,  Uоп ≈ 1,25 В, Iadj ≈ 50 мкА
+ *   источник тока: I = Uоп / R
+ */
+const uid = `lm-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<lm317-calc class="pcb-widget pcb-calc not-content">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">LM317: напряжение и ток</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+	<div class="pcb-segmented" role="radiogroup" aria-label="Режим">
+		<label><input type="radio" name={`${uid}-m`} value="v" checked /><span>Стабилизатор напряжения</span></label>
+		<label><input type="radio" name={`${uid}-m`} value="i" /><span>Источник тока</span></label>
+	</div>
+
+	<div class="fields" style="margin-top:0.9rem" data-mode="v">
+		<label>Нужно Uвых, В <input name="vout" value="5" inputmode="decimal" autocomplete="off" /></label>
+		<label>R1 (выход → ADJ), Ом <input name="r1" value="240" inputmode="decimal" autocomplete="off" /><span class="hint">240 Ом — как в даташите</span></label>
+	</div>
+	<div class="fields" style="margin-top:0.9rem" data-mode="i" hidden>
+		<label>Нужный ток, А <input name="iset" value="100m" inputmode="decimal" autocomplete="off" /></label>
+		<label>Напряжение на нагрузке макс., В <input name="vload" value="6" inputmode="decimal" autocomplete="off" /></label>
+	</div>
+	<div class="fields" style="margin-top:0.75rem">
+		<label>Uвх, В <input name="vin" value="12" inputmode="decimal" autocomplete="off" /></label>
+		<label data-mode="v">Ток нагрузки, А <input name="il" value="0,5" inputmode="decimal" autocomplete="off" /></label>
+	</div>
+
+	<div class="results" data-mode="v">
+		<div class="result"><span>Расчётное R2</span><output data-o="r2">—</output></div>
+		<div class="result result--main"><span>R2 из E24 → Uвых</span><output data-o="e24">—</output></div>
+		<div class="result"><span>R2 из E96 → Uвых</span><output data-o="e96">—</output></div>
+		<div class="result"><span>Мощность на LM317</span><output data-o="p">—</output></div>
+	</div>
+	<div class="results" data-mode="i" hidden>
+		<div class="result"><span>Расчётное R</span><output data-o="ri">—</output></div>
+		<div class="result result--main"><span>R из E24 → ток</span><output data-o="rie">—</output></div>
+		<div class="result"><span>Мощность на R</span><output data-o="pri">—</output></div>
+		<div class="result"><span>Мощность на LM317 (худший случай)</span><output data-o="pi">—</output></div>
+	</div>
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		LM317 держит между выходом и ADJ ≈ 1,25 В. В режиме напряжения ток через R1 (≈ 5 мА при 240 Ом) заодно служит минимальной
+		нагрузкой. В режиме источника тока резистор R стоит между выходом и ADJ, нагрузка — после ADJ. Для работы нужно
+		Uвх − Uвых ≈ 3 В и больше (точно — график dropout в даташите), но не больше 40 В. Корпус TO-220 без радиатора рассеивает
+		около 1–2 Вт; больше — считай радиатор.
+	</p>
+</lm317-calc>
+
+<script>
+	import '../../lib/reset';
+	import { parseValue, formatValue, SERIES, seriesNeighbors } from '../../lib/units';
+
+	const VREF = 1.25,
+		IADJ = 50e-6,
+		HEAD = 3;
+
+	class Lm317Calc extends HTMLElement {
+		connectedCallback() {
+			const val = (n: string) => parseValue(this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!.value);
+			const o = (n: string) => this.querySelector(`[data-o="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const update = () => {
+				const mode = this.querySelector<HTMLInputElement>('input[type=radio]:checked')?.value ?? 'v';
+				this.querySelectorAll<HTMLElement>('[data-mode]').forEach((el) => (el.hidden = el.dataset.mode !== mode));
+				const vin = val('vin');
+				const msgs: string[] = [];
+				if (mode === 'v') {
+					const vout = val('vout'),
+						r1 = val('r1'),
+						il = val('il');
+					if (!(vout > VREF && r1 > 0)) {
+						['r2', 'e24', 'e96', 'p'].forEach((k) => (o(k).textContent = '—'));
+						warn.innerHTML = '<li>Uвых должно быть больше 1,25 В, R1 — положительным.</li>';
+						return;
+					}
+					const r2 = (vout - VREF) / (VREF / r1 + IADJ);
+					const u = (R2: number) => VREF * (1 + R2 / r1) + IADJ * R2;
+					const a = seriesNeighbors(r2, SERIES.E24.values).nearest;
+					const b = seriesNeighbors(r2, SERIES.E96.values).nearest;
+					o('r2').textContent = formatValue(r2, 'Ом');
+					o('e24').textContent = `${formatValue(a, 'Ом')} → ${formatValue(u(a), 'В')}`;
+					o('e96').textContent = `${formatValue(b, 'Ом')} → ${formatValue(u(b), 'В')}`;
+					const itot = (il > 0 ? il : 0) + VREF / r1;
+					const p = (vin - vout) * itot;
+					o('p').textContent = vin > vout ? formatValue(p, 'Вт', 2) : '—';
+					if (r1 > 240 * 1.05) msgs.push('R1 больше 240 Ом: ток через делитель меньше ≈ 5 мА — при отключённой нагрузке выход может «уплыть» вверх. Добавь нагрузку или уменьши R1.');
+					if (vin - vout < HEAD) msgs.push(`Uвх − Uвых = ${formatValue(vin - vout, 'В')} — меньше ≈ 3 В. На полном токе стабилизатор может выйти из стабилизации.`);
+					if (vin - vout > 40) msgs.push('Перепад вход–выход больше 40 В — за пределом LM317.');
+					if (il > 1.5) msgs.push('Больше 1,5 А — предел LM317 в TO-220. Нужен другой стабилизатор или импульсный.');
+					if (p > 1.5) msgs.push(`На корпусе ${formatValue(p, 'Вт', 2)} — нужен радиатор (см. калькулятор радиатора).`);
+				} else {
+					const iset = val('iset'),
+						vload = val('vload');
+					if (!(iset > 0)) {
+						['ri', 'rie', 'pri', 'pi'].forEach((k) => (o(k).textContent = '—'));
+						warn.innerHTML = '';
+						return;
+					}
+					const r = VREF / iset;
+					const re = seriesNeighbors(r, SERIES.E24.values).nearest;
+					const ireal = VREF / re + IADJ;
+					o('ri').textContent = formatValue(r, 'Ом');
+					o('rie').textContent = `${formatValue(re, 'Ом')} → ${formatValue(ireal, 'А')}`;
+					o('pri').textContent = formatValue(VREF * ireal, 'Вт', 2);
+					const pw = (vin - VREF) * ireal; // нагрузка закорочена
+					o('pi').textContent = formatValue(pw, 'Вт', 2);
+					if (vin - VREF - (vload > 0 ? vload : 0) < HEAD)
+						msgs.push(`Не хватает напряжения: нужно Uвх ≳ Uнагр + 1,25 В + 3 В = ${formatValue((vload > 0 ? vload : 0) + VREF + HEAD, 'В')}.`);
+					if (iset < 10e-3) msgs.push('Меньше ≈ 10 мА: LM317 нужен минимальный ток нагрузки (3,5–10 мА по даташиту), ток будет неточным.');
+					if (pw > 1.5) msgs.push('Если нагрузку замкнуть, всё напряжение ляжет на LM317 — посчитай радиатор под этот случай.');
+				}
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('lm317-calc', Lm317Calc);
+</script>

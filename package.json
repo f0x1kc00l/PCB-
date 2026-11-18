@@ -10,11 +10,14 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/postbuild.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "build:android": "node scripts/build-android.mjs",
-    "open:android": "cap open android"
+    "open:android": "cap open android",
+    "check": "npm run build && node scripts/check/links.mjs && node scripts/check/physics.mjs",
+    "check:ui": "node scripts/check/ui.mjs",
+    "sheets": "python3 scripts/gen_sheets.py"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.10",
@@ -26,6 +29,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
     "katex": "^0.16.22",
+    "playwright": "^1.65.1",
     "typescript": "^5.9.3"
   }
 }

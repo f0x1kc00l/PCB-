@@ -26,7 +26,14 @@ const materials = [
 ---
 
 <microstrip-calc class="pcb-widget pcb-calc not-content" data-mode={mode}>
-	<p class="pcb-widget__title">Микрополосковая линия</p>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Микрополосковая линия</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
 
 	<div class="pcb-segmented" role="radiogroup" aria-label="Что найти">
 		<label><input type="radio" name={`${uid}-mode`} value="width" checked={mode === 'width'} /><span>Ширину по Z0</span></label>
@@ -87,6 +94,7 @@ const materials = [
 </microstrip-calc>
 
 <script>
+	import '../../lib/reset';
 	import { lineInfo, widthFor } from '../../lib/microstrip';
 	import { parseValue, formatNumber } from '../../lib/units';
 

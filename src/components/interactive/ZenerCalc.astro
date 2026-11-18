@@ -1,0 +1,93 @@
+---
+/**
+ * Параметрический стабилизатор: резистор + стабилитрон.
+ *   R ≤ (Uвх.мин − Uст) / (Iн.макс + Iст.мин)
+ * Худший случай для стабилитрона — максимальное Uвх и минимальная нагрузка.
+ */
+---
+
+<zener-calc class="pcb-widget pcb-calc not-content">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Стабилизатор на стабилитроне</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+	<div class="fields">
+		<label>Uвх минимум, В <input name="vmin" value="9" inputmode="decimal" autocomplete="off" /></label>
+		<label>Uвх максимум, В <input name="vmax" value="12" inputmode="decimal" autocomplete="off" /></label>
+		<label>Напряжение стабилизации Uст, В <input name="vz" value="5,1" inputmode="decimal" autocomplete="off" /></label>
+		<label>Ток нагрузки макс., А <input name="ilmax" value="20m" inputmode="decimal" autocomplete="off" /></label>
+		<label>Ток нагрузки мин., А <input name="ilmin" value="0" inputmode="decimal" autocomplete="off" /><span class="hint">0 — нагрузку могут отключить</span></label>
+		<label>Мин. ток стабилитрона, А <input name="izmin" value="5m" inputmode="decimal" autocomplete="off" /><span class="hint">ниже — стабилизация плохая; см. даташит</span></label>
+	</div>
+	<div class="results">
+		<div class="result"><span>R не больше</span><output data-o="rmax">—</output></div>
+		<div class="result result--main"><span>Ставь (E24, вниз)</span><output data-o="r">—</output></div>
+		<div class="result"><span>Макс. ток стабилитрона</span><output data-o="iz">—</output></div>
+		<div class="result"><span>Мощность на стабилитроне</span><output data-o="pz">—</output></div>
+		<div class="result"><span>Мощность на R</span><output data-o="pr">—</output></div>
+		<div class="result"><span>КПД при полной нагрузке</span><output data-o="eff">—</output></div>
+	</div>
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		Резистор считается по худшему случаю для нагрузки: Uвх минимальное, ток нагрузки максимальный, а через стабилитрон всё ещё
+		должен идти хотя бы минимальный ток. Стабилитрон считается по худшему случаю для себя: Uвх максимальное, нагрузка отключена —
+		весь ток идёт через него. Для токов больше десятков миллиампер ставят эмиттерный повторитель после стабилитрона или
+		готовый стабилизатор.
+	</p>
+</zener-calc>
+
+<script>
+	import '../../lib/reset';
+	import { parseValue, formatValue, SERIES, seriesNeighbors } from '../../lib/units';
+
+	class ZenerCalc extends HTMLElement {
+		connectedCallback() {
+			const inp = (n: string) => parseValue(this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!.value);
+			const o = (n: string) => this.querySelector(`[data-o="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const update = () => {
+				const vmin = inp('vmin'),
+					vmax = inp('vmax'),
+					vz = inp('vz'),
+					ilmax = inp('ilmax'),
+					ilmin = inp('ilmin'),
+					izmin = inp('izmin');
+				const msgs: string[] = [];
+				const keys = ['rmax', 'r', 'iz', 'pz', 'pr', 'eff'];
+				if (![vmin, vmax, vz, ilmax, ilmin, izmin].every((x) => x >= 0) || vmax < vmin || vz <= 0) {
+					keys.forEach((k) => (o(k).textContent = '—'));
+					warn.innerHTML = '<li>Проверь поля: Uвх.макс ≥ Uвх.мин, всё неотрицательное.</li>';
+					return;
+				}
+				if (vmin <= vz) {
+					keys.forEach((k) => (o(k).textContent = '—'));
+					warn.innerHTML = '<li>Uвх.мин должно быть больше Uст — иначе стабилитрону не из чего «срезать». Нужен запас хотя бы 1–2 В.</li>';
+					return;
+				}
+				const rmax = (vmin - vz) / (ilmax + izmin);
+				const r = seriesNeighbors(rmax, SERIES.E24.values).below;
+				const izmax = (vmax - vz) / r - ilmin;
+				const pz = vz * izmax;
+				const pr = (vmax - vz) ** 2 / r;
+				const eff = (vz * ilmax) / (vmin * ((vmin - vz) / r));
+				o('rmax').textContent = formatValue(rmax, 'Ом');
+				o('r').textContent = formatValue(r, 'Ом');
+				o('iz').textContent = formatValue(izmax, 'А');
+				o('pz').textContent = formatValue(pz, 'Вт', 2);
+				o('pr').textContent = formatValue(pr, 'Вт', 2);
+				o('eff').textContent = `${Math.round(eff * 100)} %`;
+				if (pz > 0.5) msgs.push('Больше 0,5 Вт — маленький стабилитрон в стеклянном корпусе (DO-35) этого не выдержит. Бери на 1 Вт и больше или ставь повторитель.');
+				else if (pz > 0.25) msgs.push('Больше 0,25 Вт: для стабилитрона на 0,5 Вт это уже без запаса по нагреву (лучше вдвое).');
+				if (vmin - vz < 1) msgs.push('Запас Uвх − Uст меньше 1 В: при просадке входа стабилизация пропадёт.');
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+			};
+			this.addEventListener('input', update);
+			update();
+		}
+	}
+	customElements.define('zener-calc', ZenerCalc);
+</script>

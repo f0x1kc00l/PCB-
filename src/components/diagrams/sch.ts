@@ -4,8 +4,10 @@
  *
  * Двухполюсники (резистор, конденсатор, диод, катушка, кварц) рисуются вдоль отрезка (x1,y1)→(x2,y2)
  * под любым углом: корпус по центру, выводы до концов отрезка.
- * Обозначения близки к ГОСТ 2.728/2.730 (резистор — прямоугольник, транзистор — в окружности);
- * операционный усилитель — треугольником, как у Хоровица и в даташитах.
+ * По умолчанию — «как в книге»: резистор прямоугольником (ГОСТ 2.728), транзистор в окружности,
+ * операционный усилитель треугольником (как в русском издании Хоровица).
+ * Варианты для переключателя обозначений лежат в группах .sym-std / .sym-ansi / .sym-tri / .sym-gost / .sym-iec,
+ * какая видна — решает атрибут <html data-sym="gost|iec|ansi"> (стили — custom.css, скрипт — src/lib/sym.ts).
  */
 
 type P = [number, number];
@@ -38,8 +40,18 @@ function two(x1: number, y1: number, x2: number, y2: number, half: number, body:
 }
 
 /** Резистор (прямоугольник 30×10 по ГОСТ). */
+/** Зигзаг резистора по ANSI (полудлина 15). */
+const ZIG = 'M-15 0 L-12.5 -6 L-7.5 6 L-2.5 -6 L2.5 6 L7.5 -6 L12.5 6 L15 0';
 export function res(x1: number, y1: number, x2: number, y2: number, cls = 'ln'): string {
-	return two(x1, y1, x2, y2, 15, `<rect class="${cls}" x="-15" y="-5" width="30" height="10"/>`, cls);
+	return two(
+		x1,
+		y1,
+		x2,
+		y2,
+		15,
+		`<g class="sym-std"><rect class="${cls}" x="-15" y="-5" width="30" height="10"/></g><g class="sym-ansi"><path class="${cls}" d="${ZIG}"/></g>`,
+		cls,
+	);
 }
 /** Переменный резистор/потенциометр: резистор + стрелка. */
 export function pot(x1: number, y1: number, x2: number, y2: number): string {
@@ -49,7 +61,7 @@ export function pot(x1: number, y1: number, x2: number, y2: number): string {
 		x2,
 		y2,
 		15,
-		`<rect class="ln" x="-15" y="-5" width="30" height="10"/><path class="ln" d="M-12 12 L12 -12 M5 -12 H12 V-5"/>`,
+		`<g class="sym-std"><rect class="ln" x="-15" y="-5" width="30" height="10"/></g><g class="sym-ansi"><path class="ln" d="${ZIG}"/></g><path class="ln" d="M-12 12 L12 -12 M5 -12 H12 V-5"/>`,
 	);
 }
 /** Конденсатор неполярный. */
@@ -63,13 +75,23 @@ export function capPol(x1: number, y1: number, x2: number, y2: number): string {
 	const px = (x1 + x2) / 2 - Math.cos(ang) * 12 - Math.sin(ang) * 12;
 	const py = (y1 + y2) / 2 - Math.sin(ang) * 12 + Math.cos(ang) * 12;
 	return (
-		two(x1, y1, x2, y2, 4, `<path class="ln" d="M-4 -11 V11" stroke-width="2.6"/><rect class="ln" x="2" y="-11" width="4" height="22"/>`) +
+		two(
+			x1,
+			y1,
+			x2,
+			y2,
+			4,
+			`<path class="ln" d="M-4 -11 V11" stroke-width="2.6"/><g class="sym-std"><rect class="ln" x="2" y="-11" width="4" height="22"/></g><g class="sym-ansi"><path class="ln" d="M7 -11 Q1 0 7 11" stroke-width="2.6"/></g>`,
+		) +
 		`<text class="t t-s" x="${f(px)}" y="${f(py + 4)}" text-anchor="middle">+</text>`
 	);
 }
 /** Диод: анод (x1,y1) → катод (x2,y2). kind: zener — стабилитрон, led — светодиод, schottky — диод Шоттки. */
 export function diode(x1: number, y1: number, x2: number, y2: number, kind: '' | 'zener' | 'led' | 'schottky' = '', cls = 'ln'): string {
-	let b = `<path class="${cls}" d="M-8 -9 L8 0 L-8 9 Z" fill="none"/><path class="${cls}" d="M8 -9 V9"/>`;
+	let b =
+		`<g class="sym-std"><path class="${cls}" d="M-8 -9 L8 0 L-8 9 Z" fill="none"/></g>` +
+		`<g class="sym-ansi"><path class="${cls}" d="M-8 -9 L8 0 L-8 9 Z" fill="currentColor"/></g>` +
+		`<path class="${cls}" d="M8 -9 V9"/>`;
 	if (kind === 'zener') b += `<path class="${cls}" d="M8 -9 H3"/>`;
 	if (kind === 'schottky') b += `<path class="${cls}" d="M8 -9 H4 V-5 M8 9 H12 V5"/>`;
 	if (kind === 'led')
@@ -228,11 +250,23 @@ export function fet(
 export function opamp(x: number, y: number, o: { plusTop?: boolean; label?: string } = {}): string {
 	const top = o.plusTop ? '+' : '−';
 	const bot = o.plusTop ? '−' : '+';
-	return (
-		`<path class="ln" d="M${x + 10} ${y - 30} L${x + 60} ${y} L${x + 10} ${y + 30} Z"/>` +
-		`<path class="ln" d="M${x} ${y - 14} H${x + 10} M${x} ${y + 14} H${x + 10} M${x + 60} ${y} H${x + 70}"/>` +
+	const yInv = o.plusTop ? y + 14 : y - 14; // инвертирующий вход
+	const yNon = o.plusTop ? y - 14 : y + 14;
+	const signs =
 		`<text class="t" x="${x + 15}" y="${y - 9}" font-weight="700">${top}</text>` +
-		`<text class="t" x="${x + 15}" y="${y + 19}" font-weight="700">${bot}</text>` +
+		`<text class="t" x="${x + 15}" y="${y + 19}" font-weight="700">${bot}</text>`;
+	const rect = `<rect class="ln" x="${x + 10}" y="${y - 30}" width="50" height="60"/>`;
+	const amp = `<text class="t t-s" x="${x + 42}" y="${y - 16}" text-anchor="middle">▷ ∞</text>`;
+	return (
+		`<path class="ln" d="M${x + 60} ${y} H${x + 70}"/>` +
+		// «как в книге» и ANSI — треугольник со знаками входов
+		`<g class="sym-tri"><path class="ln" d="M${x + 10} ${y - 30} L${x + 60} ${y} L${x + 10} ${y + 30} Z"/>` +
+		`<path class="ln" d="M${x} ${y - 14} H${x + 10} M${x} ${y + 14} H${x + 10}"/>${signs}</g>` +
+		// ГОСТ 2.759 — прямоугольник «▷ ∞», инвертирующий вход с кружком инверсии
+		`<g class="sym-gost">${rect}${amp}<path class="ln" d="M${x} ${yNon} H${x + 10} M${x} ${yInv} H${x + 4}"/>` +
+		`<circle class="ln" cx="${x + 7}" cy="${yInv}" r="3" fill="var(--sl-color-bg, #fff)"/></g>` +
+		// IEC 60617 — прямоугольник «▷ ∞», входы подписаны «+» и «−»
+		`<g class="sym-iec">${rect}${amp}<path class="ln" d="M${x} ${y - 14} H${x + 10} M${x} ${y + 14} H${x + 10}"/>${signs}</g>` +
 		(o.label ? `<text class="t t-s t-mut" x="${x + 30}" y="${y + 4}" text-anchor="middle">${o.label}</text>` : '')
 	);
 }

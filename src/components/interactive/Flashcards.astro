@@ -1,0 +1,330 @@
+---
+/**
+ * Карточки для повторения: термины глоссария и формулы глав 1–6 (src/data/flashcards.json,
+ * генерируется scripts/gen_sheets.py). Система Лейтнера: «знал» — карточка уходит в коробку
+ * повыше и показывается реже, «не знал» — возвращается в первую. Прогресс — в браузере.
+ */
+import katex from 'katex';
+import cards from '../../data/flashcards.json';
+
+const math = (tex: string) => katex.renderToString('\\displaystyle ' + tex, { output: 'mathml', throwOnError: false });
+const decks: [string, string][] = [
+	['terms', 'Термины'],
+	['f1', 'Формулы: глава 1'],
+	['f2', 'Формулы: глава 2'],
+	['f3', 'Формулы: глава 3'],
+	['f4', 'Формулы: глава 4'],
+	['f5', 'Формулы: глава 5'],
+	['f6', 'Формулы: глава 6'],
+];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const data = (cards as any[]).map((c) =>
+	c.deck === 'terms'
+		? { id: c.id, d: c.deck, f: c.front, b: `<p class="fc__def">${c.back}</p><p class="fc__en">${c.en}</p>` }
+		: {
+				id: c.id,
+				d: c.deck,
+				f: `<div class="fc__math">${math(c.front)}</div><p class="fc__hint">${c.hint}</p>`,
+				b: `<div class="fc__math">${math(c.back)}</div><p class="fc__hint"><a href="${base}/${c.href}/">${c.hint}</a></p>`,
+			},
+);
+const counts = Object.fromEntries(decks.map(([k]) => [k, data.filter((c) => c.d === k).length]));
+---
+
+<flash-cards class="pcb-widget not-content fc">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Карточки для повторения</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-reset" data-restart title="Перемешать и начать колоду заново">↺ Заново</button>
+		</div>
+	</div>
+	<label class="fc__deck">
+		Колода
+		<select data-deck>
+			{decks.map(([k, l]) => <option value={k}>{`${l} (${counts[k]})`}</option>)}
+		</select>
+	</label>
+	<div class="fc__bar" aria-hidden="true"><span data-bar></span></div>
+	<p class="fc__stat" data-stat></p>
+	<button type="button" class="fc__card" data-card aria-live="polite">
+		<span class="fc__side" data-front></span>
+		<span class="fc__side fc__back" data-back hidden></span>
+		<span class="fc__tap" data-tap>Нажми, чтобы перевернуть</span>
+	</button>
+	<div class="fc__btns">
+		<button type="button" class="fc__no" data-no disabled>✗ Не знал</button>
+		<button type="button" class="fc__yes" data-yes disabled>✓ Знал</button>
+	</div>
+	<p class="footnote">
+		Сначала вспомни ответ сам, потом переверни. Честно отвечай «знал / не знал»: знакомые карточки будут попадаться реже, трудные —
+		чаще. Карточка «выучена», когда ты ответил правильно три раза подряд. <button type="button" class="fc__wipe" data-wipe>Сбросить прогресс этой колоды</button>
+	</p>
+	<script type="application/json" data-cards set:html={JSON.stringify(data)} />
+</flash-cards>
+
+<script>
+	type Card = { id: string; d: string; f: string; b: string };
+	const KEY = 'pcb-course:cards:v1';
+	const DKEY = 'pcb-course:cards-deck:v1';
+	const load = (): Record<string, number> => {
+		try {
+			return JSON.parse(localStorage.getItem(KEY) ?? '{}');
+		} catch {
+			return {};
+		}
+	};
+	const save = (m: Record<string, number>) => {
+		try {
+			localStorage.setItem(KEY, JSON.stringify(m));
+		} catch {
+			/* хранилище недоступно */
+		}
+	};
+
+	class FlashCards extends HTMLElement {
+		connectedCallback() {
+			const all: Card[] = JSON.parse(this.querySelector('[data-cards]')!.textContent!);
+			const q = <T extends Element>(s: string) => this.querySelector<T>(s)!;
+			const deckSel = q<HTMLSelectElement>('[data-deck]');
+			try {
+				const d = localStorage.getItem(DKEY);
+				if (d && [...deckSel.options].some((o) => o.value === d)) deckSel.value = d;
+			} catch {
+				/* нет хранилища */
+			}
+			let boxes = load();
+			let queue: Card[] = [];
+			let cur: Card | null = null;
+			let flipped = false;
+
+			const deck = () => all.filter((c) => c.d === deckSel.value);
+			const stat = () => {
+				const d = deck();
+				const learned = d.filter((c) => (boxes[c.id] ?? 0) >= 3).length;
+				q('[data-stat]').textContent = `Выучено ${learned} из ${d.length}. В этом круге осталось ${queue.length + (cur ? 1 : 0)}.`;
+				q<HTMLElement>('[data-bar]').style.width = `${d.length ? (learned / d.length) * 100 : 0}%`;
+			};
+			const build = () => {
+				// сначала невыученные (коробка 0–2), внутри — случайный порядок; выученные — в конец
+				const d = deck().map((c) => ({ c, k: (boxes[c.id] ?? 0) + Math.random() }));
+				d.sort((a, b) => a.k - b.k);
+				queue = d.map((x) => x.c);
+			};
+			const show = () => {
+				cur = queue.shift() ?? null;
+				flipped = false;
+				const front = q<HTMLElement>('[data-front]'),
+					back = q<HTMLElement>('[data-back]');
+				back.hidden = true;
+				front.hidden = false;
+				q<HTMLElement>('[data-tap]').hidden = !cur;
+				q<HTMLButtonElement>('[data-yes]').disabled = true;
+				q<HTMLButtonElement>('[data-no]').disabled = true;
+				if (!cur) {
+					front.innerHTML = '<p class="fc__done">Круг пройден! 🎉<br>Нажми «Заново», чтобы прогнать колоду ещё раз — знакомые карточки уйдут в конец.</p>';
+				} else front.innerHTML = cur.f;
+				stat();
+			};
+			const flip = () => {
+				if (!cur) return;
+				flipped = !flipped;
+				q<HTMLElement>('[data-front]').hidden = flipped;
+				const back = q<HTMLElement>('[data-back]');
+				back.hidden = !flipped;
+				if (flipped) back.innerHTML = cur.b;
+				q<HTMLButtonElement>('[data-yes]').disabled = false;
+				q<HTMLButtonElement>('[data-no]').disabled = false;
+				q<HTMLElement>('[data-tap]').hidden = true;
+			};
+			const answer = (ok: boolean) => {
+				if (!cur) return;
+				boxes = load();
+				boxes[cur.id] = ok ? Math.min(5, (boxes[cur.id] ?? 0) + 1) : 0;
+				save(boxes);
+				// не знал — карточка вернётся в этом же круге, через несколько карточек
+				if (!ok) queue.splice(Math.min(queue.length, 3), 0, cur);
+				show();
+			};
+			const restart = () => {
+				build();
+				show();
+			};
+			q('[data-card]').addEventListener('click', (e) => {
+				if ((e.target as Element).closest('a')) return;
+				flip();
+			});
+			q('[data-yes]').addEventListener('click', () => answer(true));
+			q('[data-no]').addEventListener('click', () => answer(false));
+			q('[data-restart]').addEventListener('click', restart);
+			q('[data-wipe]').addEventListener('click', () => {
+				if (!confirm('Сбросить прогресс этой колоды?')) return;
+				boxes = load();
+				for (const c of deck()) delete boxes[c.id];
+				save(boxes);
+				restart();
+			});
+			deckSel.addEventListener('change', () => {
+				try {
+					localStorage.setItem(DKEY, deckSel.value);
+				} catch {
+					/* нет хранилища */
+				}
+				restart();
+			});
+			this.addEventListener('keydown', (e) => {
+				if ((e.target as Element).matches('select')) return;
+				if (e.key === ' ' && !(e.target as Element).matches('button')) {
+					e.preventDefault();
+					flip();
+				}
+				if (flipped && (e.key === 'ArrowRight' || e.key === '1')) answer(true);
+				if (flipped && (e.key === 'ArrowLeft' || e.key === '0')) answer(false);
+			});
+			restart();
+		}
+	}
+	customElements.define('flash-cards', FlashCards);
+</script>
+
+<style>
+	.fc__deck {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		max-width: 20rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.fc__deck select {
+		min-height: 44px;
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.4rem;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+	}
+	.fc__bar {
+		height: 6px;
+		margin-top: 0.8rem;
+		border-radius: 3px;
+		background: var(--sl-color-gray-6);
+		overflow: hidden;
+	}
+	.fc__bar span {
+		display: block;
+		height: 100%;
+		background: var(--pcb-ok);
+		transition: width 0.3s;
+	}
+	.fc__stat {
+		margin: 0.35rem 0 0.6rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.fc__card {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 100%;
+		min-height: 13rem;
+		padding: 1.2rem 1rem 2rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.8rem;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+		text-align: center;
+		cursor: pointer;
+	}
+	.fc__card:focus-visible {
+		outline: 2px solid var(--sl-color-accent);
+	}
+	.fc__side {
+		display: block;
+		font-size: var(--sl-text-xl);
+		font-weight: 650;
+		overflow-wrap: anywhere;
+	}
+	.fc__side[hidden] {
+		display: none;
+	}
+	.fc__back {
+		font-size: var(--sl-text-base);
+		font-weight: 400;
+	}
+	.fc :global(.fc__math) {
+		font-size: 1.35em;
+		overflow-x: auto;
+		max-width: 100%;
+	}
+	.fc :global(.fc__math math) {
+		font-size: 1.15em;
+	}
+	.fc :global(.fc__hint) {
+		margin: 0.6rem 0 0;
+		font-size: var(--sl-text-sm);
+		font-weight: 400;
+		color: var(--sl-color-gray-3);
+	}
+	.fc :global(.fc__def) {
+		margin: 0;
+	}
+	.fc :global(.fc__en) {
+		margin: 0.6rem 0 0;
+		font-style: italic;
+		color: var(--sl-color-gray-3);
+	}
+	.fc :global(.fc__done) {
+		margin: 0;
+		font-size: var(--sl-text-base);
+		font-weight: 400;
+	}
+	.fc__tap {
+		position: absolute;
+		bottom: 0.6rem;
+		left: 0;
+		right: 0;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.fc__tap[hidden] {
+		display: none;
+	}
+	.fc__btns {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.6rem;
+		margin-top: 0.7rem;
+	}
+	.fc__btns button {
+		min-height: 48px;
+		border-radius: 0.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.fc__btns button:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+	.fc__yes:not(:disabled) {
+		border-color: var(--pcb-ok);
+	}
+	.fc__no:not(:disabled) {
+		border-color: var(--pcb-bad);
+	}
+	.fc__wipe {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--sl-color-text-accent);
+		font: inherit;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+</style>

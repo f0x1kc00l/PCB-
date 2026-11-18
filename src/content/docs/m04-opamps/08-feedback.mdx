@@ -24,6 +24,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Золотые правила предполагают бесконечное усиление. Здесь посчитаем честно — с конечным A, — и увидим, что именно даёт обратная связь.
 
@@ -73,8 +74,8 @@ A уменьшается с частотой, а значит, и AB. На вы�
 
 ## Практика
 
-1. A = 2·10⁵, нужен G = 1000. Чему равна ошибка G из-за конечного A? *(B = 0,001, AB = 200, G = A/(1 + AB) ≈ 995, ошибка ≈ 0,5 %.)*
-2. Rвых ОУ без ОС — 100 Ом, повторитель (B = 1), A = 10⁵. Выходное сопротивление с ОС? *(≈ 1 мОм на низких частотах.)*
+1. A = 2·10⁵, нужен G = 1000. Чему равна ошибка G из-за конечного A? <Reveal>B = 0,001, AB = 200, G = A/(1 + AB) ≈ 995, ошибка ≈ 0,5 %.</Reveal>
+2. Rвых ОУ без ОС — 100 Ом, повторитель (B = 1), A = 10⁵. Выходное сопротивление с ОС? <Reveal>≈ 1 мОм на низких частотах.</Reveal>
 
 <Mistakes
   items={[

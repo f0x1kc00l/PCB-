@@ -39,7 +39,14 @@ const {
 ---
 
 <multivibrator-calc class="pcb-widget pcb-calc not-content">
-	<p class="pcb-widget__title">Калькулятор мультивибратора</p>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Калькулятор мультивибратора</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
 
 	<div class="fields">
 		<label>Uпит, В <input name="vcc" value={vcc} inputmode="decimal" autocomplete="off" /></label>
@@ -98,6 +105,7 @@ const {
 </multivibrator-calc>
 
 <script>
+	import '../../lib/reset';
 	import { parseValue, formatValue, formatNumber } from '../../lib/units';
 
 	const LN2 = Math.LN2;

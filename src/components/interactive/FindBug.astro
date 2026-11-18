@@ -1,0 +1,168 @@
+---
+/**
+ * Тренажёр «Найди косяк»: нажми на место ошибки на схеме (или выбери из списка).
+ *   <FindBug id="relay-no-diode" />
+ * Схемы и объяснения — src/components/diagrams/bugs.ts.
+ */
+import Figure from '../diagrams/Figure.astro';
+import { BUGS } from '../diagrams/bugs';
+
+interface Props {
+	id: string;
+}
+const { id } = Astro.props;
+const b = BUGS[id];
+if (!b) throw new Error(`Задача «${id}» не найдена в bugs.ts`);
+const zones = b.zones
+	.map(
+		(z) =>
+			`<rect class="bug-hot" data-z="${z.id}" x="${z.r[0]}" y="${z.r[1]}" width="${z.r[2]}" height="${z.r[3]}" rx="6" tabindex="0" role="button" aria-label="${z.label}"/>`,
+	)
+	.join('');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<find-bug class="pcb-widget bug not-content" data-zones={JSON.stringify(b.zones.map(({ id, say, ok, near }) => ({ id, say, ok, near })))}>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Найди косяк: {b.title}</p>
+		<button type="button" class="pcb-reset" data-reset title="Начать заново">↺ Сброс</button>
+	</div>
+	<p class="bug__task">{b.task}</p>
+	<Figure caption="Нажми на место, где ошибка." sym>
+		<svg viewBox={`0 0 ${b.w} ${b.h}`} role="group" aria-label={b.alt} style={`max-width:${Math.round(b.w * 1.45)}px`} set:html={b.svg() + zones} />
+	</Figure>
+	<div class="bug__list" role="group" aria-label="Или выбери из списка">
+		{b.zones.map((z) => <button type="button" data-z={z.id}>{z.label}</button>)}
+	</div>
+	<p class="bug__msg" data-msg aria-live="polite"></p>
+	<p class="footnote">
+		Тема: <a href={`${base}/${b.lesson[1]}/`}>урок {b.lesson[0]}</a>.
+	</p>
+</find-bug>
+
+<script>
+	import '../../lib/reset';
+	type Z = { id: string; say: string; ok?: boolean; near?: boolean };
+	class FindBug extends HTMLElement {
+		connectedCallback() {
+			const zones: Z[] = JSON.parse(this.dataset.zones!);
+			const msg = this.querySelector<HTMLElement>('[data-msg]')!;
+			let tries = 0;
+			const pick = (id: string) => {
+				const z = zones.find((q) => q.id === id);
+				if (!z) return;
+				tries++;
+				this.querySelectorAll(`[data-z="${id}"]`).forEach((el) => el.classList.add(z.ok ? 'is-ok' : z.near ? 'is-near' : 'is-bad'));
+				msg.className = `bug__msg ${z.ok ? 'is-ok' : z.near ? 'is-near' : 'is-bad'}`;
+				msg.textContent = (z.ok ? (tries === 1 ? 'С первой попытки! ' : '') : z.near ? 'Тепло. ' : 'Нет. ') + z.say;
+				if (z.ok) this.classList.add('is-solved');
+			};
+			this.addEventListener('click', (e) => {
+				const t = (e.target as Element).closest('[data-z]');
+				if (t) pick((t as HTMLElement).dataset.z!);
+			});
+			this.addEventListener('keydown', (e) => {
+				const t = (e.target as Element).closest('rect[data-z]');
+				if (t && (e.key === 'Enter' || e.key === ' ')) {
+					e.preventDefault();
+					pick((t as HTMLElement).dataset.z!);
+				}
+			});
+			this.addEventListener('pcb-reset', () => {
+				tries = 0;
+				this.classList.remove('is-solved');
+				this.querySelectorAll('[data-z]').forEach((el) => el.classList.remove('is-ok', 'is-near', 'is-bad'));
+				msg.textContent = '';
+				msg.className = 'bug__msg';
+			});
+		}
+	}
+	customElements.define('find-bug', FindBug);
+</script>
+
+<style>
+	.bug__task {
+		margin: 0 0 0.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.bug :global(.bug-hot) {
+		fill: var(--sl-color-accent);
+		fill-opacity: 0;
+		stroke: var(--sl-color-accent);
+		stroke-opacity: 0;
+		stroke-dasharray: 4 3;
+		cursor: pointer;
+		outline: none;
+		transition:
+			fill-opacity 0.15s,
+			stroke-opacity 0.15s;
+	}
+	.bug :global(.bug-hot:hover),
+	.bug :global(.bug-hot:focus-visible) {
+		fill-opacity: 0.08;
+		stroke-opacity: 0.7;
+	}
+	.bug :global(.bug-hot.is-ok) {
+		fill: var(--pcb-ok);
+		stroke: var(--pcb-ok);
+		fill-opacity: 0.18;
+		stroke-opacity: 1;
+		stroke-dasharray: none;
+	}
+	.bug :global(.bug-hot.is-bad) {
+		fill: var(--pcb-bad);
+		stroke: var(--pcb-bad);
+		fill-opacity: 0.12;
+		stroke-opacity: 0.8;
+	}
+	.bug :global(.bug-hot.is-near) {
+		fill: var(--pcb-warn);
+		stroke: var(--pcb-warn);
+		fill-opacity: 0.12;
+		stroke-opacity: 0.8;
+	}
+	.bug__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-top: 0.6rem;
+	}
+	.bug__list button {
+		min-height: 44px;
+		padding: 0.3rem 0.8rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.4rem;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+		font-size: var(--sl-text-sm);
+		cursor: pointer;
+	}
+	.bug__list button.is-ok {
+		border-color: var(--pcb-ok);
+	}
+	.bug__list button.is-bad {
+		border-color: var(--pcb-bad);
+		opacity: 0.7;
+	}
+	.bug__list button.is-near {
+		border-color: var(--pcb-warn);
+	}
+	.bug__msg {
+		margin: 0.6rem 0 0;
+		font-size: var(--sl-text-sm);
+	}
+	.bug__msg.is-ok {
+		color: var(--pcb-ok);
+	}
+	.bug__msg.is-bad {
+		color: var(--pcb-bad);
+	}
+	.bug__msg.is-near {
+		color: var(--pcb-warn);
+	}
+	.bug.is-solved {
+		border-color: var(--pcb-ok);
+	}
+</style>

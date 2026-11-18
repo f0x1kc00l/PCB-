@@ -102,6 +102,47 @@
 	background: var(--sl-color-accent);
 }
 
+/* Шапка виджета: заголовок + кнопка «Сброс». */
+.pcb-widget__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin: 0 0 0.75rem;
+}
+.pcb-widget__head .pcb-widget__title {
+	margin: 0;
+	min-width: 0;
+}
+.pcb-reset {
+	flex: 0 0 auto;
+	min-height: 36px;
+	padding: 0.3rem 0.75rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.4rem;
+	background: var(--sl-color-bg);
+	color: var(--sl-color-gray-2);
+	font: inherit;
+	font-size: var(--sl-text-sm);
+	white-space: nowrap;
+	cursor: pointer;
+}
+.pcb-reset:hover,
+.pcb-reset:focus-visible {
+	border-color: var(--sl-color-accent);
+	color: var(--sl-color-white);
+}
+@media (max-width: 40rem) {
+	.pcb-reset {
+		min-height: 44px;
+	}
+}
+
+/* Атрибут hidden должен побеждать display из стилей виджетов. */
+.pcb-widget [hidden] {
+	display: none !important;
+}
+
 /* Поля ввода калькуляторов. */
 .pcb-calc .fields {
 	display: grid;
@@ -354,6 +395,16 @@
 		flex: 0 0 100%;
 		max-width: var(--mw, 100%);
 	}
+	/* Широкая схема (развязка питания): на телефоне прокручивается внутри рамки, текст остаётся читаемым. */
+	.water__stage--wide {
+		overflow-x: auto;
+		justify-content: flex-start;
+		-webkit-overflow-scrolling: touch;
+	}
+	.water .water__stage--wide svg {
+		flex: 0 0 560px;
+		max-width: none;
+	}
 	.water svg .t {
 		font-size: 14.5px;
 	}
@@ -467,6 +518,25 @@
 	font-weight: 600;
 	font-size: var(--sl-text-base);
 	color: var(--sl-color-white);
+}
+/* Табло показаний (HTML вместо SVG: на телефоне не раздувается и не налезает на текст). */
+.water__panel {
+	display: grid;
+	gap: 0.15rem;
+	margin: 0.6rem 0 0;
+	padding: 0.6rem 0.8rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	font-variant-numeric: tabular-nums;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.water__panel b {
+	font-size: var(--sl-text-base);
+	color: var(--sl-color-white);
+}
+.water__panel .is-danger {
+	color: var(--water-danger);
 }
 .water__note {
 	margin: 0.35rem 0 0;
@@ -585,4 +655,219 @@
 .sl-markdown-content .sl-link-button,
 .hero .sl-link-button {
 	min-height: 44px;
+}
+
+/* Подсветка пар «вода ↔ электричество» (WaterOhm). */
+.water .pair-hot {
+	fill: var(--sl-color-accent);
+	fill-opacity: 0;
+	stroke: var(--sl-color-accent);
+	stroke-opacity: 0;
+	stroke-width: 2;
+	stroke-dasharray: 4 3;
+	cursor: pointer;
+	outline: none;
+	transition:
+		fill-opacity 0.15s,
+		stroke-opacity 0.15s;
+}
+.water[data-hl='src'] .pair-hot[data-pair='src'],
+.water[data-hl='r'] .pair-hot[data-pair='r'],
+.water[data-hl='sw'] .pair-hot[data-pair='sw'] {
+	fill-opacity: 0.12;
+	stroke-opacity: 1;
+}
+.water__pairnote {
+	margin: 0.5rem 0 0;
+	min-height: 2.6em;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.water[data-hl] .water__pairnote {
+	color: var(--sl-color-white);
+}
+
+/* Кнопки в шапке виджета: на весь экран, поделиться, сброс. */
+.pcb-widget__tools {
+	display: flex;
+	flex: 0 0 auto;
+	gap: 0.35rem;
+}
+.pcb-tool {
+	flex: 0 0 auto;
+	min-width: 36px;
+	min-height: 36px;
+	padding: 0.2rem 0.5rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.4rem;
+	background: var(--sl-color-bg);
+	color: var(--sl-color-gray-2);
+	font: inherit;
+	font-size: var(--sl-text-sm);
+	line-height: 1;
+	cursor: pointer;
+}
+.pcb-tool:hover,
+.pcb-tool:focus-visible {
+	border-color: var(--sl-color-accent);
+	color: var(--sl-color-white);
+}
+@media (max-width: 40rem) {
+	.pcb-tool {
+		min-width: 44px;
+		min-height: 44px;
+	}
+	.pcb-widget__head {
+		flex-wrap: wrap;
+	}
+}
+/* Полноэкранный режим виджета. */
+.pcb-widget.is-full {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	margin: 0;
+	border-radius: 0;
+	overflow: auto;
+	overscroll-behavior: contain;
+	padding: max(0.8rem, env(safe-area-inset-top)) max(0.8rem, env(safe-area-inset-right)) max(1.2rem, env(safe-area-inset-bottom))
+		max(0.8rem, env(safe-area-inset-left));
+	background: var(--sl-color-bg);
+}
+.pcb-widget.is-full .water__stage svg,
+.pcb-widget.is-full .diagram__body svg {
+	max-height: 72vh;
+}
+.pcb-widget.is-full .diagram__body svg {
+	max-width: 100% !important;
+	width: 100%;
+}
+html.pcb-noscroll,
+html.pcb-noscroll body {
+	overflow: hidden;
+}
+/* Всплывашка «ссылка скопирована» и подсветка виджета, открытого по ссылке. */
+.pcb-widget {
+	position: relative;
+}
+.pcb-toast {
+	position: absolute;
+	right: 0.8rem;
+	top: 3.4rem;
+	z-index: 5;
+	max-width: min(22rem, 80%);
+	padding: 0.5rem 0.7rem;
+	border-radius: 0.45rem;
+	background: var(--sl-color-gray-6);
+	border: 1px solid var(--sl-color-accent);
+	color: var(--sl-color-white);
+	font-size: var(--sl-text-sm);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s;
+}
+.pcb-toast.is-on {
+	opacity: 1;
+}
+.pcb-flash {
+	animation: pcb-flash 1.6s ease-out;
+}
+@keyframes pcb-flash {
+	0%,
+	40% {
+		box-shadow: 0 0 0 3px var(--sl-color-accent);
+	}
+	100% {
+		box-shadow: 0 0 0 0 transparent;
+	}
+}
+/* Пока виджет развёрнут — прячем шапку и панели Starlight (они в своём слое и перекрыли бы его). */
+html.pcb-noscroll :is(header.header, .sidebar-pane, .right-sidebar-container, mobile-starlight-toc, .mobile-preferences, starlight-menu-button, .sl-menu-button) {
+	visibility: hidden;
+}
+
+/* Стиль обозначений на схемах: «как в книге» (по умолчанию), ГОСТ, IEC, ANSI (src/lib/sym.ts). */
+.sym-ansi,
+.sym-gost,
+.sym-iec {
+	display: none;
+}
+html[data-sym='ansi'] .sym-std {
+	display: none;
+}
+html[data-sym='ansi'] .sym-ansi {
+	display: inline;
+}
+html[data-sym='gost'] .sym-tri,
+html[data-sym='iec'] .sym-tri {
+	display: none;
+}
+html[data-sym='gost'] .sym-gost,
+html[data-sym='iec'] .sym-iec {
+	display: inline;
+}
+.diagram__sym {
+	position: absolute;
+	top: 0.4rem;
+	left: 0.4rem;
+	z-index: 1;
+	max-width: 8.5rem;
+	min-height: 32px;
+	padding: 0.15rem 0.35rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.4rem;
+	background: var(--sl-color-bg);
+	color: var(--sl-color-gray-2);
+	font: inherit;
+	font-size: var(--sl-text-xs);
+	cursor: pointer;
+}
+@media (pointer: coarse) {
+	.diagram__sym {
+		min-height: 40px;
+	}
+}
+
+/* ===================================================================
+ * Печать и «Сохранить как PDF»: только текст урока, без меню и кнопок.
+ * =================================================================== */
+@media print {
+	header.header,
+	.sidebar-pane,
+	.right-sidebar-container,
+	mobile-starlight-toc,
+	.pagination-links,
+	.course-progress,
+	.pcb-widget__tools,
+	.pcb-reset,
+	.diagram__zoom,
+	.diagram__sym,
+	.check__bar,
+	.reveal__btn,
+	starlight-menu-button,
+	footer .meta {
+		display: none !important;
+	}
+	:root {
+		--sl-nav-height: 0px;
+	}
+	.main-frame {
+		padding-top: 0 !important;
+	}
+	body {
+		background: #fff !important;
+	}
+	.pcb-widget,
+	figure,
+	.formula,
+	tr {
+		break-inside: avoid-page;
+	}
+	h2,
+	h3 {
+		break-after: avoid-page;
+	}
+	a {
+		color: inherit !important;
+	}
 }

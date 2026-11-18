@@ -19,8 +19,19 @@ hero:
 import ContinueCard from '../../components/home/ContinueCard.astro';
 import CourseMap from '../../components/home/CourseMap.astro';
 import LearningPath from '../../components/home/LearningPath.astro';
+import OfflineSave from '../../components/interactive/OfflineSave.astro';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <ContinueCard />
+
+## Инструменты
+
+<CardGrid>
+	<LinkCard title="Калькуляторы" description="14 калькуляторов: Ом, делитель, номиналы и маркировка, светодиод, стабилитрон, LM317, радиатор, 555, платы." href="calc/" />
+	<LinkCard title="Лаборатория" description="Живые схемы, АЧХ, «Найди косяк», карточки, шпаргалки глав и лабы на Arduino/ESP32." href="lab/" />
+</CardGrid>
+
+<OfflineSave />
 
 ## Путь обучения
 

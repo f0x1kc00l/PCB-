@@ -1,0 +1,35 @@
+---
+/** Кнопка «Распечатать / сохранить в PDF». В диалоге печати браузера выбери «Сохранить как PDF». */
+---
+
+<p class="print-btn not-content">
+	<button type="button" onclick="window.print()">🖨 Распечатать или сохранить в PDF</button>
+	<span>В окне печати выбери принтер «Сохранить как PDF».</span>
+</p>
+
+<style>
+	.print-btn {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem;
+		margin: 1rem 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.print-btn button {
+		min-height: 44px;
+		padding: 0.35rem 0.9rem;
+		border: 1px solid var(--sl-color-accent);
+		border-radius: 0.45rem;
+		background: var(--sl-color-accent-low);
+		color: var(--sl-color-white);
+		font: inherit;
+		cursor: pointer;
+	}
+	@media print {
+		.print-btn {
+			display: none;
+		}
+	}
+</style>

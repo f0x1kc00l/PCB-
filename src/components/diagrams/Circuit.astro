@@ -17,7 +17,7 @@ if (!make) throw new Error(`Схема «${id}» не найдена в circuits
 const c = make();
 ---
 
-<Figure n={n} caption={caption}>
+<Figure n={n} caption={caption} sym>
 	<svg
 		viewBox={`0 0 ${c.w} ${c.h}`}
 		role="img"

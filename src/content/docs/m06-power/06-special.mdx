@@ -28,6 +28,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 ## Импульсные стабилизаторы
 
@@ -92,10 +93,10 @@ import M from '../../../components/lesson/M.astro';
 
 ## Практика
 
-1. Понижающий: 12 → 3,3 В. D? *(≈ 0,275; реально чуть больше из-за потерь.)*
-2. Повышающий: 3,7 → 5 В. D? *(1 − 3,7/5 = 0,26.)*
-3. LM317 как источник 350 мА для светодиода. R и мощность? *(R = 1,25/0,35 ≈ 3,6 Ом; P ≈ 0,44 Вт → 1 Вт.)*
-4. 12 → 5 В при 1 А: потери линейного стабилизатора и импульсного с КПД 90 %? *(7 Вт против ≈ 0,56 Вт.)*
+1. Понижающий: 12 → 3,3 В. D? <Reveal>≈ 0,275; реально чуть больше из-за потерь.</Reveal>
+2. Повышающий: 3,7 → 5 В. D? <Reveal>1 − 3,7/5 = 0,26.</Reveal>
+3. LM317 как источник 350 мА для светодиода. R и мощность? <Reveal>R = 1,25/0,35 ≈ 3,6 Ом; P ≈ 0,44 Вт → 1 Вт.</Reveal>
+4. 12 → 5 В при 1 А: потери линейного стабилизатора и импульсного с КПД 90 %? <Reveal>7 Вт против ≈ 0,56 Вт.</Reveal>
 
 <Mistakes
   items={[

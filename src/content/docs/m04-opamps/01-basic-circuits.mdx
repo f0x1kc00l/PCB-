@@ -27,6 +27,8 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
+import LiveCircuit from '../../../components/interactive/LiveCircuit.astro';
 
 Все схемы этого урока считаются в две строки по золотым правилам. Считай вместе с текстом.
 
@@ -80,11 +82,17 @@ import M from '../../../components/lesson/M.astro';
   большие — входные токи и ёмкости дают ошибки и наводки.
 </Callout>
 
+Живые схемы обоих усилителей: доведи их до насыщения.
+
+<LiveCircuit id="oa-inv" />
+
+<LiveCircuit id="oa-noninv" />
+
 ## Практика
 
-1. Инвертирующий: нужно K = −10, Rвх ≥ 10 кОм. Номиналы? *(R1 = 10 кОм, R2 = 100 кОм.)*
-2. Неинвертирующий: K = 11. *(R1 = 10 кОм, R2 = 100 кОм.)*
-3. Источник тока 10 мА в светодиод из сигнала 0–1 В. R? Что ограничит ток? *(R = 100 Ом; выходной ток ОУ — 10 мА уже на пределе многих ОУ, лучше добавить внешний транзистор.)*
+1. Инвертирующий: нужно K = −10, Rвх ≥ 10 кОм. Номиналы? <Reveal>R1 = 10 кОм, R2 = 100 кОм.</Reveal>
+2. Неинвертирующий: K = 11. <Reveal>R1 = 10 кОм, R2 = 100 кОм.</Reveal>
+3. Источник тока 10 мА в светодиод из сигнала 0–1 В. R? Что ограничит ток? <Reveal>R = 100 Ом; выходной ток ОУ — 10 мА уже на пределе многих ОУ, лучше добавить внешний транзистор.</Reveal>
 
 <Mistakes
   items={[

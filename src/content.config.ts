@@ -7,8 +7,8 @@
  */
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
-import { docsLoader } from '@astrojs/starlight/loaders';
-import { docsSchema } from '@astrojs/starlight/schema';
+import { docsLoader, i18nLoader } from '@astrojs/starlight/loaders';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
 
 /**
  * Ссылка на учебник. По умолчанию — Хоровиц, Хилл «Искусство схемотехники», т. 1 (главы 1–6);
@@ -29,6 +29,8 @@ const extLink = z.object({
 });
 
 export const collections = {
+	// Подписи интерфейса Starlight по-русски (src/content/i18n/ru.json).
+	i18n: defineCollection({ loader: i18nLoader(), schema: i18nSchema() }),
 	docs: defineCollection({
 		loader: docsLoader(),
 		schema: docsSchema({

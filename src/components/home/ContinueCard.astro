@@ -6,16 +6,25 @@
 import { getCollection } from 'astro:content';
 import { isLessonId, lessonHref } from '../../lib/site';
 
-const lessons = (await getCollection('docs')).filter((d) => isLessonId(d.id));
+import cards from '../../data/flashcards.json';
+
+const docs = await getCollection('docs');
+const lessons = docs.filter((d) => isLessonId(d.id));
 const total = lessons.length;
+// всего задач с проверкой ответа и карточек — для сводки
+const checks = docs.reduce((n, d) => n + ((d.body ?? '').match(/<Check\b/g)?.length ?? 0), 0);
+const cardIds = (cards as { id: string }[]).map((c) => c.id);
 const firstHref = lessonHref('m00-intro/01-how-course-works');
 ---
 
-<section class="continue not-content" data-total={total} data-first={firstHref}>
+<section class="continue not-content" data-total={total} data-first={firstHref} data-cards={JSON.stringify(cardIds)}>
 	<div class="continue__stats">
 		<p class="continue__label">Твой прогресс</p>
 		<p class="continue__value"><span data-done>0</span> из {total} уроков</p>
 		<div class="continue__bar" aria-hidden="true"><span data-fill></span></div>
+		<p class="continue__more">
+			задач решено: <b data-checks>0</b> из {checks} · карточек выучено: <b data-cards>0</b> из {cardIds.length}
+		</p>
 	</div>
 	<div class="continue__actions">
 		<a class="continue__btn" href={firstHref} data-continue>Начать курс →</a>
@@ -40,6 +49,17 @@ const firstHref = lessonHref('m00-intro/01-how-course-works');
 		box.querySelector('[data-done]')!.textContent = String(Math.min(done, total));
 		box.querySelector<HTMLElement>('[data-fill]')!.style.width = `${total ? Math.min(done / total, 1) * 100 : 0}%`;
 		reset.hidden = done === 0;
+
+		// задачи с проверкой (Check) и карточки (Flashcards) хранят свой прогресс отдельно
+		try {
+			const solved = Object.keys(JSON.parse(localStorage.getItem('pcb-course:checks:v1') ?? '{}')).length;
+			const boxes: Record<string, number> = JSON.parse(localStorage.getItem('pcb-course:cards:v1') ?? '{}');
+			const ids: string[] = JSON.parse(box.dataset.cards ?? '[]');
+			box.querySelector('[data-checks]')!.textContent = String(solved);
+			box.querySelector('[data-cards]')!.textContent = String(ids.filter((i) => (boxes[i] ?? 0) >= 3).length);
+		} catch {
+			/* хранилище недоступно */
+		}
 
 		const last = getLastVisited();
 		if (last) {
@@ -129,6 +149,14 @@ const firstHref = lessonHref('m00-intro/01-how-course-works');
 		font-size: var(--sl-text-xs);
 		text-decoration: underline;
 		cursor: pointer;
+	}
+	.continue__more {
+		margin-top: 0.45rem !important;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.continue__more b {
+		color: var(--sl-color-white);
 	}
 	.continue__note {
 		grid-column: 1 / -1;

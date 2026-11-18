@@ -25,6 +25,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Точность стабилизатора, АЦП, измерителя определяется **опорным напряжением**. Все остальные ошибки делятся на глубину ОС — а ошибка опорного источника переходит на выход целиком.
 
@@ -64,8 +65,8 @@ Uбэ транзистора уменьшается с температурой,
 
 ## Практика
 
-1. TL431, нужно 5,0 В, R2 = 10 кОм. R1? *(R1 = 10·(5/2,495 − 1) ≈ 10,04 → 10 кОм, Uвых ≈ 4,99 В.)*
-2. Питание 12 В, TL431 на 5 В, нагрузка 2 мА, минимальный ток TL431 1 мА, делитель берёт 0,25 мА. R0? *(R0 ≤ (12 − 5)/3,25 мА ≈ 2,15 → 2 кОм.)*
+1. TL431, нужно 5,0 В, R2 = 10 кОм. R1? <Reveal>R1 = 10·(5/2,495 − 1) ≈ 10,04 → 10 кОм, Uвых ≈ 4,99 В.</Reveal>
+2. Питание 12 В, TL431 на 5 В, нагрузка 2 мА, минимальный ток TL431 1 мА, делитель берёт 0,25 мА. R0? <Reveal>R0 ≤ (12 − 5)/3,25 мА ≈ 2,15 → 2 кОм.</Reveal>
 
 <Mistakes
   items={[

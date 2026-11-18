@@ -24,6 +24,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Отрицательная ОС вычитает выход из входа. Но каждый каскад внутри ОУ — это RC-цепь со своим полюсом и сдвигом фазы. Если на какой-то частоте суммарный сдвиг достигает 180°, «минус» превращается в «плюс», и при петлевом усилении ≥ 1 усилитель становится **генератором**.
 
@@ -67,8 +68,8 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 ## Практика
 
-1. ОУ с fт = 10 МГц, усилитель ×20. Полоса? *(≈ 500 кГц.)*
-2. Выход ОУ раскачивается при подключении кабеля 2 м (≈ 200 пФ). Что сделать в первую очередь? *(Резистор 50–100 Ом последовательно с выходом.)*
+1. ОУ с fт = 10 МГц, усилитель ×20. Полоса? <Reveal>≈ 500 кГц.</Reveal>
+2. Выход ОУ раскачивается при подключении кабеля 2 м (≈ 200 пФ). Что сделать в первую очередь? <Reveal>Резистор 50–100 Ом последовательно с выходом.</Reveal>
 
 <Mistakes
   items={[

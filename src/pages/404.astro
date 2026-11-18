@@ -1,0 +1,24 @@
+---
+/** Страница «не найдено» (встроенная у Starlight отключена: disable404Route). */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'Страница не найдена',
+		description: 'Такой страницы в курсе нет.',
+		template: 'splash',
+		editUrl: false,
+		pagefind: false,
+		hero: {
+			title: 'Такой страницы нет',
+			tagline: 'Возможно, урок переехал после перенумерации курса. Начни с главной, найди урок поиском или загляни в калькуляторы и лабораторию.',
+			actions: [
+				{ text: 'На главную', link: base, icon: 'right-arrow', variant: 'primary' },
+				{ text: 'Калькуляторы', link: `${base}calc/`, variant: 'minimal' },
+				{ text: 'Лаборатория', link: `${base}lab/`, variant: 'minimal' },
+			],
+		},
+	}}
+/>

@@ -1,0 +1,118 @@
+---
+/**
+ * Таймер 555 (биполярный NE555).
+ *   генератор: tв = 0,693·(R1 + R2)·C, tн = 0,693·R2·C, f = 1,44 / ((R1 + 2R2)·C)
+ *   одновибратор: T = 1,1·R·C
+ */
+const uid = `t5-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<timer555-calc class="pcb-widget pcb-calc not-content">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Таймер 555</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+	<div class="pcb-segmented" role="radiogroup" aria-label="Режим">
+		<label><input type="radio" name={`${uid}-m`} value="a" checked /><span>Генератор (астабильный)</span></label>
+		<label><input type="radio" name={`${uid}-m`} value="m" /><span>Одновибратор</span></label>
+	</div>
+	<div class="fields" style="margin-top:0.9rem">
+		<label data-mode="a">R1, Ом <input name="r1" value="1к" inputmode="decimal" autocomplete="off" /><span class="hint">между +U и выводом 7</span></label>
+		<label data-mode="a">R2, Ом <input name="r2" value="10к" inputmode="decimal" autocomplete="off" /><span class="hint">между выводами 7 и 6/2</span></label>
+		<label data-mode="m" hidden>R, Ом <input name="r" value="100к" inputmode="decimal" autocomplete="off" /></label>
+		<label>C, Ф <input name="c" value="10мк" inputmode="decimal" autocomplete="off" /></label>
+	</div>
+	<svg class="wave" viewBox="0 0 300 70" aria-hidden="true">
+		<line x1="0" y1="60" x2="300" y2="60" stroke="var(--sl-color-gray-5)" />
+		<polyline data-wave fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5" />
+	</svg>
+	<div class="results" data-mode="a">
+		<div class="result result--main"><span>Частота</span><output data-o="f">—</output></div>
+		<div class="result"><span>Высокий уровень tв</span><output data-o="th">—</output></div>
+		<div class="result"><span>Низкий уровень tн</span><output data-o="tl">—</output></div>
+		<div class="result"><span>Скважность (доля «1»)</span><output data-o="d">—</output></div>
+	</div>
+	<div class="results" data-mode="m" hidden>
+		<div class="result result--main"><span>Длительность импульса</span><output data-o="t">—</output></div>
+	</div>
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		Конденсатор перезаряжается между 1/3 и 2/3 напряжения питания, поэтому частота почти не зависит от питания. В генераторе
+		заряд идёт через R1 + R2, разряд — только через R2, поэтому «1» всегда длиннее «0» (доля «1» больше 50 %). Нужна ровно
+		половина — ставят диод параллельно R2 или берут другую схему. Точность — несколько процентов плюс допуск C.
+	</p>
+</timer555-calc>
+
+<script>
+	import '../../lib/reset';
+	import { parseValue, formatValue } from '../../lib/units';
+
+	class Timer555Calc extends HTMLElement {
+		connectedCallback() {
+			const val = (n: string) => parseValue(this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!.value);
+			const o = (n: string) => this.querySelector(`[data-o="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const wave = this.querySelector('[data-wave]')!;
+			const update = () => {
+				const mode = this.querySelector<HTMLInputElement>('input[type=radio]:checked')?.value ?? 'a';
+				this.querySelectorAll<HTMLElement>('[data-mode]').forEach((el) => (el.hidden = el.dataset.mode !== mode));
+				const c = val('c');
+				const msgs: string[] = [];
+				if (mode === 'a') {
+					const r1 = val('r1'),
+						r2 = val('r2');
+					if (!(r1 > 0 && r2 > 0 && c > 0)) {
+						['f', 'th', 'tl', 'd'].forEach((k) => (o(k).textContent = '—'));
+						return;
+					}
+					const th = Math.LN2 * (r1 + r2) * c,
+						tl = Math.LN2 * r2 * c;
+					const d = th / (th + tl);
+					o('f').textContent = formatValue(1 / (th + tl), 'Гц');
+					o('th').textContent = formatValue(th, 'с');
+					o('tl').textContent = formatValue(tl, 'с');
+					o('d').textContent = `${(d * 100).toFixed(1).replace('.', ',')} %`;
+					const pts: string[] = [];
+					let x = 0;
+					const per = 300 / 3;
+					for (let k = 0; k < 3; k++) {
+						pts.push(`${x},60`, `${x},12`, `${x + per * d},12`, `${x + per * d},60`);
+						x += per;
+					}
+					pts.push('300,60');
+					wave.setAttribute('points', pts.join(' '));
+					if (r1 < 1000) msgs.push('R1 меньше 1 кОм: в момент разряда вывод 7 замыкает +U через R1 на землю — лишний ток и нагрев.');
+					if (1 / (th + tl) > 100e3) msgs.push('Выше ~100 кГц у классического NE555 фронты и задержки начинают заметно портить частоту.');
+				} else {
+					const r = val('r');
+					if (!(r > 0 && c > 0)) {
+						o('t').textContent = '—';
+						return;
+					}
+					const t = 1.1 * r * c;
+					o('t').textContent = formatValue(t, 'с');
+					wave.setAttribute('points', '0,60 40,60 40,12 220,12 220,60 300,60');
+				}
+				if (c > 100e-6) msgs.push('Электролит больше 100 мкФ: ток утечки сравним с током заряда через большие R — время будет неточным.');
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('timer555-calc', Timer555Calc);
+</script>
+
+<style>
+	.wave {
+		display: block;
+		width: 100%;
+		max-width: 22rem;
+		margin: 0.8rem auto 0;
+	}
+</style>

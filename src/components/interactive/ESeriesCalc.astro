@@ -1,0 +1,157 @@
+---
+/**
+ * Ряды номиналов E6…E96: ближайший номинал и подбор пары резисторов
+ * под нужный коэффициент делителя (Uвых = Uвх · R2 / (R1 + R2)).
+ */
+const uid = `es-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<e-series-calc class="pcb-widget pcb-calc not-content">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Ряды номиналов E6…E96</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+
+	<div class="pcb-segmented" role="radiogroup" aria-label="Ряд">
+		<span class="seg-caption">Ряд:</span>
+		{
+			['E6', 'E12', 'E24', 'E48', 'E96'].map((s) => (
+				<label>
+					<input type="radio" name={`${uid}-s`} value={s} checked={s === 'E24'} />
+					<span>{s}</span>
+				</label>
+			))
+		}
+	</div>
+
+	<h4 class="sub">Ближайший номинал</h4>
+	<div class="fields">
+		<label>Нужное значение <input name="val" value="5,1к" inputmode="decimal" autocomplete="off" /><span class="hint">Ом, Ф, Гн — всё равно</span></label>
+	</div>
+	<div class="results">
+		<div class="result result--main"><span>Ближайший</span><output data-o="near">—</output></div>
+		<div class="result"><span>Снизу</span><output data-o="below">—</output></div>
+		<div class="result"><span>Сверху</span><output data-o="above">—</output></div>
+		<div class="result"><span>Допуск ряда</span><output data-o="tol">—</output></div>
+	</div>
+
+	<h4 class="sub">Пара резисторов для делителя</h4>
+	<div class="fields">
+		<label>Uвх, В <input name="vin" value="12" inputmode="decimal" autocomplete="off" /></label>
+		<label>Нужно Uвых, В <input name="vout" value="3,3" inputmode="decimal" autocomplete="off" /></label>
+		<label>R2 от, Ом <input name="lo" value="1к" inputmode="decimal" autocomplete="off" /></label>
+		<label>R2 до, Ом <input name="hi" value="100к" inputmode="decimal" autocomplete="off" /></label>
+	</div>
+	<div class="table-wrap">
+		<table class="pairs">
+			<thead><tr><th>R1 (верхний)</th><th>R2 (нижний)</th><th>Uвых</th><th>Ошибка</th></tr></thead>
+			<tbody data-pairs></tbody>
+		</table>
+	</div>
+	<p class="footnote">
+		Ряды по IEC 60063: в декаде 6, 12, 24, 48 или 96 значений, шаг подобран так, чтобы соседние номиналы с учётом допуска
+		почти перекрывались. Ошибка в таблице — только от округления до номинала; к ней добавится допуск самих резисторов.
+	</p>
+</e-series-calc>
+
+<script>
+	import '../../lib/reset';
+	import { parseValue, formatValue, SERIES, seriesNeighbors, seriesRange } from '../../lib/units';
+
+	class ESeriesCalc extends HTMLElement {
+		connectedCallback() {
+			const inp = (n: string) => this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!;
+			const o = (n: string) => this.querySelector(`[data-o="${n}"]`)!;
+			const tbody = this.querySelector('[data-pairs]')!;
+			const pct = (x: number) => `${x >= 0 ? '+' : '−'}${Math.abs(x * 100).toFixed(2).replace('.', ',')} %`;
+
+			const update = () => {
+				const sName = this.querySelector<HTMLInputElement>('input[type=radio]:checked')?.value ?? 'E24';
+				const s = SERIES[sName];
+				const v = parseValue(inp('val').value);
+				inp('val').setAttribute('aria-invalid', String(!(v > 0)));
+				if (v > 0) {
+					const n = seriesNeighbors(v, s.values);
+					o('near').textContent = `${formatValue(n.nearest, '', 3)} (${pct(n.nearest / v - 1)})`;
+					o('below').textContent = formatValue(n.below, '', 3);
+					o('above').textContent = formatValue(n.above, '', 3);
+				} else ['near', 'below', 'above'].forEach((k) => (o(k).textContent = '—'));
+				o('tol').textContent = s.tol;
+
+				const vin = parseValue(inp('vin').value),
+					vout = parseValue(inp('vout').value),
+					lo = parseValue(inp('lo').value),
+					hi = parseValue(inp('hi').value);
+				if (!(vin > 0 && vout > 0 && vout < vin && lo > 0 && hi >= lo)) {
+					tbody.innerHTML = '<tr><td colspan="4">Нужно 0 &lt; Uвых &lt; Uвх и правильный диапазон R2.</td></tr>';
+					return;
+				}
+				const k = (vin - vout) / vout; // R1 = k · R2
+				const found: { r1: number; r2: number; u: number; e: number }[] = [];
+				for (const r2 of seriesRange(s.values, lo, hi)) {
+					const n = seriesNeighbors(r2 * k, s.values);
+					for (const r1 of new Set([n.below, n.above])) {
+						const u = (vin * r2) / (r1 + r2);
+						found.push({ r1, r2, u, e: u / vout - 1 });
+					}
+				}
+				found.sort((a, b) => Math.abs(a.e) - Math.abs(b.e) || a.r1 + a.r2 - (b.r1 + b.r2));
+				const seen = new Set<string>();
+				const best = found.filter((f) => {
+					const key = (f.r1 / f.r2).toPrecision(6);
+					if (seen.has(key)) return false;
+					seen.add(key);
+					return true;
+				});
+				tbody.innerHTML = best
+					.slice(0, 5)
+					.map(
+						(f) =>
+							`<tr><td>${formatValue(f.r1, 'Ом')}</td><td>${formatValue(f.r2, 'Ом')}</td><td>${formatValue(f.u, 'В', 4)}</td><td>${pct(f.e)}</td></tr>`,
+					)
+					.join('');
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('e-series-calc', ESeriesCalc);
+</script>
+
+<style>
+	.sub {
+		margin: 1.1rem 0 0.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-white);
+	}
+	.table-wrap {
+		margin-top: 0.75rem;
+		overflow-x: auto;
+	}
+	.pairs {
+		width: 100%;
+		border-collapse: collapse;
+		font-family: var(--pcb-mono);
+		font-size: var(--sl-text-sm);
+	}
+	.pairs :global(:is(th, td)) {
+		padding: 0.35rem 0.5rem;
+		border-bottom: 1px solid var(--sl-color-gray-5);
+		text-align: start;
+		white-space: nowrap;
+	}
+	.pairs th {
+		font-family: inherit;
+		color: var(--sl-color-gray-3);
+		font-weight: 600;
+	}
+	.pairs :global(tbody tr:first-child td) {
+		color: var(--sl-color-white);
+		font-weight: 650;
+	}
+</style>

@@ -1,0 +1,73 @@
+---
+/**
+ * Вся глава на одной странице — для печати или сохранения в PDF.
+ *   /print/m01-basics/ … /print/m06-power/
+ * Относительные ссылки уроков («../02-ohms-law/») переписывает scripts/postbuild.mjs.
+ */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection, render } from 'astro:content';
+import { modules } from '../../data/modules.mjs';
+import PrintButton from '../../components/interactive/PrintButton.astro';
+
+export async function getStaticPaths() {
+	return modules.filter((m) => m.part === 'book').map((m) => ({ params: { dir: m.dir }, props: { m } }));
+}
+const { m } = Astro.props as { m: (typeof modules)[number] };
+const docs = (await getCollection('docs'))
+	.filter((d) => d.id.startsWith(`${m.dir}/`))
+	.sort((a, b) => (a.data.sidebar?.order ?? 0) - (b.data.sidebar?.order ?? 0));
+const parts = await Promise.all(docs.map(async (d) => ({ d, C: (await render(d)).Content })));
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const title = `Глава ${m.n}. ${m.label} — целиком`;
+---
+
+<StarlightPage
+	frontmatter={{
+		title,
+		description: `Все уроки главы ${m.n} одной страницей — для печати и PDF.`,
+		tableOfContents: false,
+		pagefind: false,
+	}}
+>
+	<p>Все уроки главы подряд. Интерактивные виджеты печатаются в начальном состоянии; ответы к задачам остаются спрятанными.</p>
+	<PrintButton />
+	<nav class="print-toc not-content" aria-label="Уроки главы">
+		<ol>
+			{parts.map(({ d }) => <li><a href={`${base}/${d.id}/`}>{d.data.sidebar?.label ?? d.data.title}</a></li>)}
+		</ol>
+	</nav>
+	{
+		parts.map(({ d, C }) => (
+			<section class="print-lesson">
+				<h2 class="print-lesson__title">{d.data.sidebar?.label ?? d.data.title}</h2>
+				<C />
+			</section>
+		))
+	}
+</StarlightPage>
+
+<style>
+	.print-toc ol {
+		columns: 2 16rem;
+		margin: 1rem 0 2rem;
+		font-size: var(--sl-text-sm);
+	}
+	.print-lesson {
+		margin-top: 3rem;
+		padding-top: 1.5rem;
+		border-top: 2px solid var(--sl-color-gray-5);
+	}
+	.print-lesson__title {
+		font-size: var(--sl-text-3xl);
+	}
+	@media print {
+		.print-lesson {
+			break-before: page;
+			border: 0;
+			margin-top: 0;
+		}
+		.print-toc {
+			break-after: page;
+		}
+	}
+</style>

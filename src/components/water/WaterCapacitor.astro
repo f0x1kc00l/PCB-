@@ -62,6 +62,7 @@ const { n } = Astro.props;
 	</svg>
 	</div>
 	<div class="water__controls">
+		<label class="water__row"><span>Насос U</span><input type="range" data-u min="1" max="12" step="0.5" value="5" /><output data-uv></output></label>
 		<label class="water__row"><span>Сужение R</span><input type="range" data-r min="1" max="10" step="0.5" value="4.7" /><output data-rv></output></label>
 		<label class="water__row"><span>Мягкость мембраны C</span><input type="range" data-c min="47" max="470" step="1" value="220" /><output data-cv></output></label>
 	</div>
@@ -78,8 +79,8 @@ const { n } = Astro.props;
 	class WaterCapacitor extends HTMLElement {
 		connectedCallback() {
 			const r = this;
-			const U = 5;
-			let R = 4.7e3,
+			let U = 5,
+				R = 4.7e3,
 				C = 220e-6,
 				Uc = 0,
 				charge = true,
@@ -93,7 +94,7 @@ const { n } = Astro.props;
 			const sc = new Scope([$(r, '[data-tu]'), $(r, '[data-ti]')], { x: 0, y: 0, w: 260, h: 200 }, 260);
 			const P = (k: string) => $(r, `[data-p="${k}"]`);
 			const drawTank = () => {
-				const b = (Uc / U) * 38; // прогиб мембраны вниз
+				const b = Math.min(1.2, Uc / U) * 38; // прогиб мембраны вниз
 				const ym = 150 + b * 0.35;
 				$(r, '[data-mem]').setAttribute('d', `M257 150 Q300 ${(150 + 2 * b).toFixed(1)} 343 150`);
 				$(r, '[data-wa]').setAttribute('d', `M257 94 H343 V150 Q300 ${(150 + 2 * b).toFixed(1)} 257 150 Z`);
@@ -101,6 +102,7 @@ const { n } = Astro.props;
 				void ym;
 			};
 			const upd = () => {
+				$(r, '[data-uv]').textContent = fm(U, 1) + ' В';
 				$(r, '[data-rv]').textContent = si(R, 'Ом');
 				$(r, '[data-cv]').textContent = si(C, 'Ф');
 				const tau = R * C;
@@ -118,6 +120,7 @@ const { n } = Astro.props;
 			upd();
 			r.addEventListener('input', (e) => {
 				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-u]')) U = +t.value;
 				if (t.matches('[data-r]')) R = +t.value * 1e3;
 				if (t.matches('[data-c]')) C = +t.value * 1e-6;
 				upd();

@@ -1,0 +1,57 @@
+---
+/**
+ * Ответ, спрятанный под кнопку: сначала подумай, потом смотри.
+ *   1. Вопрос? <Reveal>ответ</Reveal>
+ * Работает внутри строки текста (не ломает абзац и список).
+ */
+---
+
+<span class="reveal"><button type="button" class="reveal__btn" aria-expanded="false">Ответ</button><span class="reveal__body" hidden><slot /></span></span>
+
+<script>
+	if (!(window as any).__pcbReveal) {
+		(window as any).__pcbReveal = true;
+		document.addEventListener('click', (e) => {
+			const b = (e.target as Element | null)?.closest?.('.reveal__btn') as HTMLButtonElement | null;
+			if (!b) return;
+			const body = b.nextElementSibling as HTMLElement;
+			const open = body.hidden;
+			body.hidden = !open;
+			b.setAttribute('aria-expanded', String(open));
+			b.textContent = open ? 'Скрыть' : 'Ответ';
+		});
+	}
+</script>
+
+<style is:global>
+	.reveal__btn {
+		display: inline-flex;
+		align-items: center;
+		min-height: 32px;
+		margin-inline-start: 0.3rem;
+		padding: 0.05rem 0.6rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 999px;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-gray-2);
+		font: inherit;
+		font-size: var(--sl-text-xs);
+		vertical-align: 0.1em;
+		cursor: pointer;
+	}
+	.reveal__btn[aria-expanded='true'] {
+		border-color: var(--sl-color-accent);
+		color: var(--sl-color-white);
+	}
+	.reveal__body:not([hidden]) {
+		display: inline;
+		margin-inline-start: 0.35rem;
+		font-style: italic;
+		color: var(--sl-color-gray-2);
+	}
+	@media (pointer: coarse) {
+		.reveal__btn {
+			min-height: 40px;
+		}
+	}
+</style>

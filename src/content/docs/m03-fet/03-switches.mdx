@@ -27,6 +27,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 ПТ — почти идеальный ключ: в открытом состоянии это небольшое сопротивление, в закрытом — разрыв, а управление почти не потребляет ток. Ключи бывают **аналоговые** (пропускают сигнал в обе стороны) и **силовые** (включают нагрузку).
 
@@ -93,8 +94,8 @@ n-МОП в верхнем плече лучше (меньше Rси при то
 
 ## Практика
 
-1. Нагрузка 5 А, Rси.откр = 20 мОм. Мощность на ключе? *(P = 25·0,02 = 0,5 Вт.)*
-2. Драйвер выдаёт 20 мА, Qз = 30 нКл. Время переключения? *(t ≈ 30·10⁻⁹/0,02 = 1,5 мкс.)*
+1. Нагрузка 5 А, Rси.откр = 20 мОм. Мощность на ключе? <Reveal>P = 25·0,02 = 0,5 Вт.</Reveal>
+2. Драйвер выдаёт 20 мА, Qз = 30 нКл. Время переключения? <Reveal>t ≈ 30·10⁻⁹/0,02 = 1,5 мкс.</Reveal>
 
 <Mistakes
   items={[

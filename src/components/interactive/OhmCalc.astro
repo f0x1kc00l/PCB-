@@ -18,7 +18,14 @@ const uid = `ohm-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
 <ohm-calc class="pcb-widget pcb-calc not-content" data-find={find}>
-	<p class="pcb-widget__title">Калькулятор закона Ома</p>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Калькулятор закона Ома</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
 
 	<div class="pcb-segmented" role="radiogroup" aria-label="Что найти">
 		<span class="seg-caption">Найти:</span>
@@ -57,6 +64,7 @@ const uid = `ohm-${Math.random().toString(36).slice(2, 8)}`;
 </ohm-calc>
 
 <script>
+	import '../../lib/reset';
 	import { parseValue, formatValue } from '../../lib/units';
 
 	const UNITS = { U: 'В', I: 'А', R: 'Ом' } as const;

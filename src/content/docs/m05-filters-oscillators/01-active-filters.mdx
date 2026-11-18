@@ -26,6 +26,8 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
+import BodePlot from '../../../components/interactive/BodePlot.astro';
 
 ## Почему RC-цепочек мало
 
@@ -71,10 +73,14 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
   на них лучше всего видно, чем приходится платить за крутизну.
 </Callout>
 
+Сравни первый и второй порядок: переключай схему и смотри на наклон спада.
+
+<BodePlot kind="sk" />
+
 ## Практика
 
-1. Сколько полюсов нужно Баттерворту, чтобы на 4fс ослабление было не меньше 40 дБ? *(4²ⁿ ≥ 10⁴ → n ≥ 3,3 → n = 4: −48 дБ.)*
-2. Сигнал — прямоугольные импульсы, нужно убрать ВЧ-шум, не исказив фронты звоном. Какой тип? *(Бессель.)*
+1. Сколько полюсов нужно Баттерворту, чтобы на 4fс ослабление было не меньше 40 дБ? <Reveal>4²ⁿ ≥ 10⁴ → n ≥ 3,3 → n = 4: −48 дБ.</Reveal>
+2. Сигнал — прямоугольные импульсы, нужно убрать ВЧ-шум, не исказив фронты звоном. Какой тип? <Reveal>Бессель.</Reveal>
 
 <Mistakes
   items={[
@@ -102,3 +108,7 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
     },
   ]}
 />
+
+<Callout type="tip" title="Вся глава одной страницей">
+  Для печати или PDF: [глава 5 целиком](../../print/m05-filters-oscillators/), а коротко — [шпаргалка главы 5](../../lab/15-sheet-ch5/).
+</Callout>

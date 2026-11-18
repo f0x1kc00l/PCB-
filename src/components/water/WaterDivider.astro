@@ -52,7 +52,7 @@ const { n } = Astro.props;
 		<!-- эквивалентный генератор -->
 		
 		</svg>
-	<svg viewBox="545 30 100 112" style="--w:100;--mw:200px" aria-hidden="true">
+	<svg viewBox="540 32 110 158" style="--w:110;--mw:140px" aria-hidden="true">
 		<g transform="translate(540 50)">
 			<text class="ts" x="50" y="0" text-anchor="middle">эквивалент</text>
 			<rect x="10" y="14" width="80" height="80" class="wall" />
@@ -63,6 +63,7 @@ const { n } = Astro.props;
 	</svg>
 	</div>
 	<div class="water__controls">
+		<label class="water__row"><span>Насос U</span><input type="range" data-u min="1" max="24" step="1" value="12" /><output data-uv></output></label>
 		<label class="water__row"><span>Сужение R1</span><input type="range" data-r1 min="1" max="20" step="1" value="10" /><output data-r1v></output></label>
 		<label class="water__row"><span>Сужение R2</span><input type="range" data-r2 min="1" max="20" step="1" value="10" /><output data-r2v></output></label>
 		<label class="water__row"><span>Нагрузка Rн</span><input type="range" data-rl min="1" max="40" step="1" value="5" /><output data-rlv></output></label>
@@ -80,8 +81,8 @@ const { n } = Astro.props;
 	class WaterDivider extends HTMLElement {
 		connectedCallback() {
 			const r = this;
-			const U = 12;
-			let R1 = 10,
+			let U = 12,
+				R1 = 10,
 				R2 = 10,
 				RL = 5,
 				load = false,
@@ -103,6 +104,7 @@ const { n } = Astro.props;
 				IL = load ? Uo / RL : 0;
 				const Eth = (U * R2) / (R1 + R2);
 				const Rth = (R1 * R2) / (R1 + R2);
+				$(r, '[data-uv]').textContent = U + ' В';
 				$(r, '[data-r1v]').textContent = R1 + ' Ом';
 				$(r, '[data-r2v]').textContent = R2 + ' Ом';
 				$(r, '[data-rlv]').textContent = RL + ' Ом';
@@ -116,16 +118,16 @@ const { n } = Astro.props;
 				($(r, '[data-load]') as SVGGElement).style.display = load ? '' : 'none';
 				lb.hide(!load);
 				($(r, '[data-ltxt]') as SVGTextElement).style.display = load ? '' : 'none';
-				const a = -120 + (240 * Uo) / U;
+				const a = -120 + (240 * Uo) / 24; // шкала манометра 0…24 В
 				$(r, '[data-needle]').setAttribute('transform', `rotate(${a.toFixed(1)} 370 118)`);
-				const eh = (78 * Eth) / U;
+				const eh = (78 * Eth) / 24;
 				$(r, '[data-eqw]').setAttribute('y', String(93 - eh));
 				$(r, '[data-eqw]').setAttribute('height', String(eh));
 				$(r, '[data-eqe]').textContent = `Eэ = ${fm(Eth, 2)} В`;
 				$(r, '[data-eqr]').textContent = `Rэ = ${fm(Rth, 2)} Ом`;
 				$(r, '[data-fx]').textContent = load
 					? `Uвых = Eэ · Rн/(Rэ + Rн) = ${fm(Eth, 2)} · ${RL}/(${fm(Rth, 2)} + ${RL}) = ${fm(Uo, 2)} В`
-					: `Uвых = U · R2/(R1 + R2) = 12 · ${R2}/${R1 + R2} = ${fm(Uo, 2)} В`;
+					: `Uвых = U · R2/(R1 + R2) = ${U} · ${R2}/${R1 + R2} = ${fm(Uo, 2)} В`;
 				$(r, '[data-fx2]').textContent = load
 					? `Просадка ${fm(100 * (1 - Uo / Eth), 1)} %. Правило Хоровица: нагрузка должна быть хотя бы в 10 раз «тяжелее» Rэ — тогда просадка меньше 10 %.`
 					: 'Без нагрузки делитель выдаёт напряжение холостого хода — это и есть Eэ эквивалентного генератора.';
@@ -133,6 +135,7 @@ const { n } = Astro.props;
 			upd();
 			r.addEventListener('input', (e) => {
 				const t = e.target as HTMLInputElement;
+				if (t.matches('[data-u]')) U = +t.value;
 				if (t.matches('[data-r1]')) R1 = +t.value;
 				if (t.matches('[data-r2]')) R2 = +t.value;
 				if (t.matches('[data-rl]')) RL = +t.value;

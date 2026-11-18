@@ -26,6 +26,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Схемы на ПТ повторяют транзисторные из главы 2 — источник тока, усилитель, повторитель. Отличия: входного тока нет, крутизна меньше, а параметры разбросаны сильнее.
 
@@ -76,8 +77,8 @@ import M from '../../../components/lesson/M.astro';
 
 ## Практика
 
-1. JFET с Iс.нач = 6 мА и Uотс = −3 В. Какой Rи даст 1,5 мА? *(1,5 = 6(1 − U/3)² → 1 − U/3 = 0,5 → |Uзи| = 1,5 В; Rи = 1,5/1,5 мА = 1 кОм.)*
-2. Истоковый повторитель: gₘ = 2 мА/В, Rи = 2 кОм. Коэффициент передачи? *(4/5 = 0,8.)*
+1. JFET с Iс.нач = 6 мА и Uотс = −3 В. Какой Rи даст 1,5 мА? <Reveal>1,5 = 6(1 − U/3)² → 1 − U/3 = 0,5 → |Uзи| = 1,5 В; Rи = 1,5/1,5 мА = 1 кОм.</Reveal>
+2. Истоковый повторитель: gₘ = 2 мА/В, Rи = 2 кОм. Коэффициент передачи? <Reveal>4/5 = 0,8.</Reveal>
 
 <Mistakes
   items={[

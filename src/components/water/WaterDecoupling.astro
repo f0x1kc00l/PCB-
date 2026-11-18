@@ -24,7 +24,7 @@ const { n } = Astro.props;
 	]}
 	caption="Воду в длинной трубе нельзя мгновенно разогнать — у неё инерция (индуктивность дорожки). Поэтому, когда микросхема резко открывает «кран», давление у неё падает. Бак рядом отдаёт воду сразу, а труба потом спокойно его доливает. Но бак должен стоять у самого крана: даже короткая подводка — это снова инерция."
 >
-	<div class="water__stage">
+	<div class="water__stage water__stage--wide">
 	<svg viewBox="8 8 664 170" style="--w:664" role="img" aria-label="Слева башня-стабилизатор, длинная труба к микросхеме справа, рядом с микросхемой бак-конденсатор. Внизу график напряжения на выводе питания.">
 		<!-- башня -->
 		<rect x="20" y="20" width="56" height="70" rx="4" class="wall" />
@@ -67,6 +67,8 @@ const { n } = Astro.props;
 	</div>
 	<div class="water__controls">
 		<label class="water__row"><span>Расстояние конденсатор → вывод</span><input type="range" data-dist min="1" max="30" step="1" value="2" /><output data-distv></output></label>
+		<label class="water__row"><span>Ёмкость C (лог.)</span><input type="range" data-cc min="1" max="3" step="0.01" value="2" /><output data-ccv></output></label>
+		<label class="water__row"><span>Импульс тока микросхемы</span><input type="range" data-ipk min="20" max="400" step="10" value="100" /><output data-ipkv></output></label>
 	</div>
 	<p class="water__readout" data-fx></p>
 	<p class="water__note" data-fx2></p>
@@ -78,14 +80,14 @@ const { n } = Astro.props;
 	const VS = 3.3,
 		L1 = 30e-9,
 		R1 = 0.05,
-		C = 100e-9,
 		ESR = 0.02,
-		IPK = 0.1,
 		IQ = 0.02,
 		PER = 200e-9,
 		TR = 5e-9,
 		DUTY = 0.25,
 		LMM = 1e-9; // ≈ 1 нГн на мм подводки
+	let C = 100e-9,
+		IPK = 0.1;
 	function iload(t: number) {
 		const x = t % PER;
 		const on = PER * DUTY;
@@ -119,6 +121,9 @@ const { n } = Astro.props;
 				($(r, '[data-capg]') as SVGGElement).style.display = cap ? '' : 'none';
 				($(r, '[data-p="cap"]') as SVGElement).style.display = cap ? '' : 'none';
 				$(r, '[data-distv]').textContent = `${dist} мм`;
+				$(r, '[data-ccv]').textContent = si(C, 'Ф');
+				$(r, '[data-ipkv]').textContent = si(IPK, 'А');
+				$(r, '[data-capt]').textContent = `C = ${si(C, 'Ф')}`;
 				minV = VS;
 			};
 			place();
@@ -126,6 +131,8 @@ const { n } = Astro.props;
 				const tg = e.target as HTMLInputElement;
 				if (tg.matches('[data-c]')) cap = tg.checked;
 				if (tg.matches('[data-dist]')) dist = +tg.value;
+				if (tg.matches('[data-cc]')) C = 10 ** +tg.value * 1e-9;
+				if (tg.matches('[data-ipk]')) IPK = +tg.value * 1e-3;
 				place();
 				sc.clear();
 			});

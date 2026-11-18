@@ -1,0 +1,237 @@
+---
+/**
+ * Маркировка резисторов по IEC 60062: цветные полосы (4, 5, 6 полос) и коды SMD
+ * (3 цифры, 4 цифры, EIA-96). Работает в обе стороны.
+ */
+const COLORS = [
+	['black', 'чёрный', '#111'],
+	['brown', 'коричневый', '#7b3f00'],
+	['red', 'красный', '#d32f2f'],
+	['orange', 'оранжевый', '#f57c00'],
+	['yellow', 'жёлтый', '#f2c40f'],
+	['green', 'зелёный', '#2e8b3e'],
+	['blue', 'синий', '#1e6fd0'],
+	['violet', 'фиолетовый', '#8a3fc0'],
+	['grey', 'серый', '#8d8d8d'],
+	['white', 'белый', '#f4f4f4'],
+	['gold', 'золотой', '#c9a227'],
+	['silver', 'серебристый', '#c0c0c0'],
+] as const;
+const uid = `rc-${Math.random().toString(36).slice(2, 8)}`;
+const digitOpts = COLORS.slice(0, 10);
+const multOpts = COLORS; // gold ×0,1, silver ×0,01
+const tolOpts = ['brown', 'red', 'green', 'blue', 'violet', 'grey', 'gold', 'silver'];
+const tcrOpts = ['black', 'brown', 'red', 'orange', 'yellow', 'green', 'blue', 'violet', 'grey'];
+const name = (c: string) => COLORS.find((x) => x[0] === c)![1];
+---
+
+<resistor-code-calc class="pcb-widget pcb-calc not-content" data-colors={JSON.stringify(COLORS)}>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Маркировка резисторов: цвет и SMD</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+
+	<h4 class="sub">Полосы → номинал</h4>
+	<div class="pcb-segmented" role="radiogroup" aria-label="Число полос">
+		<span class="seg-caption">Полос:</span>
+		{
+			['4', '5', '6'].map((n) => (
+				<label>
+					<input type="radio" name={`${uid}-n`} value={n} checked={n === '4'} />
+					<span>{n}</span>
+				</label>
+			))
+		}
+	</div>
+
+	<svg class="res" viewBox="0 0 320 70" role="img" aria-label="Резистор с цветными полосами">
+		<line x1="0" y1="35" x2="320" y2="35" stroke="var(--sl-color-gray-3)" stroke-width="4" />
+		<rect x="60" y="12" width="200" height="46" rx="20" fill="#d9c49a" stroke="#a8915f" />
+		<g data-bands></g>
+	</svg>
+
+	<div class="fields bands">
+		<label data-b="d1">1-я цифра <select name="d1">{digitOpts.map(([c]) => <option value={c} selected={c === 'yellow'}>{name(c)}</option>)}</select></label>
+		<label data-b="d2">2-я цифра <select name="d2">{digitOpts.map(([c]) => <option value={c} selected={c === 'violet'}>{name(c)}</option>)}</select></label>
+		<label data-b="d3">3-я цифра <select name="d3">{digitOpts.map(([c]) => <option value={c}>{name(c)}</option>)}</select></label>
+		<label data-b="m">Множитель <select name="m">{multOpts.map(([c]) => <option value={c} selected={c === 'red'}>{name(c)}</option>)}</select></label>
+		<label data-b="t">Допуск <select name="t">{tolOpts.map((c) => <option value={c} selected={c === 'gold'}>{name(c)}</option>)}</select></label>
+		<label data-b="tc">ТКС <select name="tc">{tcrOpts.map((c) => <option value={c} selected={c === 'brown'}>{name(c)}</option>)}</select></label>
+	</div>
+	<div class="results">
+		<div class="result result--main"><span>Номинал</span><output data-o="val">—</output></div>
+		<div class="result"><span>Допуск / диапазон</span><output data-o="tol">—</output></div>
+		<div class="result" data-tcres><span>ТКС</span><output data-o="tcr">—</output></div>
+	</div>
+
+	<h4 class="sub">Номинал → полосы и SMD-код</h4>
+	<div class="fields">
+		<label>Номинал, Ом <input name="value" value="4,7к" inputmode="decimal" autocomplete="off" /></label>
+	</div>
+	<ul class="codes" data-tocodes></ul>
+
+	<h4 class="sub">SMD-код → номинал</h4>
+	<div class="fields">
+		<label>Код на корпусе <input name="smd" value="472" autocomplete="off" /><span class="hint">472, 4R7, 1002, 01C</span></label>
+	</div>
+	<div class="results">
+		<div class="result result--main"><span>Номинал</span><output data-o="smd">—</output></div>
+	</div>
+	<p class="footnote">
+		Читай полосы от той, что ближе к краю; полоса допуска обычно стоит отдельно, с промежутком. Код из 3 цифр — две значащих
+		и число нулей (±5 %), из 4 цифр — три значащих (±1 %). EIA-96: две цифры — номер значения в ряду E96, буква — множитель.
+		R — запятая: 4R7 = 4,7 Ом. Код «0» или «000» — перемычка 0 Ом.
+	</p>
+</resistor-code-calc>
+
+<script>
+	import '../../lib/reset';
+	import { parseValue, formatValue, E96 } from '../../lib/units';
+
+	const ORDER = ['black', 'brown', 'red', 'orange', 'yellow', 'green', 'blue', 'violet', 'grey', 'white'];
+	const MULT: Record<string, number> = { gold: 0.1, silver: 0.01 };
+	ORDER.forEach((c, i) => (MULT[c] = 10 ** i));
+	const TOL: Record<string, number> = { brown: 1, red: 2, green: 0.5, blue: 0.25, violet: 0.1, grey: 0.05, gold: 5, silver: 10 };
+	const TCR: Record<string, number> = { black: 250, brown: 100, red: 50, orange: 15, yellow: 25, green: 20, blue: 10, violet: 5, grey: 1 };
+	const EIA_MULT: Record<string, number> = { Z: 0.001, Y: 0.01, R: 0.01, X: 0.1, S: 0.1, A: 1, B: 10, H: 10, C: 100, D: 1e3, E: 1e4, F: 1e5 };
+	const EIA_LETTER: [number, string][] = [[0.01, 'Y'], [0.1, 'X'], [1, 'A'], [10, 'B'], [100, 'C'], [1e3, 'D'], [1e4, 'E'], [1e5, 'F']];
+
+	class ResistorCodeCalc extends HTMLElement {
+		connectedCallback() {
+			const colors: [string, string, string][] = JSON.parse(this.dataset.colors!);
+			const hex = (c: string) => colors.find((x) => x[0] === c)![2];
+			const cname = (c: string) => colors.find((x) => x[0] === c)![1];
+			const sel = (n: string) => this.querySelector<HTMLSelectElement>(`select[name="${n}"]`)!;
+			const o = (n: string) => this.querySelector(`[data-o="${n}"]`)!;
+			const inp = (n: string) => this.querySelector<HTMLInputElement>(`input[name="${n}"]`)!;
+			const swatch = (c: string) => `<span class="sw" style="background:${hex(c)}"></span>${cname(c)}`;
+
+			const toBands = (v: number, digits: 2 | 3): string[] | null => {
+				// v = (значащие цифры) · 10^e, e от −2 (серебро) до 9 (белый)
+				const e = Math.floor(Math.log10(v)) - (digits - 1);
+				for (const ee of [e]) {
+					if (ee < -2 || ee > 9) return null;
+					const sig = Math.round(v / 10 ** ee);
+					if (Math.abs(sig * 10 ** ee - v) / v > 1e-6) return null;
+					const ds = String(sig).padStart(digits, '0').split('').map((d) => ORDER[+d]);
+					const m = ee === -1 ? 'gold' : ee === -2 ? 'silver' : ORDER[ee];
+					return [...ds, m];
+				}
+				return null;
+			};
+
+			const smdDecode = (raw: string): number => {
+				const s = raw.trim().toUpperCase().replace(/\s/g, '');
+				if (/^0+$/.test(s)) return 0;
+				if (/^\d*R\d*$/.test(s)) return Number(s.replace('R', '.'));
+				let m = s.match(/^(\d{2})([ZYRXSABHCDEF])$/);
+				if (m && +m[1] >= 1 && +m[1] <= 96) return E96[+m[1] - 1] * EIA_MULT[m[2]];
+				m = s.match(/^(\d{2,3})(\d)$/);
+				if (m) return +m[1] * 10 ** +m[2];
+				return NaN;
+			};
+
+			const update = () => {
+				const n = +(this.querySelector<HTMLInputElement>('input[type=radio]:checked')?.value ?? '4');
+				this.querySelector<HTMLElement>('[data-b="d3"]')!.style.display = n >= 5 ? '' : 'none';
+				this.querySelector<HTMLElement>('[data-b="tc"]')!.style.display = n === 6 ? '' : 'none';
+				this.querySelector<HTMLElement>('[data-tcres]')!.style.display = n === 6 ? '' : 'none';
+				const digs = n >= 5 ? ['d1', 'd2', 'd3'] : ['d1', 'd2'];
+				const sig = Number(digs.map((d) => ORDER.indexOf(sel(d).value)).join(''));
+				const val = sig * MULT[sel('m').value];
+				const tol = TOL[sel('t').value];
+				o('val').textContent = formatValue(val, 'Ом', 4);
+				o('tol').textContent = `±${String(tol).replace('.', ',')} % (${formatValue(val * (1 - tol / 100), 'Ом', 4)} … ${formatValue(val * (1 + tol / 100), 'Ом', 4)})`;
+				o('tcr').textContent = `${TCR[sel('tc').value]} ppm/°C`;
+				// рисунок
+				const bands = [...digs.map((d) => sel(d).value), sel('m').value, sel('t').value, ...(n === 6 ? [sel('tc').value] : [])];
+				const xs = n === 4 ? [85, 115, 145, 220] : n === 5 ? [82, 106, 130, 154, 220] : [82, 104, 126, 148, 205, 232];
+				this.querySelector('[data-bands]')!.innerHTML = bands
+					.map((c, i) => `<rect x="${xs[i]}" y="12" width="13" height="46" fill="${hex(c)}" stroke="rgba(0,0,0,.25)"/>`)
+					.join('');
+
+				// номинал → полосы и коды
+				const v = parseValue(inp('value').value);
+				const ul = this.querySelector('[data-tocodes]')!;
+				inp('value').setAttribute('aria-invalid', String(!(v > 0)));
+				if (v > 0) {
+					const items: string[] = [];
+					const b4 = toBands(v, 2),
+						b5 = toBands(v, 3);
+					items.push(b4 ? `<li><b>4 полосы:</b> ${b4.map(swatch).join(' · ')} · + допуск</li>` : '<li><b>4 полосы:</b> нужно больше двух значащих цифр — смотри 5 полос</li>');
+					items.push(b5 ? `<li><b>5 полос:</b> ${b5.map(swatch).join(' · ')} · + допуск</li>` : '<li><b>5 полос:</b> нельзя записать тремя значащими цифрами</li>');
+					// SMD 3 и 4 цифры
+					// sig — число значащих цифр: код из 3 знаков = 2 цифры + показатель, из 4 знаков = 3 + показатель
+					const code = (sig: number) => {
+						if (v < 10 ** (sig - 1)) {
+							// мелкие номиналы пишут через R: 4R7, 47R0, R47
+							const s = v.toPrecision(sig);
+							if (Math.abs(Number(s) - v) / v > 1e-6 || !s.includes('.')) return null;
+							return s.replace(/^0\./, '.').replace('.', 'R');
+						}
+						const e = Math.floor(Math.log10(v)) - (sig - 1);
+						const m = Math.round(v / 10 ** e);
+						if (Math.abs(m * 10 ** e - v) / v > 1e-6 || e > 9) return null;
+						return `${m}${e}`;
+					};
+					const c3 = code(2),
+						c4 = code(3);
+					items.push(`<li><b>SMD, 3 цифры:</b> ${c3 ?? 'нет точной записи'}</li>`);
+					items.push(`<li><b>SMD, 4 цифры:</b> ${c4 ?? 'нет точной записи'}</li>`);
+					const mant = v / 10 ** Math.floor(Math.log10(v));
+					const idx = E96.findIndex((x) => Math.abs(x / 100 - mant) < 1e-6);
+					const mul = 10 ** Math.floor(Math.log10(v)) / 100;
+					const letter = EIA_LETTER.find(([k]) => Math.abs(k - mul) / mul < 1e-6)?.[1];
+					items.push(`<li><b>EIA-96:</b> ${idx >= 0 && letter ? String(idx + 1).padStart(2, '0') + letter : 'номинал не из ряда E96'}</li>`);
+					ul.innerHTML = items.join('');
+				} else ul.innerHTML = '';
+
+				const sv = smdDecode(inp('smd').value);
+				inp('smd').setAttribute('aria-invalid', String(Number.isNaN(sv)));
+				o('smd').textContent = Number.isNaN(sv) ? 'не распознан' : sv === 0 ? '0 Ом (перемычка)' : formatValue(sv, 'Ом', 4);
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('resistor-code-calc', ResistorCodeCalc);
+</script>
+
+<style>
+	.sub {
+		margin: 1.1rem 0 0.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-white);
+	}
+	.res {
+		display: block;
+		width: 100%;
+		max-width: 22rem;
+		margin: 0.8rem auto;
+	}
+	.bands {
+		grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+	}
+	.codes {
+		margin: 0.6rem 0 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: 0.35rem;
+		font-size: var(--sl-text-sm);
+	}
+	.codes :global(.sw) {
+		display: inline-block;
+		width: 0.85em;
+		height: 0.85em;
+		margin-right: 0.25em;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 2px;
+		vertical-align: -0.1em;
+	}
+</style>

@@ -9,12 +9,24 @@
 interface Props {
 	n?: string;
 	caption: string;
+	/** Показать выбор стиля обозначений (для схем из библиотеки sch.ts). */
+	sym?: boolean;
 }
-const { n, caption } = Astro.props;
+const { n, caption, sym = false } = Astro.props;
 ---
 
 <figure class="diagram not-content">
 	<button type="button" class="diagram__zoom" aria-label="Открыть рисунок крупно" title="Открыть крупно">⤢</button>
+	{
+		sym && (
+			<select class="diagram__sym" data-sym aria-label="Стиль обозначений на схемах" title="Стиль обозначений — для всех схем курса">
+				<option value="book">Как в книге</option>
+				<option value="gost">ГОСТ</option>
+				<option value="iec">IEC</option>
+				<option value="ansi">ANSI</option>
+			</select>
+		)
+	}
 	<div class="diagram__body"><slot /></div>
 	<figcaption>
 		{n && <strong>Рис. {n}. </strong>}
@@ -23,6 +35,7 @@ const { n, caption } = Astro.props;
 </figure>
 
 <script>
+	import '../../lib/sym';
 	function openZoom(fig: HTMLElement) {
 		const body = fig.querySelector('.diagram__body');
 		const svg = body?.querySelector('svg');

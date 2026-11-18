@@ -23,6 +23,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Схемы до сих пор питались от ±15 В, и «ноль» был посередине. В устройствах с батареей или USB питание одно: 0 и, например, +5 В. Вход и выход ОУ не могут выйти за эти пределы, поэтому сигнал нужно «поднять» на середину.
 
@@ -58,8 +59,8 @@ import M from '../../../components/lesson/M.astro';
 
 ## Практика
 
-1. Питание 5 В, сигнал микрофона 10 мВ, нужен размах ±1 В на выходе. Усиление и номиналы R4, R5? *(K = 100: R5 = 1 кОм, R4 = 99 → 100 кОм.)*
-2. R5 = 1 кОм, нижняя частота 50 Гц. C3? *(C3 ≥ 1/(2π·50·1000) ≈ 3,2 мкФ → 4,7 мкФ.)*
+1. Питание 5 В, сигнал микрофона 10 мВ, нужен размах ±1 В на выходе. Усиление и номиналы R4, R5? <Reveal>K = 100: R5 = 1 кОм, R4 = 99 → 100 кОм.</Reveal>
+2. R5 = 1 кОм, нижняя частота 50 Гц. C3? <Reveal>C3 ≥ 1/(2π·50·1000) ≈ 3,2 мкФ → 4,7 мкФ.</Reveal>
 
 <Mistakes
   items={[

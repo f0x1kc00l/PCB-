@@ -92,6 +92,9 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 	<div class="water__controls">
 		<label class="water__row" data-rowb><span>Ток базы Iб</span><input type="range" data-ib min="0" max="1" step="0.01" value="0.2" /><output data-ibv></output></label>
 		<label class="water__row" data-rowg><span>Напряжение затвор–исток Uзи</span><input type="range" data-vg min="0" max="5" step="0.05" value="1" /><output data-vgv></output></label>
+		<label class="water__row" data-rowbeta><span>Усиление β</span><input type="range" data-beta min="20" max="500" step="10" value="100" /><output data-betav></output></label>
+		<label class="water__row" data-rowvth><span>Порог Uпор</span><input type="range" data-vth min="0.5" max="4" step="0.1" value="1.5" /><output data-vthv></output></label>
+		<label class="water__row"><span>Нагрузка Rк</span><input type="range" data-rc min="20" max="1000" step="10" value="100" /><output data-rcv></output></label>
 	</div>
 	<p class="water__readout" data-fx></p>
 	<p class="water__note" data-fx2></p>
@@ -101,11 +104,7 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 	import { Path, Drops, animate, paint, fm, si, $ } from '../../lib/water';
 
 	const VCC = 5,
-		RC = 100,
-		BETA = 100,
-		VTH = 1.5,
-		KN = 0.2,
-		ICMAX = VCC / RC;
+		KN = 0.2;
 	class WaterTransistor extends HTMLElement {
 		connectedCallback() {
 			const r = this;
@@ -114,7 +113,11 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 				Vg = 1,
 				Vgs = 1,
 				Ic = 0,
-				Igate = 0;
+				Igate = 0,
+				RC = 100,
+				BETA = 100,
+				VTH = 1.5,
+				ICMAX = VCC / RC;
 			const g = $(r, '[data-d]');
 			const big = new Drops(g, new Path([[300, 20], [300, 280]]), 15);
 			const sNpn = new Drops(g, new Path([[60, 170], [290, 170], [290, 200], [300, 210], [300, 280]]), 18, 1.8);
@@ -133,6 +136,8 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 				vis('[data-p="rc2"]', true);
 				(r.querySelector('[data-rowb]') as HTMLElement).style.display = mos ? 'none' : '';
 				(r.querySelector('[data-rowg]') as HTMLElement).style.display = mos ? '' : 'none';
+				(r.querySelector('[data-rowbeta]') as HTMLElement).style.display = mos ? 'none' : '';
+				(r.querySelector('[data-rowvth]') as HTMLElement).style.display = mos ? '' : 'none';
 				sNpn.hide(!npn);
 				sPnp.hide(!pnp);
 				gate.hide(!mos);
@@ -151,6 +156,12 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 				const t = e.target as HTMLInputElement;
 				if (t.matches('[data-ib]')) Ib = +t.value * 1e-3;
 				if (t.matches('[data-vg]')) Vg = +t.value;
+				if (t.matches('[data-beta]')) BETA = +t.value;
+				if (t.matches('[data-vth]')) VTH = +t.value;
+				if (t.matches('[data-rc]')) {
+					RC = +t.value;
+					ICMAX = VCC / RC;
+				}
 				if (t.type === 'radio') {
 					mode = t.value;
 					show();
@@ -215,6 +226,9 @@ const uid = `wt-${Math.random().toString(36).slice(2, 7)}`;
 				$(r, '[data-l3]').textContent = l3;
 				$(r, '[data-ibv]').textContent = si(Ib, 'А');
 				$(r, '[data-vgv]').textContent = fm(Vg, 2) + ' В';
+				$(r, '[data-betav]').textContent = String(BETA);
+				$(r, '[data-vthv]').textContent = fm(VTH, 1) + ' В';
+				$(r, '[data-rcv]').textContent = RC + ' Ом';
 				const drop = Ic * RC; // падение на нагрузке
 				if (mode === 'pnp') {
 					const uk = drop; // потенциал коллектора = падение на нагрузке над землёй

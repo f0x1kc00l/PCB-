@@ -1,168 +1,131 @@
-# Схемотехника с нуля — сайт-учебник
+# Схемотехника с нуля
 
-Курс электроники для начинающих по плану первого тома «Искусства схемотехники» П. Хоровица и У. Хилла:
-главы 1–6 курса = главы 1–6 книги (основы, транзисторы, ПТ, ОУ, фильтры и генераторы, источники питания),
-плюс дополнительные модули: практикум и печатные платы (устройство, проектирование, производство, ВЧ/СВЧ).
-Статический сайт на [Astro](https://astro.build) + [Starlight](https://starlight.astro.build), адаптивный — от телефона до широкого монитора.
+**Учебник электроники для начинающих** — по плану первого тома «Искусства схемотехники» П. Хоровица и У. Хилла.
+Сайт и Android-приложение, работает офлайн, удобен с телефона.
+
+Astro 7 · Starlight · KaTeX · Pagefind · Capacitor
+
+---
+
+## Что внутри
+
+| | |
+|---|---|
+| **Курс** | Главы 1–6 = главы 1–6 книги: основы, транзисторы, ПТ, ОУ, фильтры и генераторы, источники питания. Плюс модули 7–11: практикум и печатные платы (до ВЧ/СВЧ). 109 уроков. |
+| **Задачи** | 41 задача с проверкой ответа (понимает «4,7к», «20м»), подсказки по шагам, решения. В уроках ответы спрятаны под кнопку. |
+| **Калькуляторы** | 14 штук отдельным разделом: Ом, делитель, ряды E6–E96, маркировка, светодиод, стабилитрон, LM317, радиатор, 555, мультивибратор, ширина дорожки, микрополоска, стек слоёв, УГО. |
+| **Лаборатория** | Живые схемы с настоящим расчётом цепи, интерактивная АЧХ, тренажёр «Найди косяк», карточки (285), шпаргалки глав, 4 лабы на Arduino/ESP32. |
+| **Водяные аналогии** | 11 анимаций с ползунками; у каждого опыта — полный экран, ссылка на состояние и «Сброс». |
+| **Схемы** | Генерируются кодом; стиль обозначений переключается: как в книге / ГОСТ / IEC / ANSI. |
+| **Офлайн и печать** | Кнопка «Сохранить курс на устройство» (service worker). Шпаргалки и главы целиком — в PDF. |
+| **Прогресс** | Пройденные уроки, решённые задачи и выученные карточки — в браузере, без регистрации. |
 
 ## Быстрый старт
 
-Нужен **Node.js 22.23 или новее**. Проверка: `node -v`.
+Нужен **Node.js 22.23+**.
 
 ```bash
-npm install      # один раз
-npm run dev      # локальный сервер: http://localhost:4321
-npm run build    # сборка в dist/ (вместе с поиском Pagefind)
-npm run preview  # посмотреть собранную версию
+npm install
+npm run dev        # http://localhost:4321
 ```
+
+| Команда | Что делает |
+|---|---|
+| `npm run build` | Сборка в `dist/` + постобработка (офлайн-список, печатные главы) |
+| `npm run preview` | Посмотреть собранный сайт |
+| `npm run check` | Сборка, проверка всех внутренних ссылок, тесты расчётов |
+| `npm run check:ui` | В браузере: вёрстка на 360/768/1024/1440, ошибки JS, ключевые виджеты ¹ |
+| `npm run sheets` | Пересобрать шпаргалки и карточки из уроков (после правки формул) |
+| `npm run build:android` | Сборка для приложения и копирование в `android/` |
+
+¹ Один раз: `npx playwright install chromium` — или укажи свой браузер: `CHROME_PATH=/usr/bin/google-chrome`.
 
 ## Структура
 
 ```
 src/
-├── content/docs/                 ← ВСЕ УРОКИ
-│   ├── index.mdx                 главная
-│   ├── m00-intro/                как устроен курс
-│   ├── m01-basics/ … m06-power/  главы 1–6 (по книге)
-│   ├── m07-practice/             практикум: схемы, корпуса, даташиты, макетка
-│   ├── m08-pcb-basics/ … m11-rf/ печатные платы (доп. модули)
-│   └── appendix/                 приложения A–I
+├── content/docs/
+│   ├── m00-intro … m06-power/     главы 0–6
+│   ├── m07-practice … m11-rf/     дополнительные модули
+│   ├── calc/                      калькуляторы
+│   ├── lab/                       лаборатория, шпаргалки, лабы на железе
+│   └── appendix/                  глоссарий, ошибки, стандарты, карта книги
 ├── components/
-│   ├── lesson/        врезки, формулы (Formula, M), ошибки, задание, ссылки
-│   ├── diagrams/      схемы: sch.ts (условные обозначения), circuits.ts (реестр схем), Circuit.astro
-│   ├── interactive/   квиз, калькуляторы, стек слоёв, таблица УГО, «урок пройден»
+│   ├── lesson/        Formula, M, Callout, Mistakes, Check, Reveal
+│   ├── diagrams/      sch.ts (символы), circuits.ts (схемы), live.ts (живые схемы), bugs.ts
+│   ├── interactive/   калькуляторы, LiveCircuit, BodePlot, FindBug, Flashcards, Quiz
 │   ├── water/         водяные аналогии
-│   ├── home/          блоки главной
-│   └── overrides/     переопределённые части Starlight
-├── data/modules.mjs   список модулей (меню + карта на главной)
-├── lib/               прогресс, единицы, формулы IPC и микрополоска
-└── styles/custom.css  тема, адаптивная вёрстка
-public/spravka/        карманная справка (отдельная страница)
+│   └── home/, overrides/
+├── lib/               mna.ts (решатель цепей), units.ts, water.ts, reset.ts, sym.ts, progress.ts
+├── pages/print/       глава целиком для печати
+└── data/              modules.mjs (список модулей), flashcards.json
+scripts/               postbuild, генераторы приложений и шпаргалок, проверки (check/)
+public/                sw.js (офлайн), spravka/ (карманная справка)
+android/               проект Capacitor
 ```
 
 ## Как написать урок
-
-Frontmatter (паспорт урока):
 
 ```yaml
 ---
 title: Инвертирующий усилитель
 description: Одна строка для поиска
-sidebar:
-  label: "4.1 Основные схемы включения ОУ"   # номер = глава.урок
-  order: 1
+sidebar: { label: "4.1 Основные схемы включения ОУ", order: 1 }
 duration: 35
-status: ready                 # draft — плашка «в разработке»
-goals:
-  - вывести усиление из золотых правил
-prerequisites:
-  - m04-opamps/00-intro       # id урока = путь без расширения
-book:                         # Хоровиц, Хилл, т. 1 (по умолчанию)
-  - { ch: 4, sec: "4.04", page: 184, note: "инвертирующий усилитель" }
-  - { book: maloratsky, ch: 1, sec: "1.2", page: 18 }
-sources:
-  - title: Даташит LM358
-    url: https://www.ti.com/product/LM358
+status: ready                       # draft — плашка «в разработке»
+goals: [вывести усиление из золотых правил]
+prerequisites: [m04-opamps/00-intro]
+book: [{ ch: 4, sec: "4.04", page: 184 }]
 ---
 ```
 
-Компоненты (импорт от `src/content/docs/<модуль>/`):
-
-| Что | Пример |
+| Компонент | Пример |
 |---|---|
-| Формула (KaTeX, LaTeX) | `<Formula tex="K = -\frac{R_2}{R_1}" label="инвертирующий" />` — части через `\qquad` переносятся на телефоне |
+| Формула | `<Formula tex="K = -\frac{R_2}{R_1}" label="инвертирующий" />` |
 | Формула в строке | `<M t="r_e = 25\,\text{мВ}/I_К" />` |
-| Схема из реестра | `<Circuit id="oa-inverting" n="4.1" caption="…" />` (новые схемы — в `circuits.ts`) |
-| Врезки | `<Callout type="tip">`, `type="warning"`, `type="book" where="гл. 4, §4.04, с. 184"` |
-| Ошибки, квиз, задание | `<Mistakes items={[…]} />`, `<Quiz questions={[…]} />`, `<Assignment time={30}>…</Assignment>` |
-| Калькуляторы | `<OhmCalc />`, `<DividerCalc />`, `<TraceWidthCalc />`, `<MultivibratorCalc />`, `<MicrostripCalc />` |
+| Схема | `<Circuit id="oa-inverting" n="4.1" caption="…" />` |
+| Живая схема | `<LiveCircuit id="divider" />` |
+| Задача с проверкой | `<Check a={[{ label: "Uвых", unit: "В", value: "3,33" }]} hint="…" />` |
+| Спрятанный ответ | `Вопрос? <Reveal>ответ</Reveal>` |
+| Врезка | `<Callout type="tip">`, `"warning"`, `"book" where="гл. 4, с. 184"` |
 
-Ссылки между уроками — **относительные**: `[урок 1.2](../../m01-basics/02-ohms-law/)`, в том же модуле — `[2.3](../03-basic-circuits/)`.
-
-Сводные приложения пересобираются скриптами:
-
-```bash
-python3 scripts/gen_appendix.py .                                        # D. Типичные ошибки, F. Карта учебника
-python3 scripts/gen_glossary.py src/content/docs/appendix/01-glossary.mdx  # A. Глоссарий
-```
+Ссылки между уроками — относительные: `[1.2](../../m01-basics/02-ohms-law/)`.
+После правки формул — `npm run sheets`; глоссарий и сводные приложения — `scripts/gen_glossary.py`, `scripts/gen_appendix.py`.
 
 ## Публикация
 
-### GitHub Pages
+**GitHub Pages.** Settings › Pages › Source: *GitHub Actions*. Workflow `.github/workflows/deploy.yml` собирает сайт при пуше в `main` и сам подставляет адрес.
 
-1. Создай репозиторий на GitHub и запушь проект.
-2. **Settings › Pages › Build and deployment › Source: GitHub Actions.**
-3. Workflow `.github/workflows/deploy.yml` уже лежит в проекте и запускается при каждом пуше в `main`.
-   Он сам подставляет адрес `https://<user>.github.io/<repo>/`.
-   Если репозиторий называется `<user>.github.io`, сайт будет в корне — workflow это учитывает.
+**Netlify.** Import an existing project — настройки возьмутся из `netlify.toml`.
 
-Ручная сборка под подпапку: `SITE_URL=https://user.github.io BASE_PATH=/pcb-course npm run build`.
+Сборка под подпапку вручную: `SITE_URL=https://user.github.io BASE_PATH=/pcb-course npm run build`.
 
-### Netlify
+## Android
 
-1. **Add new site › Import an existing project**, выбери репозиторий.
-2. Настройки сборки подтянутся из `netlify.toml` (команда `npm run build`, папка `dist`, Node 22).
-3. По желанию задай переменную окружения `SITE_URL` с адресом сайта (нужна для sitemap).
+WebView с копией сайта внутри (Capacitor) — работает полностью офлайн.
 
-## Android-приложение
+- **Без Android Studio:** workflow `.github/workflows/android.yml` собирает APK при пуше — Actions › Build Android APK › Artifacts.
+- **Локально** (JDK 21 + Android SDK 36):
 
-Сайт упакован в приложение через [Capacitor](https://capacitorjs.com): WebView, внутри которого лежит собранный сайт.
-Работает **полностью офлайн**: уроки, калькуляторы, поиск и прогресс — всё внутри APK.
+  ```bash
+  npm run build:android
+  npm run open:android      # или: cd android && ./gradlew assembleDebug
+  ```
 
-### Вариант 1. APK на GitHub (без установки Android Studio)
+После правки уроков снова `npm run build:android` — приложение возит копию сайта с собой.
 
-Workflow `.github/workflows/android.yml` собирает APK при каждом пуше в `main`.
-Открой **Actions › Build Android APK ›** последний запуск **› Artifacts › pcb-course-apk**, скачай архив, внутри `app-debug.apk`.
-Кинь на телефон и установи (разреши установку из неизвестных источников).
-
-### Вариант 2. Локально
-
-Нужны Node 22.23+, **JDK 21** и Android Studio (или Android SDK с platform 36).
-
-```bash
-npm run build:android    # собрать сайт в режиме приложения и скопировать в android/
-npm run open:android     # открыть проект в Android Studio → Run или Build › Build APK(s)
-```
-
-Или из консоли: `cd android && ./gradlew assembleDebug` (в Windows `gradlew.bat assembleDebug`).
-APK появится в `android/app/build/outputs/apk/debug/app-debug.apk`.
-
-**После любой правки уроков** снова запусти `npm run build:android`: приложение не подтягивает сайт из интернета, оно возит его копию с собой.
-
-### Что настроено и где
-
-| Что | Где |
+| Настройка | Где |
 |---|---|
-| Имя приложения, идентификатор пакета | `capacitor.config.ts` (`appName`, `appId`) |
-| Иконка и сплэш-экран | исходники в `assets/`, перегенерация: `npx @capacitor/assets generate --android` |
-| Цвет фона окна (светлая/тёмная тема) | `android/app/src/main/res/values*/app_colors.xml` |
-| Кнопка «Назад» листает историю страниц | `android/app/src/main/java/com/pcbcourse/app/MainActivity.java` |
-| Исправление ссылок на уроки внутри приложения | `src/lib/app-links.js` |
-| Номер версии | `android/app/build.gradle` (`versionCode`, `versionName`) |
+| Имя и `appId` | `capacitor.config.ts`, `android/app/build.gradle` |
+| Версия | `android/app/build.gradle` (`versionCode`, `versionName`) |
+| Иконка и сплэш | `assets/` → `npx @capacitor/assets generate --android` |
+| Ссылки на уроки внутри приложения | `src/lib/app-links.js` |
+| «Поделиться» из приложения | собирать с `SITE_URL=<адрес сайта>` |
 
-Почему нужен `app-links.js`: встроенный сервер Capacitor на любой адрес без расширения отдаёт корневой `index.html`
-(так удобно одностраничным приложениям). У нас каждый урок — отдельная страница, поэтому скрипт превращает
-`/m01-basics/02-ohms-law/` в `/m01-basics/02-ohms-law/index.html`. Скрипт попадает только в сборку приложения.
-
-### Google Play
-
-Debug-APK годится для своего телефона и раздачи знакомым. Для Google Play:
-1. Придумай свой идентификатор пакета (перевёрнутый домен, например `am.example.pcbcourse`) и пропиши его в `capacitor.config.ts` (`appId`) и в `android/app/build.gradle` (`applicationId`). Java-пакет `com.pcbcourse.app` переименовывать не обязательно. После публикации идентификатор менять нельзя.
-2. В Android Studio: **Build › Generate Signed App Bundle / APK › Android App Bundle**, создай ключ (keystore) и **сохрани его** — без него обновления не выпустить.
-3. Загрузи `.aab` в Google Play Console.
-
-## Прогресс ученика
-
-Хранится в `localStorage` под ключами `pcb-course:progress:v1` и `pcb-course:last:v1` (имена ключей оставлены прежними).
-Уроком считается страница из папки `mNN-…`.
+Для Google Play: свой `appId` до первой публикации, подписанный `.aab` (Build › Generate Signed App Bundle), ключ хранить.
 
 ## Источники
 
-- П. Хоровиц, У. Хилл. Искусство схемотехники, т. 1. — М.: Мир, 1993 — главы 1–6.
-- Л. Г. Малорацкий. Микроминиатюризация элементов и устройств СВЧ. — М.: Сов. радио, 1976 — модуль 11.
-- Даташиты производителей; IPC-2221B, IPC-2152, IPC-7351B, IPC-A-600, IPC-A-610; ГОСТ 2.702, 2.710 и ГОСТ на УГО.
-
-## Карманная справка
-
-`public/spravka/index.html` (на сайте — `/spravka/`): термины простыми словами, водяные аналогии, формулы.
-Тексты — `scripts/spravka/cards.py`, пересборка: `npm run build && python3 scripts/spravka/build_spravka.py && npm run build`.
+- П. Хоровиц, У. Хилл. *Искусство схемотехники*, т. 1. — М.: Мир, 1993 — главы 1–6.
+- Л. Г. Малорацкий. *Микроминиатюризация элементов и устройств СВЧ*. — М.: Сов. радио, 1976 — модуль 11.
+- Даташиты производителей; IPC-2221B, IPC-2152, IPC-7351B, IPC-A-600/610; ЕСКД (ГОСТ 2.7xx).

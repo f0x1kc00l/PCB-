@@ -25,6 +25,7 @@ import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import SchematicRules from '../../../components/diagrams/m03-circuits/SchematicRules.astro';
 import Multivibrator from '../../../components/diagrams/m03-circuits/Multivibrator.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Схема — это язык, на котором электронщики договариваются друг с другом. С неё начинается любая плата: сначала рисуют схему, потом по ней — плату.
 
@@ -93,9 +94,9 @@ import Multivibrator from '../../../components/diagrams/m03-circuits/Multivibrat
 
 ## Практика
 
-1. На рис. 7.1б найди все элементы, подключённые к цепи 12V. *(P1, R1, R2, R3, R4.)*
-2. Какие элементы подключены к цепи «коллектор Q2»? *(R4, коллектор Q2, правая обкладка C1.)*
-3. Найди место, где проводник пересекает другой без соединения. *(C2 через проводник R1 и C1 через проводник R2.)*
+1. На рис. 7.1б найди все элементы, подключённые к цепи 12V. <Reveal>P1, R1, R2, R3, R4.</Reveal>
+2. Какие элементы подключены к цепи «коллектор Q2»? <Reveal>R4, коллектор Q2, правая обкладка C1.</Reveal>
+3. Найди место, где проводник пересекает другой без соединения. <Reveal>C2 через проводник R1 и C1 через проводник R2.</Reveal>
 4. Открой даташит любой платы-модуля (например, отладочной платы с микроконтроллером) и найди на схеме метки цепей. Сколько раз встречается метка GND?
 
 <Mistakes

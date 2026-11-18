@@ -117,6 +117,11 @@ export function animate(root: HTMLElement, fn: (dt: number, t: number) => void) 
 	});
 	io.observe(root);
 	function frame(now: number) {
+		// Виджет сбросили (заменили свежей копией) — старый цикл гасим.
+		if (!root.isConnected) {
+			io.disconnect();
+			return;
+		}
 		if (!visible) return;
 		const dt = Math.min(0.05, (now - last) / 1000);
 		last = now;

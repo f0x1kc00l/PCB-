@@ -29,6 +29,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 Микросхема 723 — «конструктор» линейного стабилизатора: все узлы выведены наружу, поэтому на ней видно, как устроен **любой** линейный стабилизатор, включая 7805 и LM317.
 
@@ -72,9 +73,9 @@ import M from '../../../components/lesson/M.astro';
 
 ## Практика
 
-1. Uоп = 7,15 В, нужно 12 В, R2 = 10 кОм. R1? *(R1 = R2·(12/7,15 − 1) ≈ 6,8 кОм.)*
-2. Ограничение на 0,5 А. Rогр и его мощность? *(1,3 Ом; P ≈ 0,65·0,5 ≈ 0,33 Вт → 0,5–1 Вт.)*
-3. Вход 20 В, выход 12 В, короткое замыкание, ток ограничен 0,5 А. Мощность на проходном транзисторе? *(≈ 20·0,5 = 10 Вт.)*
+1. Uоп = 7,15 В, нужно 12 В, R2 = 10 кОм. R1? <Reveal>R1 = R2·(12/7,15 − 1) ≈ 6,8 кОм.</Reveal>
+2. Ограничение на 0,5 А. Rогр и его мощность? <Reveal>1,3 Ом; P ≈ 0,65·0,5 ≈ 0,33 Вт → 0,5–1 Вт.</Reveal>
+3. Вход 20 В, выход 12 В, короткое замыкание, ток ограничен 0,5 А. Мощность на проходном транзисторе? <Reveal>≈ 20·0,5 = 10 Вт.</Reveal>
 
 <Mistakes
   items={[
@@ -101,3 +102,7 @@ import M from '../../../components/lesson/M.astro';
     },
   ]}
 />
+
+<Callout type="tip" title="Вся глава одной страницей">
+  Для печати или PDF: [глава 6 целиком](../../print/m06-power/), а коротко — [шпаргалка главы 6](../../lab/16-sheet-ch6/).
+</Callout>

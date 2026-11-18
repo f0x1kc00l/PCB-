@@ -27,6 +27,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
 import M from '../../../components/lesson/M.astro';
+import Reveal from '../../../components/lesson/Reveal.astro';
 
 ## Фильтр Саллена — Ки (ИНУН)
 
@@ -87,8 +88,8 @@ import M from '../../../components/lesson/M.astro';
 
 ## Практика
 
-1. Саллен — Ки с единичным усилением, Баттерворт на 100 Гц, R = 22 кОм. C2 и C1? *(C2 = 1/(2π·100·22·10³·√2) ≈ 51 нФ, C1 ≈ 100 нФ.)*
-2. Двойной Т на 50 Гц с R = 33 кОм. C? *(1/(2π·50·33000) ≈ 96 нФ → 100 нФ.)*
+1. Саллен — Ки с единичным усилением, Баттерворт на 100 Гц, R = 22 кОм. C2 и C1? <Reveal>C2 = 1/(2π·100·22·10³·√2) ≈ 51 нФ, C1 ≈ 100 нФ.</Reveal>
+2. Двойной Т на 50 Гц с R = 33 кОм. C? <Reveal>1/(2π·50·33000) ≈ 96 нФ → 100 нФ.</Reveal>
 
 <Mistakes
   items={[

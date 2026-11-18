@@ -68,6 +68,8 @@ const { n } = Astro.props;
 	</svg>
 	</div>
 	<div class="water__controls">
+		<label class="water__row"><span>Насос U</span><input type="range" data-u min="3" max="24" step="1" value="12" /><output data-uv></output></label>
+		<label class="water__row"><span>Сужение R</span><input type="range" data-r min="2" max="50" step="1" value="10" /><output data-rv></output></label>
 		<label class="water__row"><span>Масса колеса L</span><input type="range" data-l min="10" max="100" step="5" value="50" /><output data-lv></output></label>
 	</div>
 	<div class="water__btns">
@@ -84,9 +86,9 @@ const { n } = Astro.props;
 	class WaterInductor extends HTMLElement {
 		connectedCallback() {
 			const r = this;
-			const U = 12,
-				R = 10,
-				SLOW = 500,
+			let U = 12,
+				R = 10;
+			const SLOW = 500,
 				RARC = 1000;
 			let L = 0.05,
 				I = 0,
@@ -105,6 +107,8 @@ const { n } = Astro.props;
 			const P = (k: string) => $(r, `[data-p="${k}"]`);
 			const upd = () => {
 				$(r, '[data-lv]').textContent = si(L, 'Гн');
+				$(r, '[data-uv]').textContent = U + ' В';
+				$(r, '[data-rv]').textContent = R + ' Ом';
 				const b = $(r, '[data-sb]');
 				b.textContent = open ? 'Закрыть кран' : 'Открыть кран';
 				b.setAttribute('aria-pressed', String(open));
@@ -117,6 +121,8 @@ const { n } = Astro.props;
 			r.addEventListener('input', (e) => {
 				const t = e.target as HTMLInputElement;
 				if (t.matches('[data-l]')) L = +t.value * 1e-3;
+				if (t.matches('[data-u]')) U = +t.value;
+				if (t.matches('[data-r]')) R = +t.value;
 				if (t.matches('[data-dd]')) diode = t.checked;
 				upd();
 			});

@@ -1,0 +1,42 @@
+---
+title: "Лаборатория"
+description: "Интерактивные инструменты курса: живые схемы, АЧХ, тренажёр «Найди косяк», карточки, шпаргалки глав и лабораторные на Arduino/ESP32."
+sidebar:
+  label: "Обзор"
+  order: 0
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Здесь собрано всё, что помогает не просто прочитать урок, а потрогать и закрепить.
+
+## Потрогать
+
+<CardGrid>
+	<LinkCard title="Живые схемы" description="8 схем, которые пересчитываются на лету: делитель, светодиод, стабилитрон, ключ, повторитель, каскад, ОУ." href="01-live-circuits/" />
+	<LinkCard title="АЧХ" description="Интерактивный график: RC-фильтры, Саллен — Ки, полоса усилителя на ОУ." href="02-bode/" />
+	<LinkCard title="Найди косяк" description="8 схем с типичными ошибками — нажми на место ошибки." href="03-find-the-bug/" />
+</CardGrid>
+
+## Запомнить
+
+<CardGrid>
+	<LinkCard title="Карточки" description="200 терминов и все формулы глав 1–6 с интервальным повторением." href="04-flashcards/" />
+	<LinkCard title="Шпаргалка: глава 1" description="Основы: Ом, Кирхгоф, RC, импеданс, диоды." href="11-sheet-ch1/" />
+	<LinkCard title="Шпаргалка: глава 2" description="Биполярные транзисторы." href="12-sheet-ch2/" />
+	<LinkCard title="Шпаргалка: глава 3" description="Полевые транзисторы." href="13-sheet-ch3/" />
+	<LinkCard title="Шпаргалка: глава 4" description="Операционные усилители и обратная связь." href="14-sheet-ch4/" />
+	<LinkCard title="Шпаргалка: глава 5" description="Активные фильтры и генераторы." href="15-sheet-ch5/" />
+	<LinkCard title="Шпаргалка: глава 6" description="Источники питания." href="16-sheet-ch6/" />
+</CardGrid>
+
+## Собрать руками
+
+Четыре лабораторные на Arduino Uno или ESP32 — каждая продолжает живую схему: сначала предсказываешь, потом измеряешь.
+
+<CardGrid>
+	<LinkCard title="Лаба 1: делитель" description="Просадка делителя под нагрузкой — мультиметром и АЦП." href="21-hw-divider/" />
+	<LinkCard title="Лаба 2: RC-цепь" description="Записываем экспоненту заряда и находим τ." href="22-hw-rc/" />
+	<LinkCard title="Лаба 3: светодиод" description="Прямое напряжение и ток при разных резисторах." href="23-hw-led/" />
+	<LinkCard title="Лаба 4: ключ" description="Насыщение транзистора и правило выбора Rб." href="24-hw-switch/" />
+</CardGrid>

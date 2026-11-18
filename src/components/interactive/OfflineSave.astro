@@ -1,0 +1,128 @@
+---
+/**
+ * «Сохранить курс на устройство»: просит service worker (public/sw.js) скачать весь сайт.
+ * После этого курс открывается без интернета — в метро, в самолёте, в деревне.
+ */
+---
+
+<offline-save class="pcb-widget not-content offline" data-base={import.meta.env.BASE_URL.replace(/\/?$/, '/')}>
+	<p class="pcb-widget__title">Курс без интернета</p>
+	<p class="offline__text" data-text>Сохрани курс на устройство — и он будет открываться без сети.</p>
+	<div class="offline__bar" hidden data-barbox><span data-bar></span></div>
+	<button type="button" class="offline__btn" data-go hidden>Сохранить курс на устройство</button>
+</offline-save>
+
+<script>
+	const KEY = 'pcb-course:offline:v1';
+	class OfflineSave extends HTMLElement {
+		connectedCallback() {
+			const text = this.querySelector<HTMLElement>('[data-text]')!;
+			const btn = this.querySelector<HTMLButtonElement>('[data-go]')!;
+			const barbox = this.querySelector<HTMLElement>('[data-barbox]')!;
+			const bar = this.querySelector<HTMLElement>('[data-bar]')!;
+			const mb = (b: number) => `${(b / 1048576).toFixed(1).replace('.', ',')} МБ`;
+			if ((window as any).Capacitor) {
+				text.textContent = 'Ты в приложении — весь курс уже лежит на телефоне и работает без интернета.';
+				return;
+			}
+			if (!('serviceWorker' in navigator) || !('caches' in window)) {
+				text.textContent = 'Этот браузер не умеет сохранять сайты для офлайна. Открой курс в Chrome, Edge, Firefox или Safari.';
+				return;
+			}
+			let saved: { at: string; bytes: number } | null = null;
+			try {
+				saved = JSON.parse(localStorage.getItem(KEY) ?? 'null');
+			} catch {
+				/* нет хранилища */
+			}
+			const idle = () => {
+				btn.hidden = false;
+				btn.disabled = false;
+				if (saved) {
+					text.textContent = `Курс сохранён ${new Date(saved.at).toLocaleDateString('ru-RU')} (${mb(saved.bytes)}) — открывается без сети. Курс обновился? Сохрани заново.`;
+					btn.textContent = 'Обновить сохранённую копию';
+				} else {
+					text.textContent = 'Сохрани курс на устройство — и он будет открываться без сети. Нужно один раз, при хорошем интернете.';
+					btn.textContent = 'Сохранить курс на устройство';
+				}
+			};
+			fetch(`${this.dataset.base}offline-files.json`, { cache: 'no-store' })
+				.then((r) => r.json())
+				.then((l) => {
+					if (!saved) text.textContent = `Сохрани курс на устройство (≈ ${mb(l.bytes)}) — и он будет открываться без сети.`;
+				})
+				.catch(() => {});
+			idle();
+			navigator.serviceWorker.addEventListener('message', (e) => {
+				const d = e.data || {};
+				if (d.type === 'progress') {
+					barbox.hidden = false;
+					bar.style.width = `${(d.done / d.total) * 100}%`;
+					text.textContent = `Сохраняю… ${d.done} из ${d.total} файлов`;
+				} else if (d.type === 'done') {
+					saved = { at: new Date().toISOString(), bytes: d.bytes };
+					try {
+						localStorage.setItem(KEY, JSON.stringify(saved));
+					} catch {
+						/* нет хранилища */
+					}
+					barbox.hidden = true;
+					idle();
+					if (d.failed) text.textContent += ` (не скачалось файлов: ${d.failed} — повтори позже)`;
+				} else if (d.type === 'error') {
+					barbox.hidden = true;
+					idle();
+					text.textContent = 'Не получилось: нет связи с сайтом. Попробуй ещё раз при хорошем интернете.';
+				}
+			});
+			btn.addEventListener('click', async () => {
+				btn.disabled = true;
+				text.textContent = 'Готовлю…';
+				try {
+					const reg = await navigator.serviceWorker.ready;
+					(reg.active ?? navigator.serviceWorker.controller)?.postMessage({ type: 'cache-all' });
+				} catch {
+					text.textContent = 'Офлайн-режим доступен только на сайте по https.';
+					btn.disabled = false;
+				}
+			});
+		}
+	}
+	customElements.define('offline-save', OfflineSave);
+</script>
+
+<style>
+	.offline__text {
+		margin: 0 0 0.6rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.offline__bar {
+		height: 6px;
+		margin-bottom: 0.6rem;
+		border-radius: 3px;
+		background: var(--sl-color-gray-6);
+		overflow: hidden;
+	}
+	.offline__bar span {
+		display: block;
+		height: 100%;
+		width: 0;
+		background: var(--sl-color-accent);
+		transition: width 0.2s;
+	}
+	.offline__btn {
+		min-height: 44px;
+		padding: 0.4rem 1rem;
+		border: 1px solid var(--sl-color-accent);
+		border-radius: 0.5rem;
+		background: var(--sl-color-accent-low);
+		color: var(--sl-color-white);
+		font: inherit;
+		cursor: pointer;
+	}
+	.offline__btn:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+</style>

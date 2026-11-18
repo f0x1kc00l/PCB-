@@ -1,7 +1,10 @@
 ---
 /**
- * Рамка для анимированных водяных аналогий: заголовок, анимация, подпись.
- * Внутрь кладут <svg> и элементы управления.
+ * Рамка для анимированных водяных аналогий: заголовок, кнопка «Сброс»,
+ * анимация, легенда, подпись. Внутрь кладут <svg> и элементы управления.
+ *
+ * Сброс: рядом с живым виджетом лежит <template> с исходной разметкой;
+ * кнопка заменяет виджет свежей копией (см. src/lib/reset.ts).
  */
 interface Props {
 	title: string;
@@ -13,21 +16,60 @@ interface Props {
 	map?: [string, string][];
 }
 const { title, n, caption, tag: Tag, map = [] } = Astro.props;
+const inner = await Astro.slots.render('default');
 ---
 
-<Tag class="pcb-widget water not-content">
-	<p class="pcb-widget__title">{n && <span>Рис. {n}.</span>} {title}</p>
-	<slot />
-	{
-		map.length > 0 && (
-			<ul class="water__map" aria-label="Соответствие воды и электричества">
-				{map.map(([w, e]) => (
-					<li>
-						<b>{w}</b> → {e}
-					</li>
-				))}
-			</ul>
-		)
-	}
-	{caption && <p class="water__note">{caption}</p>}
-</Tag>
+<div class="water-host" data-reset-host>
+	<Tag class="pcb-widget water not-content">
+		<div class="pcb-widget__head">
+			<p class="pcb-widget__title">{n && <span>Рис. {n}.</span>} {title}</p>
+			<div class="pcb-widget__tools">
+				<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+				<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+				<button type="button" class="pcb-reset" data-reset title="Вернуть всё как было">↺ Сброс</button>
+			</div>
+		</div>
+		<Fragment set:html={inner} />
+		{
+			map.length > 0 && (
+				<ul class="water__map" aria-label="Соответствие воды и электричества">
+					{map.map(([w, e]) => (
+						<li>
+							<b>{w}</b> → {e}
+						</li>
+					))}
+				</ul>
+			)
+		}
+		{caption && <p class="water__note">{caption}</p>}
+	</Tag>
+	<template data-reset-tpl>
+		<Tag class="pcb-widget water not-content">
+			<div class="pcb-widget__head">
+				<p class="pcb-widget__title">{n && <span>Рис. {n}.</span>} {title}</p>
+				<div class="pcb-widget__tools">
+					<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+					<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+					<button type="button" class="pcb-reset" data-reset title="Вернуть всё как было">↺ Сброс</button>
+				</div>
+			</div>
+			<Fragment set:html={inner} />
+			{
+				map.length > 0 && (
+					<ul class="water__map" aria-label="Соответствие воды и электричества">
+						{map.map(([w, e]) => (
+							<li>
+								<b>{w}</b> → {e}
+							</li>
+						))}
+					</ul>
+				)
+			}
+			{caption && <p class="water__note">{caption}</p>}
+		</Tag>
+	</template>
+</div>
+
+<script>
+	import '../../lib/reset';
+</script>

@@ -1,0 +1,289 @@
+---
+/**
+ * Проверка ответа на задачу.
+ *
+ *   <Check a={[{ label: 'Uвых', unit: 'В', value: '3,33' }]} hint="Замени делитель эквивалентом." />
+ *   <Check a={[{ label: 'K', min: 55, max: 66 }]} />            — подходит любой ответ в диапазоне
+ *   <Check choices={['Подойдёт', 'Не подойдёт']} correct={0} />  — выбор варианта
+ *
+ * value понимает инженерную запись (4,7к, 100н, 20m); tol — допуск в процентах (по умолчанию 3 %).
+ * Решённые задачи запоминаются в браузере.
+ */
+interface Field {
+	label: string;
+	unit?: string;
+	value?: string;
+	tol?: number;
+	min?: number;
+	max?: number;
+}
+interface Props {
+	a?: Field[];
+	choices?: string[];
+	correct?: number;
+	hint?: string | string[];
+}
+const { a = [], choices, correct = 0, hint } = Astro.props;
+const hints = hint ? (Array.isArray(hint) ? hint : [hint]) : [];
+const uid = `ck-${Math.random().toString(36).slice(2, 8)}`;
+const spec = JSON.stringify({ a, correct });
+---
+
+<answer-check class="check not-content" data-spec={spec}>
+	{
+		choices ? (
+			<div class="check__choices" role="radiogroup" aria-label="Варианты ответа">
+				{choices.map((c, i) => (
+					<label>
+						<input type="radio" name={uid} value={String(i)} />
+						<span>{c}</span>
+					</label>
+				))}
+			</div>
+		) : (
+			<div class="check__fields">
+				{a.map((f) => (
+					<label>
+						<span>
+							{f.label}
+							{f.unit && `, ${f.unit}`}
+						</span>
+						<input inputmode="decimal" autocomplete="off" placeholder="ответ" />
+					</label>
+				))}
+			</div>
+		)
+	}
+	<div class="check__bar">
+		<button type="button" data-go>Проверить</button>
+		{hints.length > 0 && <button type="button" data-hint>Подсказка</button>}
+		<span class="check__msg" data-msg aria-live="polite"></span>
+	</div>
+	{hints.length > 0 && (
+		<ol class="check__hints" data-hints>
+			{hints.map((h) => (
+				<li hidden>{h}</li>
+			))}
+		</ol>
+	)}
+</answer-check>
+
+<script>
+	import { parseValue } from '../../lib/units';
+
+	const KEY = 'pcb-course:checks:v1';
+	const load = (): Record<string, number> => {
+		try {
+			return JSON.parse(localStorage.getItem(KEY) ?? '{}');
+		} catch {
+			return {};
+		}
+	};
+	const save = (id: string) => {
+		try {
+			const m = load();
+			m[id] = Date.now();
+			localStorage.setItem(KEY, JSON.stringify(m));
+		} catch {
+			/* хранилище недоступно */
+		}
+	};
+	const num = (s: string) => parseValue(s.replace(/−/g, '-').replace(/^[≈~=]\s*/, ''));
+
+	class AnswerCheck extends HTMLElement {
+		connectedCallback() {
+			const spec = JSON.parse(this.dataset.spec!) as {
+				a: { value?: string; tol?: number; min?: number; max?: number }[];
+				correct: number;
+			};
+			// Ключ задачи: страница + порядковый номер проверки на ней.
+			const idx = [...document.querySelectorAll('answer-check')].indexOf(this);
+			const id = `${location.pathname.replace(/index\.html$/, '').replace(/\/+$/, '')}#${idx}`;
+			const msg = this.querySelector<HTMLElement>('[data-msg]')!;
+			const done = () => {
+				this.classList.add('is-solved');
+				msg.textContent = 'Верно ✓';
+			};
+			if (load()[id]) {
+				this.classList.add('is-solved');
+				msg.textContent = 'Уже решена ✓';
+			}
+			const go = () => {
+				const radios = this.querySelectorAll<HTMLInputElement>('input[type=radio]');
+				if (radios.length) {
+					const sel = [...radios].find((r) => r.checked);
+					if (!sel) {
+						msg.textContent = 'Выбери вариант.';
+						return;
+					}
+					if (+sel.value === spec.correct) {
+						done();
+						save(id);
+					} else {
+						this.classList.remove('is-solved');
+						msg.textContent = 'Нет. Перечитай условие или возьми подсказку.';
+					}
+					return;
+				}
+				const inputs = [...this.querySelectorAll<HTMLInputElement>('.check__fields input')];
+				let ok = 0,
+					empty = 0;
+				inputs.forEach((inp, i) => {
+					const f = spec.a[i];
+					const v = num(inp.value);
+					let good = false;
+					if (inp.value.trim() === '') empty++;
+					else if (Number.isFinite(v)) {
+						if (f.min !== undefined || f.max !== undefined) good = v >= (f.min ?? -Infinity) && v <= (f.max ?? Infinity);
+						else {
+							const t = num(f.value!);
+							const tol = (f.tol ?? 3) / 100;
+							good = t === 0 ? Math.abs(v) < 1e-12 : Math.abs(v - t) <= Math.abs(t) * tol;
+						}
+					}
+					inp.setAttribute('aria-invalid', String(inp.value.trim() !== '' && !good));
+					inp.classList.toggle('is-ok', good);
+					if (good) ok++;
+				});
+				if (empty === inputs.length) {
+					msg.textContent = 'Введи ответ. Можно с приставкой: 4,7к, 20м, 100н.';
+					return;
+				}
+				if (ok === inputs.length) {
+					done();
+					save(id);
+				} else {
+					this.classList.remove('is-solved');
+					msg.textContent =
+						inputs.length > 1 ? `Сошлось ${ok} из ${inputs.length}. Красным — то, что не сходится.` : 'Не сходится. Проверь единицы и приставки — или возьми подсказку.';
+				}
+			};
+			this.querySelector('[data-go]')!.addEventListener('click', go);
+			this.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' && (e.target as HTMLElement).matches('input:not([type=radio])')) {
+					e.preventDefault();
+					go();
+				}
+			});
+			const hb = this.querySelector<HTMLButtonElement>('[data-hint]');
+			hb?.addEventListener('click', () => {
+				const next = this.querySelector<HTMLElement>('[data-hints] li[hidden]');
+				if (next) next.hidden = false;
+				if (!this.querySelector('[data-hints] li[hidden]')) hb.disabled = true;
+			});
+		}
+	}
+	customElements.define('answer-check', AnswerCheck);
+</script>
+
+<style>
+	.check {
+		display: block;
+		margin: 0.6rem 0 0.4rem;
+		padding: 0.7rem 0.8rem;
+		border: 1px dashed var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+	}
+	.check.is-solved {
+		border-style: solid;
+		border-color: var(--pcb-ok);
+	}
+	.check__fields {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+		gap: 0.5rem;
+	}
+	.check__fields label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.check input:not([type='radio']) {
+		width: 100%;
+		min-height: 44px;
+		padding: 0.4rem 0.6rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.35rem;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+		font-family: var(--pcb-mono);
+	}
+	.check input[aria-invalid='true'] {
+		border-color: var(--pcb-bad);
+	}
+	.check input.is-ok {
+		border-color: var(--pcb-ok);
+	}
+	.check__choices {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+	.check__choices label {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0.3rem 0.8rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.4rem;
+		font-size: var(--sl-text-sm);
+		cursor: pointer;
+	}
+	.check__choices input {
+		position: absolute;
+		opacity: 0;
+	}
+	.check__choices label:has(input:checked) {
+		border-color: var(--sl-color-accent);
+		background: var(--sl-color-accent-low);
+	}
+	.check__choices label:has(input:focus-visible) {
+		outline: 2px solid var(--sl-color-accent);
+	}
+	.check__bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.6rem;
+	}
+	.check__bar button {
+		min-height: 44px;
+		padding: 0.3rem 0.9rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.4rem;
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		font: inherit;
+		font-size: var(--sl-text-sm);
+		cursor: pointer;
+	}
+	.check__bar button[data-go] {
+		border-color: var(--sl-color-accent);
+		background: var(--sl-color-accent-low);
+	}
+	.check__bar button:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+	.check__msg {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.check.is-solved .check__msg {
+		color: var(--pcb-ok);
+		font-weight: 600;
+	}
+	.check__hints {
+		margin: 0.5rem 0 0;
+		padding-left: 1.2rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.check__hints li[hidden] {
+		display: none;
+	}
+</style>

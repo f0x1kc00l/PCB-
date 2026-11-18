@@ -1,0 +1,130 @@
+---
+/**
+ * Живая схема: двигаешь номиналы — цепь пересчитывается, на схеме видны напряжения и токи.
+ *   <LiveCircuit id="divider" n="1.5в" />
+ * Схемы и их расчёт — в src/components/diagrams/live.ts, решатель — src/lib/mna.ts.
+ */
+import Figure from '../diagrams/Figure.astro';
+import { LIVE } from '../diagrams/live';
+import { formatValue } from '../../lib/units';
+
+interface Props {
+	id: string;
+	n?: string;
+	caption?: string;
+}
+const { id, n, caption } = Astro.props;
+const def = LIVE[id];
+if (!def) throw new Error(`Живая схема «${id}» не найдена в live.ts`);
+const fmt = (v: number, unit: string) => (unit ? formatValue(v, unit, 3) : String(v));
+---
+
+<live-circuit class="pcb-widget live not-content" data-id={id}>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Живая схема: {def.title}</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+	<Figure n={n} caption={caption ?? 'Двигай ползунки — цепь пересчитывается сразу. Значения на схеме обновляются.'} sym>
+		<svg viewBox={`0 0 ${def.w} ${def.h}`} role="img" aria-label={def.alt} style={`max-width:${Math.round(def.w * 1.45)}px`} set:html={def.svg()} />
+	</Figure>
+	<div class="water__panel live__panel" aria-live="polite" data-lines></div>
+	<ul class="live__warn" data-warn></ul>
+	<div class="water__controls">
+		{
+			def.params.map((p) => (
+				<label class="water__row">
+					<span>{p.label}</span>
+					{p.log ? (
+						<input
+							type="range"
+							data-k={p.k}
+							data-log
+							data-unit={p.unit}
+							min={Math.log10(p.min)}
+							max={Math.log10(p.max)}
+							step="0.01"
+							value={Math.log10(p.value)}
+						/>
+					) : (
+						<input type="range" data-k={p.k} data-unit={p.unit} min={p.min} max={p.max} step={p.step ?? 0.1} value={p.value} />
+					)}
+					<output data-o={p.k}>{fmt(p.value, p.unit)}</output>
+				</label>
+			))
+		}
+	</div>
+	{
+		def.toggles && (
+			<div class="water__btns">
+				{def.toggles.map((t) => (
+					<label class="water__check">
+						<input type="checkbox" data-t={t.k} checked={t.value} /> {t.label}
+					</label>
+				))}
+			</div>
+		)
+	}
+	<p class="footnote">
+		Расчёт честный: метод узловых потенциалов, диоды и транзисторы — по экспоненциальным моделям (как в SPICE, только проще).
+		Поэтому видно и 0,6–0,7 В на переходе, и насыщение, и упор ОУ в питание.
+	</p>
+</live-circuit>
+
+<script>
+	import '../../lib/reset';
+	import { LIVE } from '../diagrams/live';
+	import { formatValue, nearestE24 } from '../../lib/units';
+
+	class LiveCircuit extends HTMLElement {
+		connectedCallback() {
+			const def = LIVE[this.dataset.id!];
+			const ranges = [...this.querySelectorAll<HTMLInputElement>('input[type=range]')];
+			const checks = [...this.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+			const lines = this.querySelector('[data-lines]')!;
+			const warn = this.querySelector('[data-warn]')!;
+			const glow = this.querySelector('[data-glow]');
+			const update = () => {
+				const p: Record<string, number> = {};
+				for (const r of ranges) {
+					const k = r.dataset.k!;
+					const v = r.hasAttribute('data-log') ? nearestE24(10 ** +r.value) : +r.value;
+					p[k] = v;
+					const unit = r.dataset.unit ?? '';
+					this.querySelector(`[data-o="${k}"]`)!.textContent = unit ? formatValue(v, unit, 3) : String(v);
+				}
+				const t: Record<string, boolean> = {};
+				for (const c of checks) t[c.dataset.t!] = c.checked;
+				this.querySelectorAll<SVGGElement>('[data-show]').forEach((g) => (g.style.display = t[g.dataset.show!] ? '' : 'none'));
+				const res = def.run(p, t);
+				for (const [k, v] of Object.entries(res.texts)) this.querySelectorAll(`[data-x="${k}"]`).forEach((el) => (el.textContent = v));
+				lines.innerHTML = res.lines.map((l) => `<span>${l}</span>`).join('');
+				warn.innerHTML = (res.warn ?? []).map((m) => `<li>${m}</li>`).join('');
+				if (glow) glow.setAttribute('opacity', String(0.75 * (res.glow ?? 0)));
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('live-circuit', LiveCircuit);
+</script>
+
+<style>
+	.live__warn {
+		margin: 0.5rem 0 0;
+		padding: 0;
+		list-style: none;
+		font-size: var(--sl-text-sm);
+		color: var(--pcb-warn);
+	}
+	.live__warn :global(li)::before {
+		content: '⚠ ';
+	}
+	.live :global(.diagram) {
+		margin-block: 0.25rem 0;
+	}
+</style>

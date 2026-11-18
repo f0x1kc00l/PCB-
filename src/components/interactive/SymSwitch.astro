@@ -1,0 +1,35 @@
+---
+/**
+ * Переключатель стиля обозначений для всех схем курса (то же, что выпадающий список в углу схемы).
+ */
+const uid = `sym-${Math.random().toString(36).slice(2, 8)}`;
+const OPTS: [string, string][] = [
+	['book', 'Как в книге'],
+	['gost', 'ГОСТ'],
+	['iec', 'IEC'],
+	['ansi', 'ANSI'],
+];
+---
+
+<div class="pcb-widget not-content sym-switch">
+	<p class="pcb-widget__title">Стиль обозначений на всех схемах курса</p>
+	<div class="pcb-segmented" role="radiogroup" aria-label="Стиль обозначений">
+		{
+			OPTS.map(([v, l]) => (
+				<label>
+					<input type="radio" name={uid} value={v} data-sym checked={v === 'book'} />
+					<span>{l}</span>
+				</label>
+			))
+		}
+	</div>
+	<p class="footnote">
+		«Как в книге» — как в русском издании Хоровица: резисторы прямоугольником, ОУ треугольником. ГОСТ — ОУ прямоугольником
+		«▷ ∞» с кружком на инвертирующем входе. IEC — прямоугольник со знаками «+/−». ANSI — резистор зигзагом, ОУ треугольником,
+		обозначения Q, D, U вместо VT, VD, DA. Выбор запоминается; то же можно переключить в углу любой схемы.
+	</p>
+</div>
+
+<script>
+	import '../../lib/sym';
+</script>

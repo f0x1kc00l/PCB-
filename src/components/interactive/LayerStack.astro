@@ -122,7 +122,14 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 ---
 
 <layer-stack class="pcb-widget not-content" data-preset={preset}>
-	<p class="pcb-widget__title">Стек слоёв печатной платы</p>
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Стек слоёв печатной платы</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
 
 	<div class="controls">
 		<div class="pcb-segmented" role="radiogroup" aria-label="Вариант платы">
@@ -184,6 +191,7 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 </layer-stack>
 
 <script>
+	import '../../lib/reset';
 	class LayerStack extends HTMLElement {
 		connectedCallback() {
 			// Радиокнопки разных экземпляров не должны мешать друг другу.
@@ -199,6 +207,12 @@ const presets: Record<'2' | '4', { label: string; total: string; layers: Layer[]
 				const t = e.target as HTMLInputElement;
 				if (t.type === 'radio') showPreset(t.value);
 				if (t.matches('[data-via]')) this.classList.toggle('no-via', !t.checked);
+			});
+
+			this.addEventListener('pcb-reset', () => {
+				this.querySelectorAll('.layer').forEach((b) => b.classList.remove('is-active'));
+				this.querySelectorAll<HTMLElement>('.info__hint').forEach((el) => (el.hidden = false));
+				this.querySelectorAll<HTMLElement>('[data-info]').forEach((el) => (el.hidden = true));
 			});
 
 			this.addEventListener('click', (e) => {

@@ -1,0 +1,130 @@
+---
+/**
+ * Тепловой расчёт: цепочка кристалл → корпус → радиатор → воздух.
+ *   Tкр = Tвозд + P · (Rθкр-корп + Rθкорп-рад + Rθрад-возд)
+ */
+---
+
+<heatsink-calc class="pcb-widget pcb-calc not-content">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">Радиатор: нужен ли и какой</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+	<div class="fields">
+		<label>Мощность P, Вт <input name="p" value="7" inputmode="decimal" autocomplete="off" /><span class="hint">для линейного стабилизатора: (Uвх − Uвых)·I</span></label>
+		<label>Температура воздуха, °C <input name="ta" value="40" inputmode="decimal" autocomplete="off" /><span class="hint">внутри корпуса прибора, не комнаты</span></label>
+		<label>Макс. температура кристалла, °C <input name="tj" value="150" inputmode="decimal" autocomplete="off" /><span class="hint">из даташита</span></label>
+		<label>θкр-к (кристалл–корпус), °C/Вт <input name="rjc" value="5" inputmode="decimal" autocomplete="off" /><span class="hint">из даташита (TO-220: обычно 1–5)</span></label>
+		<label>θкр-с без радиатора, °C/Вт <input name="rja" value="60" inputmode="decimal" autocomplete="off" /><span class="hint">из даташита (TO-220: порядка 60)</span></label>
+		<label
+			>θк-р: прослойка корпус–радиатор
+			<select name="rcs">
+				<option value="0,5" selected>термопаста (≈ 0,5 °C/Вт)</option>
+				<option value="1">изолирующая прокладка + паста (≈ 1 °C/Вт)</option>
+				<option value="1,5">силиконовая прокладка (≈ 1,5 °C/Вт)</option>
+			</select>
+		</label>
+		<label>Запас по температуре, °C <input name="margin" value="25" inputmode="decimal" autocomplete="off" /><span class="hint">работать на пределе — плохая идея</span></label>
+	</div>
+	<div class="chain" aria-hidden="true">
+		<span>кристалл <b data-o="tjr">—</b></span><i>θкр-к</i><span>корпус <b data-o="tc">—</b></span><i>θк-р</i><span>радиатор <b data-o="ts">—</b></span><i>θр-с</i><span>воздух <b data-o="tar">—</b></span>
+	</div>
+	<div class="results">
+		<div class="result"><span>Без радиатора кристалл нагреется до</span><output data-o="tnohs">—</output></div>
+		<div class="result result--main"><span>Нужен радиатор с θр-с не больше</span><output data-o="rsa">—</output></div>
+	</div>
+	<ul class="warnings" data-warn></ul>
+	<p class="footnote">
+		Тепло идёт как ток через последовательные сопротивления: перепад температуры = мощность × тепловое сопротивление. Значения
+		прослоек ориентировочные; у радиатора θр-с указано для вертикальной установки и естественной конвекции — в тесном корпусе
+		прибора он хуже. Меньше °C/Вт — радиатор больше.
+	</p>
+</heatsink-calc>
+
+<script>
+	import '../../lib/reset';
+	import { parseValue, formatNumber } from '../../lib/units';
+
+	class HeatsinkCalc extends HTMLElement {
+		connectedCallback() {
+			const val = (n: string) => parseValue(this.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${n}"]`)!.value);
+			const o = (n: string) => this.querySelector(`[data-o="${n}"]`)!;
+			const warn = this.querySelector('[data-warn]')!;
+			const deg = (t: number) => `${formatNumber(t, 3)} °C`;
+			const update = () => {
+				const p = val('p'),
+					ta = val('ta'),
+					tj = val('tj'),
+					rjc = val('rjc'),
+					rja = val('rja'),
+					rcs = val('rcs'),
+					margin = val('margin');
+				const msgs: string[] = [];
+				if (!(p > 0 && rjc >= 0 && rja > 0 && tj > ta)) {
+					['tnohs', 'rsa', 'tjr', 'tc', 'ts', 'tar'].forEach((k) => (o(k).textContent = '—'));
+					return;
+				}
+				const tmax = tj - (margin >= 0 ? margin : 0);
+				const tnohs = ta + p * rja;
+				o('tnohs').textContent = deg(tnohs);
+				const rsa = (tmax - ta) / p - rjc - rcs;
+				if (tnohs <= tmax) {
+					o('rsa').textContent = 'не нужен';
+					msgs.length = 0;
+				} else if (rsa <= 0) {
+					o('rsa').textContent = 'невозможно';
+					msgs.push('Даже идеальный радиатор не спасёт: тепло не успевает выйти через сам корпус. Снизь мощность (меньше Uвх, импульсный стабилизатор), раздели её на несколько корпусов или поставь корпус с меньшим Rθ.');
+				} else {
+					o('rsa').textContent = `${formatNumber(rsa, 2)} °C/Вт`;
+					if (rsa < 1) msgs.push('Меньше 1 °C/Вт — это большой радиатор или нужен вентилятор.');
+				}
+				const rs = rsa > 0 && tnohs > tmax ? rsa : 0;
+				const tjr = tnohs <= tmax ? tnohs : ta + p * (rjc + rcs + rs);
+				o('tjr').textContent = deg(tjr);
+				o('tc').textContent = tnohs <= tmax ? '' : deg(tjr - p * rjc);
+				o('ts').textContent = tnohs <= tmax ? '' : deg(ta + p * rs);
+				o('tar').textContent = deg(ta);
+				if (tnohs > tj) msgs.push(`Без радиатора кристалл ушёл бы за ${deg(tj)} — сработает тепловая защита или он сгорит.`);
+				warn.innerHTML = msgs.map((m) => `<li>${m}</li>`).join('');
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('heatsink-calc', HeatsinkCalc);
+</script>
+
+<style>
+	.chain {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.3rem 0.4rem;
+		margin-top: 0.9rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.chain span {
+		padding: 0.25rem 0.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.35rem;
+	}
+	.chain b {
+		color: var(--sl-color-white);
+		font-family: var(--pcb-mono);
+	}
+	.chain i {
+		font-style: normal;
+	}
+	.chain i::before {
+		content: '→ ';
+	}
+	.chain i::after {
+		content: ' →';
+	}
+</style>

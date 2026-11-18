@@ -1,0 +1,246 @@
+---
+/**
+ * Интерактивная АЧХ (и ФЧХ): ФНЧ и ФВЧ первого порядка, фильтр Саллена — Ки второго порядка,
+ * неинвертирующий усилитель на ОУ с конечной частотой единичного усиления fт.
+ *   <BodePlot />  или  <BodePlot kind="sk" />
+ */
+interface Props {
+	kind?: 'lp' | 'hp' | 'sk' | 'oa';
+}
+const { kind = 'lp' } = Astro.props;
+const uid = `bd-${Math.random().toString(36).slice(2, 8)}`;
+const KINDS: [string, string][] = [
+	['lp', 'RC: ФНЧ'],
+	['hp', 'RC: ФВЧ'],
+	['sk', 'Саллен — Ки, ФНЧ 2-го порядка'],
+	['oa', 'Усилитель на ОУ'],
+];
+const P = [
+	// [ключ, подпись, единица, min, max (лог.), значение, режимы]
+	['R', 'R', 'Ом', 2, 6, 4, 'lp hp sk'],
+	['C', 'C', 'Ф', -10, -5, -7, 'lp hp'],
+	['C1', 'C1 (в обратную связь)', 'Ф', -10, -6, -8.7, 'sk'],
+	['C2', 'C2 (на землю)', 'Ф', -10, -6, -9, 'sk'],
+	['K', 'Усиление K = 1 + R2/R1', '', 0, 3, 1, 'oa'],
+	['FT', 'fт ОУ (частота единичного усиления)', 'Гц', 5, 8, 6, 'oa'],
+] as const;
+---
+
+<bode-plot class="pcb-widget not-content bode">
+	<div class="pcb-widget__head">
+		<p class="pcb-widget__title">АЧХ: как схема пропускает разные частоты</p>
+		<div class="pcb-widget__tools">
+			<button type="button" class="pcb-tool" data-full aria-pressed="false" title="На весь экран" aria-label="На весь экран">⤢</button>
+			<button type="button" class="pcb-tool" data-share title="Поделиться ссылкой на это состояние" aria-label="Поделиться ссылкой">🔗</button>
+			<button type="button" class="pcb-reset" data-reset title="Вернуть исходные значения">↺ Сброс</button>
+		</div>
+	</div>
+	<div class="pcb-segmented" role="radiogroup" aria-label="Схема">
+		{
+			KINDS.map(([k, l]) => (
+				<label>
+					<input type="radio" name={uid} value={k} checked={k === kind} />
+					<span>{l}</span>
+				</label>
+			))
+		}
+	</div>
+	<svg class="bode__svg" viewBox="0 0 640 330" role="img" aria-label="График АЧХ и ФЧХ в логарифмическом масштабе">
+		<g data-grid></g>
+		<path data-mag fill="none" stroke="var(--sl-color-accent)" stroke-width="2.5"></path>
+		<path data-ph fill="none" stroke="var(--water-hi)" stroke-width="1.6" stroke-dasharray="5 4"></path>
+		<line data-cur y1="20" y2="290" stroke="currentColor" stroke-opacity="0.5"></line>
+		<circle data-dot r="5" fill="var(--sl-color-accent)"></circle>
+		<circle data-fc r="4" fill="none" stroke="var(--sl-color-accent)" stroke-width="2"></circle>
+	</svg>
+	<p class="bode__legend"><span class="m"></span> |H|, дБ (левая шкала) <span class="p"></span> фаза, ° (правая шкала)</p>
+	<div class="water__panel" data-out aria-live="polite"></div>
+	<div class="water__controls">
+		{
+			P.map(([k, l, u, mn, mx, v, modes]) => (
+				<label class="water__row" data-modes={modes}>
+					<span>{l}</span>
+					<input type="range" data-k={k} data-unit={u} min={mn} max={mx} step="0.01" value={v} />
+					<output data-o={k}></output>
+				</label>
+			))
+		}
+		<label class="water__row">
+			<span>Частота курсора</span>
+			<input type="range" data-cursor min="0" max="1" step="0.002" value="0.5" />
+			<output data-o="f"></output>
+		</label>
+	</div>
+	<p class="footnote">
+		Шкала частот логарифмическая: каждая клетка — в 10 раз. −3 дБ — граница полосы (амплитуда ≈ 0,707). Спад первого порядка —
+		20 дБ на декаду, второго — 40. У ОУ произведение усиления на полосу постоянно: больше K — уже полоса.
+	</p>
+</bode-plot>
+
+<script>
+	import '../../lib/reset';
+	import { formatValue, nearestE24 } from '../../lib/units';
+
+	type C = { re: number; im: number };
+	const div = (a: C, b: C): C => {
+		const d = b.re * b.re + b.im * b.im;
+		return { re: (a.re * b.re + a.im * b.im) / d, im: (a.im * b.re - a.re * b.im) / d };
+	};
+	const X0 = 60,
+		X1 = 590,
+		Y0 = 20,
+		Y1 = 290;
+
+	class BodePlot extends HTMLElement {
+		connectedCallback() {
+			const q = <T extends Element>(s: string) => this.querySelector<T>(s)!;
+			const val = (k: string) => {
+				const r = q<HTMLInputElement>(`input[data-k="${k}"]`);
+				const v = 10 ** +r.value;
+				return k === 'K' ? Math.max(1, Number(v.toPrecision(2))) : k === 'FT' ? Number(v.toPrecision(2)) : nearestE24(v);
+			};
+			const update = () => {
+				const kind = q<HTMLInputElement>('input[type=radio]:checked').value;
+				this.querySelectorAll<HTMLElement>('[data-modes]').forEach((el) => (el.hidden = !el.dataset.modes!.split(' ').includes(kind)));
+				for (const r of this.querySelectorAll<HTMLInputElement>('input[data-k]')) {
+					const k = r.dataset.k!;
+					const u = r.dataset.unit!;
+					q(`[data-o="${k}"]`).textContent = u ? formatValue(val(k), u, 3) : String(val(k)).replace('.', ',');
+				}
+				// характерная частота и передаточная функция H(f)
+				let fc: number, H: (f: number) => C, dbMin: number, dbMax: number, note: string;
+				const R = val('R');
+				if (kind === 'lp' || kind === 'hp') {
+					const Cc = val('C');
+					fc = 1 / (2 * Math.PI * R * Cc);
+					H = kind === 'lp' ? (f) => div({ re: 1, im: 0 }, { re: 1, im: f / fc }) : (f) => div({ re: 0, im: f / fc }, { re: 1, im: f / fc });
+					dbMin = -60;
+					dbMax = 10;
+					note = `fс = 1/(2πRC) = ${formatValue(fc, 'Гц')}`;
+				} else if (kind === 'sk') {
+					const c1 = val('C1'),
+						c2 = val('C2');
+					fc = 1 / (2 * Math.PI * R * Math.sqrt(c1 * c2));
+					const Q = 0.5 * Math.sqrt(c1 / c2);
+					H = (f) => div({ re: 1, im: 0 }, { re: 1 - (f / fc) ** 2, im: f / fc / Q });
+					dbMin = -80;
+					dbMax = 20;
+					const type = Math.abs(Q - 0.707) < 0.03 ? ' — Баттерворт (максимально плоская)' : Q > 0.75 ? ' — подъём перед срезом' : ' — плавный спад';
+					note = `f₀ = 1/(2πR√(C1·C2)) = ${formatValue(fc, 'Гц')}, Q = ½·√(C1/C2) = ${Q.toFixed(2).replace('.', ',')}${type}`;
+				} else {
+					const K = val('K'),
+						ft = val('FT');
+					fc = ft / K;
+					H = (f) => div({ re: K, im: 0 }, { re: 1, im: f / fc });
+					dbMin = -20;
+					dbMax = 70;
+					note = `полоса по −3 дБ ≈ fт/K = ${formatValue(fc, 'Гц')}`;
+				}
+				// сетка — по круглым декадам (10 Гц, 100 Гц…), частота среза — в середине
+				const fmin = 10 ** (Math.round(Math.log10(fc)) - 3),
+					fmax = fmin * 1e6;
+				const lx = (f: number) => X0 + ((Math.log10(f) - Math.log10(fmin)) / 6) * (X1 - X0);
+				const ly = (db: number) => Y0 + ((dbMax - Math.max(dbMin, Math.min(dbMax, db))) / (dbMax - dbMin)) * (Y1 - Y0);
+				const py = (deg: number) => Y0 + ((180 - deg) / 360) * (Y1 - Y0);
+				// сетка
+				let g = '';
+				for (let d = 0; d <= 6; d++) {
+					const f = fmin * 10 ** d;
+					const x = X0 + (d / 6) * (X1 - X0);
+					g += `<line x1="${x}" y1="${Y0}" x2="${x}" y2="${Y1}" class="bode__grid"/><text x="${x}" y="${Y1 + 18}" text-anchor="middle" class="bode__t">${formatValue(f, 'Гц', 2)}</text>`;
+				}
+				for (let db = Math.ceil(dbMin / 20) * 20; db <= dbMax; db += 20) {
+					const y = ly(db);
+					g += `<line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" class="bode__grid${db === 0 ? ' bode__zero' : ''}"/><text x="${X0 - 6}" y="${y + 4}" text-anchor="end" class="bode__t">${String(db).replace('-', '−')}</text>`;
+				}
+				for (const deg of [-180, -90, 0, 90, 180]) g += `<text x="${X1 + 6}" y="${py(deg) + 4}" class="bode__t bode__tp">${String(deg).replace('-', '−')}°</text>`;
+				const y3 = ly(20 * Math.log10(Math.hypot(H(kind === 'hp' ? fmax : fmin).re, H(kind === 'hp' ? fmax : fmin).im)) - 3);
+				g += `<line x1="${X0}" y1="${y3}" x2="${X1}" y2="${y3}" class="bode__m3"/><text x="${X1 - 4}" y="${y3 - 5}" text-anchor="end" class="bode__t">−3 дБ</text>`;
+				q('[data-grid]').innerHTML = g;
+				let dm = '',
+					dp = '';
+				for (let i = 0; i <= 300; i++) {
+					const f = fmin * 10 ** ((6 * i) / 300);
+					const h = H(f);
+					const db = 20 * Math.log10(Math.hypot(h.re, h.im));
+					const ph = (Math.atan2(h.im, h.re) * 180) / Math.PI;
+					dm += `${i ? 'L' : 'M'}${lx(f).toFixed(1)} ${ly(db).toFixed(1)}`;
+					dp += `${i ? 'L' : 'M'}${lx(f).toFixed(1)} ${py(ph).toFixed(1)}`;
+				}
+				q('[data-mag]').setAttribute('d', dm);
+				q('[data-ph]').setAttribute('d', dp);
+				const hc = H(fc);
+				q('[data-fc]').setAttribute('cx', lx(fc).toFixed(1));
+				q('[data-fc]').setAttribute('cy', ly(20 * Math.log10(Math.hypot(hc.re, hc.im))).toFixed(1));
+				// курсор
+				const t = +q<HTMLInputElement>('input[data-cursor]').value;
+				const f = fmin * 10 ** (6 * t);
+				const h = H(f);
+				const mag = Math.hypot(h.re, h.im);
+				const db = 20 * Math.log10(mag);
+				const ph = (Math.atan2(h.im, h.re) * 180) / Math.PI;
+				q('[data-cur]').setAttribute('x1', lx(f).toFixed(1));
+				q('[data-cur]').setAttribute('x2', lx(f).toFixed(1));
+				q('[data-dot]').setAttribute('cx', lx(f).toFixed(1));
+				q('[data-dot]').setAttribute('cy', ly(db).toFixed(1));
+				q('[data-o="f"]').textContent = formatValue(f, 'Гц', 3);
+				q('[data-out]').innerHTML =
+					`<b>${note}</b>` +
+					`<span>на ${formatValue(f, 'Гц', 3)}: |H| = ${mag.toPrecision(3).replace('.', ',')} (${db.toFixed(1).replace('.', ',').replace('-', '−')} дБ), фаза ${ph.toFixed(0).replace('-', '−')}°</span>`;
+			};
+			this.addEventListener('input', update);
+			this.addEventListener('change', update);
+			update();
+		}
+	}
+	customElements.define('bode-plot', BodePlot);
+</script>
+
+<style>
+	.bode__svg {
+		display: block;
+		width: 100%;
+		margin-top: 0.8rem;
+		color: var(--sl-color-white);
+	}
+	.bode :global(.bode__grid) {
+		stroke: var(--sl-color-gray-5);
+		stroke-width: 0.7;
+	}
+	.bode :global(.bode__zero) {
+		stroke: var(--sl-color-gray-3);
+	}
+	.bode :global(.bode__m3) {
+		stroke: var(--sl-color-accent);
+		stroke-opacity: 0.5;
+		stroke-dasharray: 3 4;
+	}
+	.bode :global(.bode__t) {
+		fill: var(--sl-color-gray-3);
+		font: 12px system-ui, sans-serif;
+	}
+	.bode :global(.bode__tp) {
+		fill: var(--water-hi);
+	}
+	.bode__legend {
+		margin: 0.2rem 0 0;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.bode__legend span {
+		display: inline-block;
+		width: 1.4rem;
+		height: 0;
+		margin: 0 0.3rem 0.2rem 0.6rem;
+		vertical-align: middle;
+		border-top: 2.5px solid var(--sl-color-accent);
+	}
+	.bode__legend span.p {
+		border-top: 1.6px dashed var(--water-hi);
+	}
+	@media (max-width: 40rem) {
+		.bode :global(.bode__t) {
+			font-size: 19px;
+		}
+	}
+</style>

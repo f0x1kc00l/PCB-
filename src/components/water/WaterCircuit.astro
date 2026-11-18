@@ -31,7 +31,7 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 		</span>
 	</div>
 	<div class="water__stage">
-	<svg viewBox="0 8 478 274" style="--w:478" role="img" aria-label="Контур: насос, предохранитель, лампа, кран; пунктиром обходная труба короткого замыкания.">
+	<svg viewBox="30 8 428 274" style="--w:428" role="img" aria-label="Контур: насос, предохранитель, лампа, кран; пунктиром обходная труба короткого замыкания.">
 		<g stroke-width="12">
 			<polyline data-p="a" class="pipe" points="60,128 60,40 140,40" />
 			<line data-p="fuse" class="pipe" x1="140" y1="40" x2="190" y2="40" stroke-width="4" />
@@ -43,30 +43,33 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 			<polyline data-p="sh" class="pipe" points="290,40 290,240" />
 		</g>
 		<rect x="135" y="30" width="60" height="20" rx="3" class="wall" />
-		<text class="ts" x="165" y="22" text-anchor="middle">предохранитель 1 А</text>
+		<text class="ts" data-lf x="165" y="22" text-anchor="middle">предохранитель 1 А</text>
 		<path data-burnt d="M158 34 L165 46 M172 34 L165 46" stroke="var(--water-danger)" stroke-width="3" />
 		<circle data-glow cx="380" cy="135" r="30" fill="#ffd34d" opacity="0" />
 		<circle cx="380" cy="135" r="16" class="wall" fill="none" />
 		<path d="M369 124 L391 146 M391 124 L369 146" class="ln" />
-		<text class="t" x="406" y="139">лампа 30 Ом</text>
+		<text class="t" x="406" y="131">лампа</text>
+		<text class="t" data-lr x="406" y="148">30 Ом</text>
 		<path data-valvei d="M220 228L235 240L220 252ZM250 228L235 240L250 252Z" class="ln" />
 		<text class="ts" x="235" y="270" text-anchor="middle">кран = ключ</text>
-		<text class="ts" data-sht x="300" y="150">КЗ: обход лампы</text>
+		<text class="ts" data-sht x="280" y="176" text-anchor="end">КЗ: обход лампы</text>
 		<circle cx="60" cy="140" r="19" fill="var(--water-hi)" fill-opacity="0.18" class="ln" />
 		<g data-imp class="ln"><path d="M47 140H73M60 127V153" /></g>
-		<text class="ts" x="88" y="144">насос 9 В</text>
+		<text class="ts" data-lu x="88" y="144">насос 9 В</text>
 		<g data-d></g>
-		
-		</svg>
-	<svg viewBox="474 18 206 98" style="--w:206;--mw:330px" aria-hidden="true">
-		<g transform="translate(480 40)">
-			<text class="th" data-st x="0" y="0"></text>
-			<text class="t tm" data-r1 x="0" y="34"></text>
-			<text class="t tm" data-r2 x="0" y="58"></text>
-			<text class="t tm" data-r3 x="0" y="82"></text>
-			<text class="t tm" data-r4 x="0" y="106"></text>
-		</g>
 	</svg>
+	</div>
+	<div class="water__panel" aria-live="polite">
+		<b data-st></b>
+		<span data-r1></span>
+		<span data-r2></span>
+		<span data-r3></span>
+		<span data-r4></span>
+	</div>
+	<div class="water__controls">
+		<label class="water__row"><span>Насос = батарейка U</span><input type="range" data-u min="1.5" max="24" step="0.5" value="9" /><output data-uv></output></label>
+		<label class="water__row"><span>Лампа R</span><input type="range" data-rl min="5" max="100" step="1" value="30" /><output data-rlv></output></label>
+		<label class="water__row"><span>Предохранитель на</span><input type="range" data-if min="0.25" max="3" step="0.25" value="1" /><output data-ifv></output></label>
 	</div>
 	<div class="water__btns">
 		<button type="button" data-fix>Поставить новый предохранитель</button>
@@ -77,14 +80,15 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 <script>
 	import { Path, Drops, animate, paint, fm, $ } from '../../lib/water';
 
-	const U = 9,
-		RL = 30,
-		RINT = 0.15,
-		RSH = 0.05;
+	const RINT = 0.15, // внутреннее сопротивление насоса (батарейки)
+		RSH = 0.05; // обходная труба (провод КЗ)
 	class WaterCircuit extends HTMLElement {
 		connectedCallback() {
 			const r = this;
-			let mode = 'closed',
+			let mode = (r.querySelector('input[type=radio]:checked') as HTMLInputElement).value,
+				U = 9,
+				RL = 30,
+				IF = 1,
 				burnt = false,
 				heat = 0,
 				ang = 0;
@@ -92,9 +96,23 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 			const viaLamp = new Drops(g, new Path([[60, 140], [60, 40], [380, 40], [380, 240], [60, 240], [60, 140]]), 16);
 			const viaShort = new Drops(g, new Path([[60, 140], [60, 40], [290, 40], [290, 240], [60, 240], [60, 140]]), 16);
 			const P = (k: string) => $(r, `[data-p="${k}"]`);
+			const T = (k: string, v: string) => ($(r, k).textContent = v);
+			const labels = () => {
+				T('[data-uv]', fm(U, 1) + ' В');
+				T('[data-rlv]', RL + ' Ом');
+				T('[data-ifv]', fm(IF, 2) + ' А');
+				T('[data-lu]', `насос ${fm(U, 1)} В`);
+				T('[data-lr]', `${RL} Ом`);
+				T('[data-lf]', `предохранитель ${fm(IF, 2)} А`);
+			};
+			labels();
 			r.addEventListener('input', (e) => {
 				const t = e.target as HTMLInputElement;
 				if (t.type === 'radio') mode = t.value;
+				if (t.matches('[data-u]')) U = +t.value;
+				if (t.matches('[data-rl]')) RL = +t.value;
+				if (t.matches('[data-if]')) IF = +t.value;
+				labels();
 			});
 			$(r, '[data-fix]').addEventListener('click', () => {
 				burnt = false;
@@ -105,11 +123,13 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 				const short = mode === 'short' && !burnt;
 				const I = open ? 0 : short ? U / (RINT + RSH) : U / (RL + RINT);
 				const Ilamp = short ? 0 : I;
-				if (short && I > 1) {
-					heat += dt;
-					if (heat > 0.9) burnt = true;
-				}
+				// Вставка греется, только если ток больше номинала; чем больше перегруз, тем быстрее.
+				if (I > IF) {
+					heat += dt * Math.min(1.1, 0.3 * ((I / IF) ** 2 - 1));
+					if (heat >= 1) burnt = true;
+				} else heat = Math.max(0, heat - dt * 0.5);
 				const Ulamp = Ilamp * RL;
+				const Plamp = Ilamp * Ulamp;
 				P('sh').style.display = mode === 'short' ? '' : 'none';
 				($(r, '[data-sht]') as SVGElement).style.display = mode === 'short' ? '' : 'none';
 				P('valve').style.display = mode === 'open' ? 'none' : '';
@@ -117,8 +137,8 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 				P('fuse').style.display = burnt ? 'none' : '';
 				($(r, '[data-burnt]') as SVGElement).style.display = burnt ? '' : 'none';
 				($(r, '[data-fix]') as HTMLElement).style.display = burnt ? '' : 'none';
-				$(r, '[data-glow]').setAttribute('opacity', (0.6 * Ilamp / (U / RL)).toFixed(2));
-				// давление: до лампы высокое; после лампы и до крана — низкое, если ток идёт
+				// яркость: 2,7 Вт (9 В на 30 Ом) — «нормально горит»
+				$(r, '[data-glow]').setAttribute('opacity', Math.min(0.9, (0.6 * Plamp) / 2.7).toFixed(2));
 				const hiTop = burnt ? 0 : 1;
 				paint([P('a')], 1);
 				paint([P('fuse')], 1);
@@ -128,24 +148,31 @@ const uid = `wc-${Math.random().toString(36).slice(2, 7)}`;
 				paint([P('valve'), P('d'), P('sh')], 0);
 				viaLamp.hide(short);
 				viaShort.hide(!short);
-				const v = short ? 420 : 900 * I / 9;
+				const v = short ? 420 : Math.min(420, 100 * I);
 				if (short) viaShort.step(v * dt);
 				else viaLamp.step(v * dt);
-				ang += (short ? 900 : 120 * I) * dt;
+				ang += (short ? 900 : Math.min(900, 400 * I)) * dt;
 				$(r, '[data-imp]').setAttribute('transform', `rotate(${ang.toFixed(1)} 60 140)`);
-				$(r, '[data-st]').textContent = burnt ? 'предохранитель сгорел' : short ? 'КОРОТКОЕ ЗАМЫКАНИЕ' : open ? 'цепь разомкнута' : 'цепь замкнута';
-				($(r, '[data-st]') as SVGElement).style.fill = short || burnt ? 'var(--water-danger)' : '';
-				$(r, '[data-r1]').textContent = `I = ${fm(I, I > 10 ? 0 : 2)} А`;
-				$(r, '[data-r2]').textContent = `на лампе: ${fm(Ulamp, 1)} В`;
-				$(r, '[data-r3]').textContent = `на кране (ключе): ${fm(mode === 'open' && !burnt ? U : 0, 1)} В`;
-				$(r, '[data-r4]').textContent = `на предохранителе: ${burnt ? fm(U, 1) + ' В (разрыв)' : '≈ 0 В'}`;
-				$(r, '[data-fx2]').textContent = burnt
-					? 'Предохранитель — специально слабое место: он рвётся первым и разрывает цепь, пока не сгорели провода, источник и дорожки на плате. Всё напряжение теперь приложено к месту разрыва.'
-					: short
-						? `Ток ограничен только внутренним сопротивлением насоса и проводов: 9 В / 0,2 Ом = 45 А. Лампа погасла — ток идёт в обход. Через долю секунды сгорит предохранитель.`
-						: open
-							? 'Обрыв: тока нет, лампа не горит. Но напряжение не исчезло — все 9 В приложены к разомкнутому крану (ключу). Мультиметр покажет 9 В на разрыве — так обрыв и ищут.'
-							: `Замкнутая цепь: источник → провод → нагрузка → провод → обратно в источник. I = 9 В / 30 Ом = ${fm(U / (RL + RINT), 2)} А.`;
+				const over = !open && !short && I > IF;
+				const st = $(r, '[data-st]') as HTMLElement;
+				st.textContent = burnt ? 'Предохранитель сгорел' : short ? 'КОРОТКОЕ ЗАМЫКАНИЕ' : open ? 'Цепь разомкнута' : over ? 'Перегрузка!' : 'Цепь замкнута';
+				st.classList.toggle('is-danger', short || burnt || over);
+				T('[data-r1]', `I = ${fm(I, I > 10 ? 0 : 2)} А`);
+				T('[data-r2]', `на лампе: ${fm(Ulamp, 1)} В, ${fm(Plamp, 2)} Вт`);
+				T('[data-r3]', `на кране (ключе): ${fm(mode === 'open' && !burnt ? U : 0, 1)} В`);
+				T('[data-r4]', `на предохранителе: ${burnt ? fm(U, 1) + ' В (разрыв)' : '≈ 0 В'}`);
+				T(
+					'[data-fx2]',
+					burnt
+						? 'Предохранитель — специально слабое место: он рвётся первым и разрывает цепь, пока не сгорели провода, источник и дорожки на плате. Всё напряжение теперь приложено к месту разрыва. Поставишь новый, не убрав причину, — сгорит снова.'
+						: short
+							? `Ток ограничен только внутренним сопротивлением насоса и проводов: ${fm(U, 1)} В / 0,2 Ом = ${fm(I, 0)} А. Лампа погасла — ток идёт в обход. Через долю секунды сгорит предохранитель.`
+							: open
+								? `Обрыв: тока нет, лампа не горит. Но напряжение не исчезло — все ${fm(U, 1)} В приложены к разомкнутому крану (ключу). Мультиметр покажет их на разрыве — так обрыв и ищут.`
+								: over
+									? `I = ${fm(U, 1)} В / ${RL} Ом = ${fm(I, 2)} А — больше номинала предохранителя ${fm(IF, 2)} А. Вставка греется и скоро перегорит. Чем больше перегруз, тем быстрее.`
+									: `Замкнутая цепь: источник → провод → нагрузка → провод → обратно в источник. I = ${fm(U, 1)} В / ${RL} Ом = ${fm(I, 2)} А, мощность на лампе P = U·I = ${fm(Plamp, 2)} Вт.`,
+				);
 			});
 		}
 	}
