@@ -25,12 +25,14 @@ import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import OhmCalc from '../../../components/interactive/OhmCalc.astro';
 import ChipSizes from '../../../components/diagrams/ChipSizes.astro';
+import Formula from '../../../components/lesson/Formula.astro';
+import M from '../../../components/lesson/M.astro';
 
 ## Мощность
 
 **Мощность (power)** — это работа за единицу времени, или энергия в секунду. Для электрической цепи она считается очень просто:
 
-**P = U · I**
+<Formula tex="P = U I = I^2 R = \frac{U^2}{R}" />
 
 Единица — **ватт** (Вт): 1 Вт = 1 Дж/с. Если напряжение в вольтах, а ток в амперах, мощность получается в ваттах.
 
@@ -38,9 +40,9 @@ import ChipSizes from '../../../components/diagrams/ChipSizes.astro';
 
 | Известно | Формула |
 |---|---|
-| U и I | P = U · I |
-| I и R | P = I² · R |
-| U и R | P = U² / R |
+| U и I | <M t="P = UI" /> |
+| I и R | <M t="P = I^2 R" /> |
+| U и R | <M t="P = \frac{U^2}{R}" /> |
 
 Пример: на резисторе 100 Ом — 5 В. P = 5² / 100 = 0,25 Вт.
 

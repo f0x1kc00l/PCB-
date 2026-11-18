@@ -25,6 +25,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import RoutingCorners from '../../../components/diagrams/m05-pcb-design/RoutingCorners.astro';
+import M from '../../../components/lesson/M.astro';
 
 Трассировка (routing) — прокладка дорожек вместо резинок. Это самая медитативная часть работы, но и в ней есть порядок и правила, которые отличают аккуратную плату от «спагетти».
 
@@ -66,7 +67,7 @@ import RoutingCorners from '../../../components/diagrams/m05-pcb-design/RoutingC
 - Каждая дорожка на нижнем слое режет полигон земли. Делай такие «перемычки» короткими и не выстраивай их в длинную линию поперёк платы (урок [9.6](../../m09-pcb-design/06-pours-ground/)).
 
 <Callout type="book" where="гл. 1, §1.02, с. 10">
-  Дорожка — это проводник с сопротивлением R = ρ·L/S (урок 1.2). Чем она длиннее и тоньше, тем больше на ней падает
+  Дорожка — это проводник с сопротивлением <M t="R = \rho\frac{L}{S}" /> (урок 1.2). Чем она длиннее и тоньше, тем больше на ней падает
   напряжения при большом токе. Хоровиц на этом не останавливается, а для конструктора платы это главный аргумент
   за короткие широкие цепи питания.
 </Callout>

@@ -28,6 +28,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import M from '../../../components/lesson/M.astro';
 
 Микросхема 723 — «конструктор» линейного стабилизатора: все узлы выведены наружу, поэтому на ней видно, как устроен **любой** линейный стабилизатор, включая 7805 и LM317.
 
@@ -48,7 +49,7 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 <Formula tex="U_\text{вых} = U_\text{оп}\,\frac{R_1 + R_2}{R_2}" />
 
-- R3 ≈ R1 ∥ R2 уравнивает падения от входных токов (как в уроке [4.3](../../m04-opamps/03-real-opamp/)).
+- <M t="R_3 \approx R_1 \parallel R_2" /> уравнивает падения от входных токов (как в уроке [4.3](../../m04-opamps/03-real-opamp/)).
 - Конденсатор 100 пФ между COMP и INV — частотная коррекция петли.
 - Для Uвых ниже Uоп опорное напряжение сначала делят делителем и подают на NI, а выход соединяют с INV напрямую (через резистор).
 

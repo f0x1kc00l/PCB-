@@ -1,7 +1,7 @@
 ---
 /**
- * Короткая формула внутри строки текста: <M t="r_e = 25\,\text{мВ}/I_К" />.
- * Длинные формулы оформляй через <Formula>, чтобы они не ломали строку на телефоне.
+ * Формула внутри строки текста в «плашке»: <M t="I = \frac{U}{R}" />.
+ * Дроби рисуются двухэтажными (\displaystyle). Длинные выкладки — через <Formula>.
  */
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -9,14 +9,32 @@ import 'katex/dist/katex.min.css';
 interface Props {
 	t: string;
 }
-const html = katex.renderToString(Astro.props.t, { displayMode: false, throwOnError: true, strict: 'ignore', output: 'html' });
+const html = katex.renderToString('\\displaystyle ' + Astro.props.t, {
+	displayMode: false,
+	throwOnError: true,
+	strict: 'ignore',
+	output: 'html',
+});
 ---
 
 <span class="m" set:html={html} />
 
 <style>
+	.m {
+		display: inline-block;
+		max-width: 100%;
+		margin: 0.15em 0.1em;
+		padding: 0.2em 0.5em;
+		border-radius: 0.45em;
+		background: var(--pcb-formula-bg);
+		border: 1px solid var(--pcb-formula-border);
+		vertical-align: middle;
+		line-height: 1.2;
+		overflow-x: auto;
+		overflow-y: hidden;
+	}
 	.m :global(.katex) {
-		font-size: 1.05em;
+		font-size: 1.08em;
 		white-space: nowrap;
 	}
 </style>

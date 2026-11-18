@@ -28,7 +28,8 @@
 	--pcb-silk: #f2f2f2;
 	--pcb-paste: #9aa3ad;
 
-	--pcb-formula-bg: #161d26;
+	--pcb-formula-bg: #1c2733;
+	--pcb-formula-border: #2b3948;
 	--pcb-figure-bg: transparent;
 
 	--pcb-radius: 0.5rem;
@@ -52,7 +53,8 @@
 	--pcb-bad: #c22d2d;
 
 	--pcb-silk: #ffffff;
-	--pcb-formula-bg: #f6f3ef;
+	--pcb-formula-bg: #f1f4f8;
+	--pcb-formula-border: #dbe2ea;
 }
 
 /* Галочка у пройденных уроков в боковом меню (класс ставит Sidebar.astro). */

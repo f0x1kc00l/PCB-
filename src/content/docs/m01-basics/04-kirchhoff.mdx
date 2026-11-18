@@ -27,6 +27,8 @@ import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Kirchhoff from '../../../components/diagrams/Kirchhoff.astro';
 import WaterKirchhoff from '../../../components/water/WaterKirchhoff.astro';
+import Formula from '../../../components/lesson/Formula.astro';
+import M from '../../../components/lesson/M.astro';
 
 Закон Ома описывает один резистор. Чтобы считать целые схемы, нужны ещё два правила, которые сформулировал Густав Кирхгоф. Они настолько естественные, что ты, скорее всего, уже ими пользуешься.
 
@@ -70,7 +72,7 @@ import WaterKirchhoff from '../../../components/water/WaterKirchhoff.astro';
 
 Ток один на всех, напряжения складываются, сопротивления тоже:
 
-**R = R1 + R2 + …**
+<Formula tex="R = R_1 + R_2 + \ldots" />
 
 Общее сопротивление всегда **больше самого большого** из резисторов цепочки.
 
@@ -78,9 +80,9 @@ import WaterKirchhoff from '../../../components/water/WaterKirchhoff.astro';
 
 Напряжение одно на всех, токи складываются. Складываются **проводимости** (величины 1/R):
 
-**1/R = 1/R1 + 1/R2 + …**
+<Formula tex="\frac{1}{R} = \frac{1}{R_1} + \frac{1}{R_2} + \ldots" />
 
-Для двух резисторов удобная форма: **R = R1·R2 / (R1 + R2)**. Два одинаковых резистора параллельно дают половину номинала. Общее сопротивление всегда **меньше самого маленького** из резисторов.
+Для двух резисторов удобная форма: <M t="R = \frac{R_1 R_2}{R_1 + R_2}" />. Два одинаковых резистора параллельно дают половину номинала. Общее сопротивление всегда **меньше самого маленького** из резисторов.
 
 Параллельное соединение обозначают знаком ‖: R2‖R3.
 

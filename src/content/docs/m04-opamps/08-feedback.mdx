@@ -23,6 +23,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import M from '../../../components/lesson/M.astro';
 
 Золотые правила предполагают бесконечное усиление. Здесь посчитаем честно — с конечным A, — и увидим, что именно даёт обратная связь.
 
@@ -34,7 +35,7 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 <Formula tex="G = \frac{U_\text{вых}}{U_\text{вх}} = \frac{A}{1 + AB}" label="усиление с ОС" />
 
-**AB** — петлевое усиление, **1 + AB** — глубина ОС. Если AB ≫ 1, то G ≈ 1/B: усиление определяет только цепь ОС (резисторы). Для неинвертирующего усилителя B = R1/(R1 + R2), и G ≈ 1 + R2/R1 — знакомая формула.
+**AB** — петлевое усиление, **1 + AB** — глубина ОС. Если AB ≫ 1, то <M t="G \approx \frac{1}{B}" />: усиление определяет только цепь ОС (резисторы). Для неинвертирующего усилителя <M t="B = \frac{R_1}{R_1 + R_2}" />, и <M t="G \approx 1 + \frac{R_2}{R_1}" /> — знакомая формула.
 
 Пример: A = 10⁵, B = 0,01 → G = 10⁵/1001 ≈ 99,9. Ошибка 0,1 % от идеальных 100.
 

@@ -27,6 +27,7 @@ import Quiz from '../../../components/interactive/Quiz.astro';
 import DividerCalc from '../../../components/interactive/DividerCalc.astro';
 import Thevenin from '../../../components/diagrams/Thevenin.astro';
 import WaterDivider from '../../../components/water/WaterDivider.astro';
+import Formula from '../../../components/lesson/Formula.astro';
 
 Делитель напряжения — самая частая схема в электронике. Он есть почти на каждой плате: задаёт выходное напряжение стабилизатора, приводит напряжение батареи к диапазону АЦП микроконтроллера, смещает транзистор в рабочую точку.
 
@@ -34,7 +35,7 @@ import WaterDivider from '../../../components/water/WaterDivider.astro';
 
 Два резистора последовательно между источником и землёй. Ток через них один и тот же (закон токов из урока [1.4](../../m01-basics/04-kirchhoff/)), поэтому напряжение делится пропорционально сопротивлениям:
 
-**Uвых = Uвх · R2 / (R1 + R2)**
+<Formula tex="U_\text{вых} = U_\text{вх}\,\frac{R_2}{R_1 + R_2}" />
 
 Здесь R1 — верхний резистор (к входу), R2 — нижний (к земле), а выход снимается с точки между ними.
 

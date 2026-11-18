@@ -29,6 +29,7 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import DatasheetMap from '../../../components/diagrams/m02-components/DatasheetMap.astro';
+import Formula from '../../../components/lesson/Formula.astro';
 
 **Даташит (datasheet)** — паспорт компонента от производителя. Всё, что ты делаешь с деталью на схеме и плате, должно опираться на него: номиналы обвязки, предельные режимы, цоколёвку, посадочное место. Даташит на транзистор — пара страниц, на микроконтроллер — сотни. Секрет в том, что читать его целиком не нужно, если знаешь, где что лежит.
 
@@ -62,7 +63,7 @@ import DatasheetMap from '../../../components/diagrams/m02-components/DatasheetM
 
 В разделе Thermal Characteristics есть **тепловое сопротивление кристалл–окружающая среда RθJA**, °C/Вт. Оно показывает, на сколько градусов кристалл нагреется на каждый ватт:
 
-**Tj = Ta + P · RθJA**
+<Formula tex="T_j = T_a + P\,R_{\theta JA}" />
 
 У транзистора в TO-92 RθJA = 200 °C/Вт. При 100 мВт кристалл будет на 20 °C горячее воздуха. Максимальная температура кристалла (Tj max) обычно 150 °C. Обрати внимание: RθJA измеряют на определённой тестовой плате, на твоей плате реальное значение может отличаться.
 

@@ -27,6 +27,8 @@ import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import ThermalPath from '../../../components/diagrams/m05-pcb-design/ThermalPath.astro';
+import Formula from '../../../components/lesson/Formula.astro';
+import M from '../../../components/lesson/M.astro';
 
 Всё, что рассеивает мощность, греется (урок [1.3](../../m01-basics/03-power/)). Для резистора это значит «не превысить номинальную мощность». Для микросхем и транзисторов важнее другое: **температура кристалла** не должна превысить предел из даташита, обычно 125–150 °C. Плата — это не только провода, но и главный радиатор для большинства SMD-компонентов.
 
@@ -40,9 +42,9 @@ import ThermalPath from '../../../components/diagrams/m05-pcb-design/ThermalPath
 | напряжение U, В | разность температур ΔT, °C |
 | сопротивление R, Ом | тепловое сопротивление θ, °C/Вт |
 
-**ΔT = P · θ**, а последовательные тепловые сопротивления складываются, как резисторы:
+<M t="\Delta T = P\,\theta" />, а последовательные тепловые сопротивления складываются, как резисторы:
 
-**TJ = TA + P · (θJC + θCB + θBA)**
+<Formula tex="T_J = T_A + P\,(\theta_{JC} + \theta_{CB} + \theta_{BA})" />
 
 где TJ — температура кристалла (junction), TA — окружающего воздуха (ambient), θJC — кристалл → корпус, θCB — корпус → плата, θBA — плата → воздух.
 

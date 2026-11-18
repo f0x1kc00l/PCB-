@@ -25,6 +25,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import M from '../../../components/lesson/M.astro';
 
 Схемы на ПТ повторяют транзисторные из главы 2 — источник тока, усилитель, повторитель. Отличия: входного тока нет, крутизна меньше, а параметры разбросаны сильнее.
 
@@ -32,7 +33,7 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 Самый простой — затвор соединён с истоком: ток равен Iс.нач. Двухвыводной элемент, но ток зависит от экземпляра в разы.
 
-С резистором в истоке ток устанавливается сам: ток создаёт на Rи напряжение, которое подзапирает транзистор (Uзи = −I·Rи).
+С резистором в истоке ток устанавливается сам: ток создаёт на Rи напряжение, которое подзапирает транзистор (<M t="U_\text{зи} = -I R_\text{и}" />).
 
 <Circuit id="jfet-source" n="3.2а" caption="Источник тока на JFET с автоматическим смещением резистором Rи." />
 
@@ -44,7 +45,7 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 Как каскад с ОЭ: сток через Rс к питанию, усиление
 
-<Formula tex="K \approx -g_m R_\text{с}, \qquad K \approx -\frac{R_\text{с}}{R_\text{и} + 1/g_m}" label="без Rи · с Rи" />
+<Formula tex="K \approx -g_m R_\text{с}, \qquad K \approx -\frac{R_\text{с}}{R_\text{и} + \frac{1}{g_m}}" label="без Rи · с Rи" />
 
 Пример: gₘ = 4 мА/В, Rс = 5 кОм → K ≈ −20 — заметно меньше, чем у биполярника при том же токе. Зато входное сопротивление определяется только резистором смещения затвора — мегаомы. Смещение затвора: резистор на землю и Rи в истоке (для JFET) или делитель (для МОП).
 

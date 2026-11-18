@@ -26,6 +26,7 @@ import Formula from '../../../components/lesson/Formula.astro';
 import Mistakes from '../../../components/lesson/Mistakes.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import Circuit from '../../../components/diagrams/Circuit.astro';
+import M from '../../../components/lesson/M.astro';
 
 Все схемы этого урока считаются в две строки по золотым правилам. Считай вместе с текстом.
 
@@ -43,7 +44,7 @@ import Circuit from '../../../components/diagrams/Circuit.astro';
 
 <Circuit id="oa-noninv" n="4.1б" caption="Неинвертирующий усилитель." />
 
-Вход «−» повторяет Uвх, а он берётся с делителя R2–R1 на выходе: Uвх = Uвых·R1/(R1 + R2).
+Вход «−» повторяет Uвх, а он берётся с делителя R2–R1 на выходе: <M t="U_\text{вх} = U_\text{вых} \frac{R_1}{R_1 + R_2}" />.
 
 <Formula tex="K = 1 + \frac{R_2}{R_1}, \qquad R_\text{вх} \to \infty" label="неинвертирующий" />
 

@@ -29,6 +29,7 @@ import Assignment from '../../../components/lesson/Assignment.astro';
 import Quiz from '../../../components/interactive/Quiz.astro';
 import ViaTypes from '../../../components/diagrams/m04-pcb-basics/ViaTypes.astro';
 import AnnularRing from '../../../components/diagrams/m04-pcb-basics/AnnularRing.astro';
+import M from '../../../components/lesson/M.astro';
 
 Отверстия делают две вещи: соединяют медь разных слоёв и держат выводы компонентов и крепёж. На плате с микроконтроллером их сотни, и каждое — потенциальная точка отказа и статья расходов. Разберёмся, какие они бывают и какие размеры закладывать.
 
@@ -56,7 +57,7 @@ import AnnularRing from '../../../components/diagrams/m04-pcb-basics/AnnularRing
 
 Вокруг металлизированного отверстия на каждом слое меди есть кольцевая площадка. Ширина медного кольца между краем отверстия и краем площадки называется **гарантийным пояском (annular ring)**:
 
-**поясок = (D − d) / 2**, где D — диаметр площадки, d — диаметр отверстия.
+поясок <M t="= \frac{D - d}{2}" />, где D — диаметр площадки, d — диаметр отверстия.
 
 <AnnularRing n="8.4б" />
 
